@@ -82,6 +82,21 @@ export default function Finder({
     return () => clearTimeout(t);
   }, []);
 
+  // Direction matters more than distance: compare with ~3 s ago (RSSI is already EMA-smoothed).
+  const history = useRef<[number, number][]>([]);
+  const now = Date.now();
+  if (peer?.rssi != null) {
+    history.current = [
+      ...history.current.filter(([t]) => now - t < 4000),
+      [now, peer.rssi],
+    ];
+  }
+  const delta =
+    peer?.rssi != null && history.current[0][0] < now - 2000
+      ? peer.rssi - history.current[0][1]
+      : 0;
+  const trend = delta >= 6 ? 'warmer' : delta <= -6 ? 'colder' : undefined;
+
   const label = !peer
     ? 'Lost them'
     : peer.hops
@@ -119,10 +134,18 @@ export default function Finder({
         <Text style={s.heat} accessibilityLiveRegion="polite">
           {label}
         </Text>
-        <Tag
-          label={peer?.rssi != null ? `${peer.rssi} dBm` : 'listening…'}
-          color={C.raised}
-        />
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {trend && (
+            <Tag
+              label={trend === 'warmer' ? '↑ warmer' : '↓ colder'}
+              color={trend === 'warmer' ? C.peach : C.blue}
+            />
+          )}
+          <Tag
+            label={peer?.rssi != null ? `${peer.rssi} dBm` : 'listening…'}
+            color={C.raised}
+          />
+        </View>
       </View>
     </View>
   );

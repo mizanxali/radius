@@ -234,7 +234,14 @@ const PROFILES: Profile[] = SEEDS.map(
   }),
 );
 
-const jitter = (n: number) => n + Math.round((Math.random() - 0.5) * 8);
+// Same EMA as real peers, so the radar breathes without jumping.
+const last = new Map<string, number>();
+const drift = (id: string, base: number) => {
+  const raw = base + (Math.random() - 0.5) * 8;
+  const next = Math.round((last.get(id) ?? base) * 0.7 + raw * 0.3);
+  last.set(id, next);
+  return next;
+};
 
 function room(): Peer[] {
   return PROFILES.map((p, i) => {
@@ -245,7 +252,7 @@ function room(): Peer[] {
         verified: p.netWorthUsd != null,
       },
       hops: base == null ? 1 + (i % 2) : 0,
-      rssi: base == null ? undefined : jitter(base),
+      rssi: base == null ? undefined : drift(p.id, base),
       lastSeen: Date.now(),
     };
   });

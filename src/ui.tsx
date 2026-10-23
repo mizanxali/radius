@@ -10,6 +10,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import LinearGradient from 'react-native-linear-gradient';
 import Haptics from 'react-native-haptic-feedback';
 import { ChevronLeft } from 'lucide-react-native';
 import { C, CAT_COLOR, F, R, T } from './theme';
@@ -223,20 +224,32 @@ export function Screen({
   gap?: number;
 }) {
   const insets = useSafeAreaInsets();
+  // iOS page-sheet modals already start below the status bar; Android's are full screen
+  const sheet = modal && Platform.OS === 'ios';
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: C.bg }}
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{
-        paddingHorizontal: 20,
-        // iOS page-sheet modals already start below the status bar; Android's are full screen
-        paddingTop: modal && Platform.OS === 'ios' ? 16 : insets.top + 8,
-        paddingBottom: insets.bottom + 110,
-        gap,
-      }}
-    >
-      {children}
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: C.bg }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: sheet ? 16 : insets.top + 8,
+          paddingBottom: insets.bottom + 110,
+          gap,
+        }}
+      >
+        {children}
+      </ScrollView>
+      {!sheet && (
+        // Scrolled content fades out under the clock instead of colliding with it.
+        <LinearGradient
+          pointerEvents="none"
+          colors={[C.bg, C.bg, `${C.bg}00`]}
+          locations={[0, 0.6, 1]}
+          style={[s.scrim, { height: insets.top + 24 }]}
+        />
+      )}
+    </View>
   );
 }
 
@@ -360,6 +373,7 @@ export function Row({
 }
 
 const s = StyleSheet.create({
+  scrim: { position: 'absolute', top: 0, left: 0, right: 0 },
   avatar: {
     alignItems: 'center',
     justifyContent: 'center',
