@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { StatusBar, Text } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
+  createNavigationContainerRef,
   DarkTheme,
   NavigationContainer,
   type NavigatorScreenParams,
@@ -23,15 +24,26 @@ import Radar from './src/screens/Radar';
 import Person from './src/screens/Person';
 import Me from './src/screens/Me';
 import Matches from './src/screens/Matches';
+import Room from './src/screens/Room';
+import Finder from './src/screens/Finder';
+import { WaveBanner } from './src/wave';
 import { C } from './src/theme';
 
-type Tabs = { Radar: undefined; Matches: undefined; Me: undefined };
+type Tabs = {
+  Radar: undefined;
+  Matches: undefined;
+  Room: undefined;
+  Me: undefined;
+};
 type Root = {
   Onboarding: undefined;
   Main: NavigatorScreenParams<Tabs>;
   Person: { id: string };
+  Finder: { id: string };
   EditProfile: undefined;
 };
+
+const nav = createNavigationContainerRef<Root>();
 
 const Stack = createNativeStackNavigator<Root>();
 const Tab = createBottomTabNavigator<Tabs>();
@@ -66,6 +78,11 @@ function MainTabs() {
           />
         )}
       </Tab.Screen>
+      <Tab.Screen
+        name="Room"
+        component={Room}
+        options={{ tabBarIcon: icon('🏆') }}
+      />
       <Tab.Screen name="Me" options={{ tabBarIcon: icon('😎') }}>
         {({ navigation }: BottomTabScreenProps<Tabs, 'Me'>) => (
           <Me onEdit={() => navigation.getParent()?.navigate('EditProfile')} />
@@ -94,6 +111,7 @@ export default function App() {
       <AppKitProvider instance={appKit}>
         <StatusBar barStyle="light-content" />
         <NavigationContainer
+          ref={nav}
           theme={{
             ...DarkTheme,
             colors: { ...DarkTheme.colors, background: C.bg },
@@ -112,7 +130,24 @@ export default function App() {
                     route,
                     navigation,
                   }: NativeStackScreenProps<Root, 'Person'>) => (
-                    <Person id={route.params.id} onClose={navigation.goBack} />
+                    <Person
+                      id={route.params.id}
+                      onClose={navigation.goBack}
+                      onFind={() =>
+                        navigation.navigate('Finder', { id: route.params.id })
+                      }
+                    />
+                  )}
+                </Stack.Screen>
+                <Stack.Screen
+                  name="Finder"
+                  options={{ presentation: 'fullScreenModal' }}
+                >
+                  {({
+                    route,
+                    navigation,
+                  }: NativeStackScreenProps<Root, 'Finder'>) => (
+                    <Finder id={route.params.id} onClose={navigation.goBack} />
                   )}
                 </Stack.Screen>
                 <Stack.Screen
@@ -129,6 +164,9 @@ export default function App() {
             )}
           </Stack.Navigator>
         </NavigationContainer>
+        <WaveBanner
+          onOpen={id => nav.isReady() && nav.navigate('Person', { id })}
+        />
         <AppKit />
       </AppKitProvider>
     </SafeAreaProvider>

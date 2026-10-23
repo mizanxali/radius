@@ -18,20 +18,23 @@ import {
   type Profile,
   type Social,
 } from '../profile';
-import { Avatar, CategoryBadge, Chip, Row, tap } from '../ui';
-import { BODY, C, CAT_COLOR, H1, H2, LABEL } from '../theme';
+import { Avatar, CategoryBadge, Chip, GradientButton, Row, tap } from '../ui';
+import { BODY, C, CAT_COLOR, G, H1, H2, LABEL } from '../theme';
 import { distanceLabel } from './Radar';
 import { NetWorth } from '../NetWorth';
 import { useMatches } from '../ai';
+import { wave } from '../wave';
 import { shortAddress, verifyWallet } from '../verify';
 
 /** A nearby person: card instantly, full profile from cache, refreshed over the mesh. */
 export default function Person({
   id,
   onClose,
+  onFind,
 }: {
   id: string;
   onClose: () => void;
+  onFind: () => void;
 }) {
   const peer = usePeer(id);
   const [profile, setProfile] = useState<Profile | undefined>(() =>
@@ -49,6 +52,16 @@ export default function Person({
   const verified = profile?.wallets.filter(w => verifyWallet(w, id)) ?? [];
   const tier = peer?.card.tier;
   const match = useMatches().matches.find(m => m.id === id);
+  const [waved, setWaved] = useState<'sending' | 'sent' | 'failed'>();
+  const sendWave = async () => {
+    setWaved('sending');
+    try {
+      await wave(id);
+      setWaved('sent');
+    } catch {
+      setWaved('failed');
+    }
+  };
 
   return (
     <ProfileView
@@ -63,6 +76,32 @@ export default function Person({
       onClose={onClose}
       actions={
         <View style={{ gap: 14 }}>
+          {peer && (
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <GradientButton
+                style={{ flex: 1 }}
+                title={
+                  waved === 'sent'
+                    ? 'Waved ✓'
+                    : waved === 'sending'
+                    ? 'Waving…'
+                    : waved === 'failed'
+                    ? 'Retry 👋'
+                    : '👋 Wave'
+                }
+                disabled={waved === 'sending' || waved === 'sent'}
+                onPress={sendWave}
+              />
+              {peer.hops === 0 && (
+                <GradientButton
+                  style={{ flex: 1 }}
+                  title="📡 Find them"
+                  colors={G.cool}
+                  onPress={onFind}
+                />
+              )}
+            </View>
+          )}
           {match && (
             <View style={s.match}>
               <Text style={LABEL}>✨ Why talk to them</Text>
