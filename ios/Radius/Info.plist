@@ -67,7 +67,7 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Radius uses the local network to find people around you.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Pick a profile photo.</string>
 	<key>RCTNewArchEnabled</key>
@@ -113,5 +113,12 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>CabinetGrotesk-Extrabold.otf</string>
+		<string>CabinetGrotesk-Regular.otf</string>
+		<string>CabinetGrotesk-Bold.otf</string>
+		<string>CabinetGrotesk-Medium.otf</string>
+	</array>
 </dict>
 </plist>

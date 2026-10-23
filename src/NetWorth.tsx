@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import Haptics from 'react-native-haptic-feedback';
+import { BadgeCheck, RefreshCw } from 'lucide-react-native';
 import { tierFor } from './profile';
-import { C, LABEL } from './theme';
+import { Card, Tag, tap } from './ui';
+import { C, F, T } from './theme';
 
-const usdFmt = (n: number) => '$' + Math.round(n).toLocaleString('en-US');
+const usdFmt = (n: number) =>
+  '$ ' +
+  n.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 /** Rolls the number up from $0 with an ease-out, then thumps. The money shot. */
 function useRollUp(target: number, ms = 1800) {
@@ -17,7 +23,7 @@ function useRollUp(target: number, ms = 1800) {
       const k = Math.min(1, (Date.now() - t0) / ms);
       setV(target * (1 - Math.pow(1 - k, 4)));
       if (k < 1) raf = requestAnimationFrame(step);
-      else Haptics.trigger('notificationSuccess');
+      else if (target > 0) Haptics.trigger('notificationSuccess');
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
@@ -40,62 +46,57 @@ export function NetWorth({
   const label = tier ?? tierFor(usd);
   if (usd == null && !label) return null;
   return (
-    <Pressable
-      accessibilityRole={onRefresh ? 'button' : undefined}
-      disabled={!onRefresh}
-      onPress={onRefresh}
-      style={s.card}
-    >
-      <LinearGradient
-        colors={['#B6FF3B22', '#3BFFB011', '#00000000']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <Text style={LABEL}>Net worth {onRefresh ? '· tap to refresh' : ''}</Text>
+    <Card>
+      <View style={s.top}>
+        <Text style={[T.strong, { flex: 1 }]}>Net worth</Text>
+        {label && <Tag label={label} color={C.mint} />}
+        {onRefresh && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Refresh net worth"
+            hitSlop={10}
+            onPress={() => (tap(), onRefresh())}
+            style={s.refresh}
+          >
+            <RefreshCw size={16} color={C.text} strokeWidth={1.75} />
+          </Pressable>
+        )}
+      </View>
       {usd != null ? (
         <Text style={s.amount} adjustsFontSizeToFit numberOfLines={1}>
           {usdFmt(shown)}
         </Text>
       ) : (
-        <Text style={s.hidden}>amount hidden</Text>
+        <Text style={[T.title, { color: C.muted }]}>Amount hidden</Text>
       )}
-      <View style={s.row}>
-        {label && <Text style={s.tier}>{label}</Text>}
-        {verifiedCount > 0 && (
-          <Text style={s.verified}>
-            ✓ {verifiedCount} verified wallet{verifiedCount > 1 ? 's' : ''}
+      {verifiedCount > 0 && (
+        <View style={s.verified}>
+          <BadgeCheck size={16} color={C.mint} strokeWidth={1.75} />
+          <Text style={[T.sub, { color: C.mint }]}>
+            {verifiedCount} verified wallet{verifiedCount > 1 ? 's' : ''}
           </Text>
-        )}
-      </View>
-    </Pressable>
+        </View>
+      )}
+    </Card>
   );
 }
 
 const s = StyleSheet.create({
-  card: {
-    borderRadius: 24,
-    padding: 20,
-    gap: 6,
-    borderWidth: 1.5,
-    borderColor: '#B6FF3B66',
-    overflow: 'hidden',
-    backgroundColor: C.surface,
+  top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  refresh: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: C.raised,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   amount: {
-    color: C.money,
-    fontSize: 48,
-    fontWeight: '900',
-    letterSpacing: -1.5,
+    fontFamily: F.medium,
+    fontSize: 42,
+    color: C.text,
+    letterSpacing: -0.5,
     fontVariant: ['tabular-nums'],
   },
-  hidden: { color: C.muted, fontSize: 28, fontWeight: '800' },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  tier: { color: C.text, fontSize: 18, fontWeight: '900' },
-  verified: { color: C.money, fontSize: 13, fontWeight: '800' },
+  verified: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 });

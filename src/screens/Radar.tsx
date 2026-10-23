@@ -1,17 +1,15 @@
 import { useEffect } from 'react';
 import {
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated, {
   Easing,
-  FadeInDown,
+  FadeIn,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -20,12 +18,10 @@ import Animated, {
   withTiming,
   ZoomIn,
 } from 'react-native-reanimated';
-import { usePeers, type Peer } from '../peers';
-import { cachedProfile } from '../peers';
+import { cachedProfile, useMyProfile, usePeers, type Peer } from '../peers';
 import { hash } from '../profile';
-import { useMyProfile } from '../peers';
-import { Avatar, CategoryBadge, tap } from '../ui';
-import { BODY, C, CAT_COLOR, G, H1, LABEL } from '../theme';
+import { Avatar, Card, Header, ListRow, Screen, Tag, tap } from '../ui';
+import { C, CAT_COLOR, F, T } from '../theme';
 
 /** 0 = touching (-35 dBm) … 1 = the rim (-90 dBm). Mesh-only peers sit on the rim. */
 export function closeness(p: Peer) {
@@ -47,86 +43,95 @@ const angleFor = (id: string) =>
   (parseInt(hash(id), 36) % 360) * (Math.PI / 180);
 
 export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
-  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const peers = usePeers();
   const [me] = useMyProfile();
-  const size = width - 40;
+  const size = width - 80; // inside a card with 20 px padding
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: C.bg }}
-      contentContainerStyle={{
-        paddingTop: insets.top + 12,
-        paddingBottom: 120,
-      }}
-    >
-      <View style={{ paddingHorizontal: 20 }}>
-        <Text style={LABEL}>📡 Radius</Text>
-        <Text style={[H1, { marginTop: 4 }]}>
-          {peers.length === 0
-            ? 'Scanning…'
-            : `${peers.length} ${
-                peers.length === 1 ? 'person' : 'people'
-              } around you`}
-        </Text>
-      </View>
-
-      <View
-        style={{
-          width: size,
-          height: size,
-          alignSelf: 'center',
-          marginVertical: 20,
-        }}
-      >
-        <RadarField size={size} />
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            { alignItems: 'center', justifyContent: 'center' },
-          ]}
-          pointerEvents="none"
-        >
-          <Avatar
-            name={me?.name ?? ''}
-            avatar={me?.avatar}
-            size={64}
-            colors={G.hot}
+    <Screen>
+      <Header title="Around you" />
+      <Card>
+        <View style={s.cardTop}>
+          <Text style={[T.strong, { flex: 1 }]}>Nearby</Text>
+          <Tag
+            label={
+              peers.length
+                ? `${peers.length} ${peers.length === 1 ? 'person' : 'people'}`
+                : 'Scanning'
+            }
           />
         </View>
-        {peers.map(p => (
-          <RadarDot
-            key={p.card.id}
-            peer={p}
-            size={size}
-            onPress={() => onOpen(p.card.id)}
-          />
-        ))}
-      </View>
+        <View
+          style={{
+            width: size,
+            height: size,
+            alignSelf: 'center',
+            marginVertical: 8,
+          }}
+        >
+          <RadarField size={size} />
+          <View
+            style={[StyleSheet.absoluteFill, s.center]}
+            pointerEvents="none"
+          >
+            <View style={s.meRing}>
+              <Avatar
+                name={me?.name ?? ''}
+                avatar={me?.avatar}
+                size={56}
+                color={C.text}
+              />
+            </View>
+          </View>
+          {peers.map(p => (
+            <RadarDot
+              key={p.card.id}
+              peer={p}
+              size={size}
+              onPress={() => onOpen(p.card.id)}
+            />
+          ))}
+        </View>
+      </Card>
 
-      <View style={{ paddingHorizontal: 20, gap: 12 }}>
-        {peers.map((p, i) => (
-          <Animated.View
-            key={p.card.id}
-            entering={FadeInDown.delay(i * 40).springify()}
-          >
-            <PeerRow peer={p} onPress={() => onOpen(p.card.id)} />
-          </Animated.View>
-        ))}
+      <Card style={{ gap: 4 }}>
+        <Text style={[T.h2, { marginBottom: 6 }]}>People</Text>
         {peers.length === 0 && (
-          <Text
-            style={[
-              BODY,
-              { color: C.muted, textAlign: 'center', marginTop: 8 },
-            ]}
-          >
+          <Text style={[T.sub, { paddingVertical: 8 }]}>
             Keep Radius open. People with the app show up here as they come into
             Bluetooth range.
           </Text>
         )}
-      </View>
-    </ScrollView>
+        {peers.map(p => (
+          <Animated.View key={p.card.id} entering={FadeIn}>
+            <ListRow
+              leading={
+                <Avatar
+                  name={p.card.name}
+                  avatar={cachedProfile(p.card.id)?.avatar}
+                  size={48}
+                  color={CAT_COLOR[p.card.category]}
+                />
+              }
+              title={p.card.name}
+              subtitle={[p.card.role, p.card.company]
+                .filter(Boolean)
+                .join(' · ')}
+              trailing={
+                <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                  {p.card.tier ? (
+                    <Text style={s.tier}>{p.card.tier}</Text>
+                  ) : null}
+                  <Text style={s.dist}>{distanceLabel(p)}</Text>
+                </View>
+              }
+              onPress={() => onOpen(p.card.id)}
+            />
+          </Animated.View>
+        ))}
+      </Card>
+    </Screen>
   );
 }
 
@@ -135,11 +140,11 @@ function RadarField({ size }: { size: number }) {
   const pulse = useSharedValue(0);
   useEffect(() => {
     sweep.value = withRepeat(
-      withTiming(360, { duration: 4000, easing: Easing.linear }),
+      withTiming(360, { duration: 4500, easing: Easing.linear }),
       -1,
     );
     pulse.value = withRepeat(
-      withTiming(1, { duration: 2600, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: 2800, easing: Easing.out(Easing.quad) }),
       -1,
     );
   }, [sweep, pulse]);
@@ -147,13 +152,13 @@ function RadarField({ size }: { size: number }) {
     transform: [{ rotate: `${sweep.value}deg` }],
   }));
   const pulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulse.value }],
-    opacity: 0.5 * (1 - pulse.value),
+    transform: [{ scale: 0.2 + pulse.value * 0.8 }],
+    opacity: 0.35 * (1 - pulse.value),
   }));
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {[1, 0.7, 0.4].map(f => (
+      {[1, 0.68, 0.36].map(f => (
         <View
           key={f}
           style={[
@@ -161,7 +166,6 @@ function RadarField({ size }: { size: number }) {
             {
               width: size * f,
               height: size * f,
-              borderRadius: size,
               left: (size * (1 - f)) / 2,
               top: (size * (1 - f)) / 2,
             },
@@ -169,24 +173,20 @@ function RadarField({ size }: { size: number }) {
         />
       ))}
       <Animated.View
-        style={[
-          s.pulse,
-          { width: size, height: size, borderRadius: size },
-          pulseStyle,
-        ]}
+        style={[s.pulse, { width: size, height: size }, pulseStyle]}
       />
       <Animated.View style={[StyleSheet.absoluteFill, sweepStyle]}>
         <LinearGradient
-          colors={['#7B61FF00', '#7B61FF55', '#FF2E93']}
+          colors={['#8FB8F000', '#8FB8F0']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={{
             position: 'absolute',
             left: 0,
-            top: size / 2 - 1.5,
+            top: size / 2 - 1,
             width: size / 2,
-            height: 3,
-            borderRadius: 2,
+            height: 2,
+            borderRadius: 1,
           }}
         />
       </Animated.View>
@@ -203,11 +203,11 @@ function RadarDot({
   size: number;
   onPress: () => void;
 }) {
-  const dot = 46;
+  const dot = 44;
   const a = angleFor(peer.card.id);
-  // Keep clear of my avatar (64) in the centre, and inside the outer ring.
-  const minR = (64 / 2 + dot / 2 + 6) / (size / 2);
-  const fraction = minR + (0.92 - minR) * closeness(peer);
+  // Keep clear of my avatar (56 + ring) in the centre, and inside the outer ring.
+  const minR = (66 / 2 + dot / 2 + 6) / (size / 2);
+  const fraction = minR + (0.9 - minR) * closeness(peer);
   const r = useSharedValue(fraction);
   useEffect(() => {
     r.value = withSpring(fraction, { damping: 18, stiffness: 60 });
@@ -216,18 +216,18 @@ function RadarDot({
     left: size / 2 + Math.cos(a) * r.value * (size / 2) - dot / 2,
     top: size / 2 + Math.sin(a) * r.value * (size / 2) - dot / 2,
   }));
-  const avatar = cachedProfile(peer.card.id)?.avatar;
-  const glow = useSharedValue(0);
+  const halo = useSharedValue(0);
   useEffect(() => {
-    glow.value = withDelay(
-      400,
-      withRepeat(withTiming(1, { duration: 1400 }), -1, true),
+    halo.value = withDelay(
+      300,
+      withRepeat(withTiming(1, { duration: 1600 }), -1, true),
     );
-  }, [glow]);
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: 0.25 + glow.value * 0.45,
-    transform: [{ scale: 1 + glow.value * 0.25 }],
+  }, [halo]);
+  const haloStyle = useAnimatedStyle(() => ({
+    opacity: 0.15 + halo.value * 0.25,
+    transform: [{ scale: 1.15 + halo.value * 0.25 }],
   }));
+  const color = CAT_COLOR[peer.card.category];
 
   return (
     <Animated.View
@@ -237,8 +237,8 @@ function RadarDot({
       <Animated.View
         style={[
           StyleSheet.absoluteFill,
-          { borderRadius: dot, backgroundColor: CAT_COLOR[peer.card.category] },
-          glowStyle,
+          { borderRadius: dot, backgroundColor: color },
+          haloStyle,
         ]}
       />
       <Pressable
@@ -249,77 +249,26 @@ function RadarDot({
       >
         <Avatar
           name={peer.card.name}
-          avatar={avatar}
+          avatar={cachedProfile(peer.card.id)?.avatar}
           size={dot}
-          colors={[CAT_COLOR[peer.card.category], '#ffffff']}
+          color={color}
         />
       </Pressable>
     </Animated.View>
   );
 }
 
-export function PeerRow({
-  peer,
-  onPress,
-}: {
-  peer: Peer;
-  onPress: () => void;
-}) {
-  const { card } = peer;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => (tap(), onPress())}
-      style={({ pressed }) => [
-        s.row,
-        { transform: [{ scale: pressed ? 0.98 : 1 }] },
-      ]}
-    >
-      <Avatar
-        name={card.name}
-        avatar={cachedProfile(card.id)?.avatar}
-        size={56}
-        colors={[CAT_COLOR[card.category], '#ffffff55']}
-      />
-      <View style={{ flex: 1, gap: 4 }}>
-        <Text style={s.name} numberOfLines={1}>
-          {card.name}
-        </Text>
-        <Text style={s.sub} numberOfLines={1}>
-          {card.role}
-          {card.company ? ` @ ${card.company}` : ''}
-        </Text>
-        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-          <CategoryBadge category={card.category} />
-          {card.tier && <Text style={s.tier}>{card.tier}</Text>}
-        </View>
-      </View>
-      <Text style={s.dist}>{distanceLabel(peer)}</Text>
-    </Pressable>
-  );
-}
-
 const s = StyleSheet.create({
-  ring: { position: 'absolute', borderWidth: 1, borderColor: '#7B61FF33' },
-  pulse: { position: 'absolute', borderWidth: 2, borderColor: '#FF2E93' },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    backgroundColor: C.surface,
-    borderRadius: 22,
-    padding: 14,
+  cardTop: { flexDirection: 'row', alignItems: 'center' },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  meRing: { padding: 5, borderRadius: 40, backgroundColor: C.raised },
+  ring: {
+    position: 'absolute',
+    borderRadius: 999,
     borderWidth: 1,
     borderColor: C.line,
   },
-  name: { color: C.text, fontSize: 18, fontWeight: '900' },
-  sub: { color: C.muted, fontSize: 14 },
-  tier: { color: C.money, fontSize: 12, fontWeight: '800' },
-  dist: {
-    color: C.muted,
-    fontSize: 12,
-    fontWeight: '700',
-    maxWidth: 80,
-    textAlign: 'right',
-  },
+  pulse: { position: 'absolute', borderRadius: 999, backgroundColor: C.blue },
+  tier: { fontFamily: F.medium, fontSize: 13, color: C.mint },
+  dist: { fontFamily: F.regular, fontSize: 13, color: C.muted },
 });

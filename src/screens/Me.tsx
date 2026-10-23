@@ -7,48 +7,26 @@ import {
   Text,
   View,
 } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAccount, useAppKit } from '@reown/appkit-react-native';
-import { useMyProfile } from '../peers';
-import { publishCard } from '../peers';
+import { Flame, PenLine, Trash2, Wallet } from 'lucide-react-native';
+import { cachedProfile, publishCard, useMyProfile } from '../peers';
 import { proveWallet, refreshNetWorth, removeWallet } from '../wallet';
 import { shortAddress } from '../verify';
 import { NetWorth } from '../NetWorth';
 import { roastMe } from '../ai';
 import { useStamps } from '../meet';
-import { cachedProfile } from '../peers';
-import { Avatar } from '../ui';
-import { GradientButton, tap } from '../ui';
-import { BODY, C, G, LABEL } from '../theme';
+import { Action, Avatar, Button, Card, ListRow, Tag, tap } from '../ui';
+import { C, F, T } from '../theme';
 import { ProfileView } from './Person';
 
 export default function Me({ onEdit }: { onEdit: () => void }) {
-  const [me] = useMyProfile();
-  return (
-    <ProfileView
-      profile={me}
-      status="you"
-      actions={
-        <View style={{ gap: 14 }}>
-          <GradientButton
-            title="Edit profile"
-            colors={G.cool}
-            onPress={onEdit}
-          />
-          <Wallets />
-          <Stamps />
-          <Roast />
-        </View>
-      }
-    />
-  );
-}
-
-function Wallets() {
   const [me, setMe] = useMyProfile();
   const { open, disconnect } = useAppKit();
   const { isConnected, allAccounts } = useAccount();
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<'wallet' | 'roast' | 'price'>();
   const [error, setError] = useState<string>();
+  const [roast, setRoast] = useState<string>();
   if (!me) return null;
 
   const has = (a: string) =>
@@ -57,89 +35,160 @@ function Wallets() {
     ? allAccounts.find(a => !has(a.address))
     : undefined;
 
-  const run = (f: () => Promise<unknown>) => async () => {
-    setBusy(true);
+  const run = (kind: typeof busy, f: () => Promise<unknown>) => async () => {
+    setBusy(kind);
     setError(undefined);
     try {
       await f();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
-      setBusy(false);
+      setBusy(undefined);
     }
   };
 
+  const doRoast = run('roast', async () => {
+    try {
+      setRoast(await roastMe());
+    } catch {
+      setRoast('The roast machine is offline. Lucky you.');
+    }
+  });
+
   return (
-    <View style={{ gap: 12 }}>
-      {me.wallets.length > 0 && (
-        <NetWorth
-          usd={me.netWorthUsd}
-          verifiedCount={me.wallets.length}
-          onRefresh={busy ? undefined : run(refreshNetWorth)}
-        />
+    <ProfileView
+      id={me.id}
+      title="My pass"
+      profile={me}
+      status="you"
+      actions={
+        <View style={s.actions}>
+          <Action icon={PenLine} label="Edit" onPress={onEdit} />
+          <Action
+            icon={Wallet}
+            label="Wallet"
+            disabled={!!busy}
+            onPress={() => open({ view: 'Connect' })}
+          />
+          <Action
+            icon={Flame}
+            label={busy === 'roast' ? 'Cooking…' : 'Roast me'}
+            active
+            disabled={!!busy}
+            onPress={doRoast}
+          />
+        </View>
+      }
+    >
+      {roast && (
+        <Animated.View entering={FadeInDown}>
+          <Card tint={C.lilac}>
+            <Text style={[T.label, { color: '#1E1E22AA' }]}>The room says</Text>
+            <Text style={s.roast}>{roast}</Text>
+          </Card>
+        </Animated.View>
       )}
 
-      {me.wallets.map(w => (
-        <View key={w.address} style={s.wallet}>
-          <Text style={s.chain}>{w.chain === 'evm' ? 'Ξ' : '◎'}</Text>
-          <Text style={s.addr}>{shortAddress(w.address)}</Text>
-          <Text style={s.ok}>✓ verified</Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Remove ${shortAddress(w.address)}`}
-            hitSlop={10}
-            onPress={() => (tap(), run(() => removeWallet(w.address))())}
-          >
-            <Text style={{ color: C.muted, fontWeight: '900' }}>✕</Text>
-          </Pressable>
-        </View>
-      ))}
-
-      {pending ? (
-        <GradientButton
+      {pending && (
+        <Button
           title={
-            busy
+            busy === 'wallet'
               ? 'Check your wallet…'
-              : `✍️ Sign to verify ${shortAddress(pending.address)}`
+              : `Sign to verify ${shortAddress(pending.address)}`
           }
-          colors={G.money}
-          disabled={busy}
-          onPress={run(async () => {
+          disabled={!!busy}
+          onPress={run('wallet', async () => {
             await proveWallet(
               `${pending.namespace}:${pending.chainId}:${pending.address}`,
             );
             await disconnect(); // the proof is all we keep; no live session needed
           })}
         />
-      ) : (
-        <GradientButton
-          title={
-            me.wallets.length
-              ? '+ Add another wallet'
-              : '💰 Connect wallet · flex your bags'
-          }
-          colors={G.money}
-          disabled={busy}
-          onPress={() => open({ view: 'Connect' })}
-        />
       )}
-      {error && <Text style={[BODY, { color: C.hot }]}>{error}</Text>}
+      {error && (
+        <Text style={[T.sub, { color: C.rose, textAlign: 'center' }]}>
+          {error}
+        </Text>
+      )}
 
-      {me.wallets.length > 0 && (
-        <View style={s.toggle}>
-          <Text style={[LABEL, { flex: 1 }]}>Show exact amount to others</Text>
-          <Switch
-            accessibilityLabel="Show exact net worth to others"
-            value={!me.hideExactNetWorth}
-            onValueChange={v => {
-              setMe({ ...me, hideExactNetWorth: !v });
-              publishCard();
-            }}
-            trackColor={{ true: C.money, false: C.line }}
+      {me.wallets.length > 0 ? (
+        <>
+          <NetWorth
+            usd={me.netWorthUsd}
+            verifiedCount={me.wallets.length}
+            onRefresh={busy ? undefined : run('price', refreshNetWorth)}
           />
-        </View>
+          <Card style={{ gap: 4 }}>
+            <Text style={[T.h2, { marginBottom: 6 }]}>Wallets</Text>
+            {me.wallets.map(w => (
+              <ListRow
+                key={w.address}
+                leading={
+                  <View
+                    style={[
+                      s.chain,
+                      { backgroundColor: w.chain === 'evm' ? C.blue : C.lilac },
+                    ]}
+                  >
+                    <Text style={s.chainText}>
+                      {w.chain === 'evm' ? 'Ξ' : '◎'}
+                    </Text>
+                  </View>
+                }
+                title={shortAddress(w.address)}
+                subtitle={
+                  w.chain === 'evm'
+                    ? 'Ethereum · verified'
+                    : 'Solana · verified'
+                }
+                trailing={
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remove ${shortAddress(w.address)}`}
+                    hitSlop={10}
+                    onPress={() => (
+                      tap(), run('wallet', () => removeWallet(w.address))()
+                    )}
+                  >
+                    <Trash2 size={20} color={C.muted} strokeWidth={1.6} />
+                  </Pressable>
+                }
+              />
+            ))}
+            <View style={s.toggle}>
+              <Text style={[T.body, { flex: 1 }]}>Show exact amount</Text>
+              <Switch
+                accessibilityLabel="Show exact net worth to others"
+                value={!me.hideExactNetWorth}
+                onValueChange={v => {
+                  setMe({ ...me, hideExactNetWorth: !v });
+                  publishCard();
+                }}
+                trackColor={{ true: C.blue, false: C.raised }}
+                thumbColor={C.text}
+              />
+            </View>
+          </Card>
+        </>
+      ) : (
+        !pending && (
+          <Card tint={C.blue}>
+            <Text style={[T.h2, { color: C.ink }]}>Flex your bags</Text>
+            <Text style={[T.body, { color: '#1E1E22CC' }]}>
+              Connect and sign with an Ethereum or Solana wallet. Your net worth
+              shows on your pass, verified.
+            </Text>
+            <Button
+              title="Connect wallet"
+              icon={Wallet}
+              onPress={() => open({ view: 'Connect' })}
+            />
+          </Card>
+        )
       )}
-    </View>
+
+      <Stamps />
+    </ProfileView>
   );
 }
 
@@ -147,114 +196,50 @@ function Stamps() {
   const stamps = useStamps();
   if (!stamps.length) return null;
   return (
-    <View style={{ gap: 10 }}>
-      <Text style={LABEL}>🤝 People you've met · {stamps.length}</Text>
+    <Card style={{ gap: 4 }}>
+      <Text style={[T.h2, { marginBottom: 6 }]}>People you've met</Text>
       {stamps.map(st => (
-        <Pressable
+        <ListRow
           key={st.id}
-          accessibilityRole={st.url ? 'link' : undefined}
-          disabled={!st.url}
-          onPress={() => st.url && (tap(), Linking.openURL(st.url))}
-          style={s.wallet}
-        >
-          <Avatar
-            name={st.peer.name}
-            avatar={cachedProfile(st.peer.id)?.avatar}
-            size={40}
-            colors={G.money}
-          />
-          <View style={{ flex: 1 }}>
-            <Text style={s.addr} numberOfLines={1}>
-              {st.peer.name}
-            </Text>
-            <Text style={{ color: C.muted, fontSize: 12 }}>
-              {new Date(st.payload.ts).toLocaleDateString()}
-              {st.peer.company ? ` · ${st.peer.company}` : ''}
-            </Text>
-          </View>
-          <Text style={[s.ok, st.status !== 'minted' && { color: C.muted }]}>
-            {st.status === 'minted' ? '⛓ On Base ↗' : 'minting…'}
-          </Text>
-        </Pressable>
+          leading={
+            <Avatar
+              name={st.peer.name}
+              avatar={cachedProfile(st.peer.id)?.avatar}
+              size={44}
+              color={C.mint}
+            />
+          }
+          title={st.peer.name}
+          subtitle={`${new Date(st.payload.ts).toLocaleDateString()}${
+            st.peer.company ? ` · ${st.peer.company}` : ''
+          }`}
+          trailing={
+            <Tag
+              label={st.status === 'minted' ? 'On Base ↗' : 'Minting'}
+              color={st.status === 'minted' ? C.mint : C.raised}
+            />
+          }
+          onPress={st.url ? () => Linking.openURL(st.url!) : undefined}
+        />
       ))}
-    </View>
-  );
-}
-
-function Roast() {
-  const [roast, setRoast] = useState<string>();
-  const [busy, setBusy] = useState(false);
-  const go = async () => {
-    setBusy(true);
-    try {
-      setRoast(await roastMe());
-    } catch {
-      setRoast('The roast machine is offline. Lucky you.');
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <View style={{ gap: 12 }}>
-      <GradientButton
-        title={
-          busy
-            ? 'Cooking…'
-            : roast
-            ? '🔥 Roast me again'
-            : '🔥 Roast my profile'
-        }
-        colors={G.hot}
-        disabled={busy}
-        onPress={go}
-      />
-      {roast && (
-        <View style={s.roast}>
-          <Text style={LABEL}>The room says</Text>
-          <Text
-            style={[BODY, { fontSize: 18, fontWeight: '700', lineHeight: 26 }]}
-          >
-            {roast}
-          </Text>
-        </View>
-      )}
-    </View>
+    </Card>
   );
 }
 
 const s = StyleSheet.create({
-  roast: {
-    backgroundColor: '#FF2E9318',
-    borderColor: C.hot,
-    borderWidth: 1.5,
-    borderRadius: 22,
-    padding: 18,
-    gap: 8,
-  },
-  wallet: {
+  actions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: C.surface,
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: C.line,
+    justifyContent: 'space-around',
+    paddingTop: 4,
   },
+  roast: { fontFamily: F.medium, fontSize: 19, lineHeight: 26, color: C.ink },
   chain: {
-    color: C.text,
-    fontSize: 18,
-    fontWeight: '900',
-    width: 20,
-    textAlign: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  addr: {
-    color: C.text,
-    fontSize: 15,
-    fontWeight: '800',
-    flex: 1,
-    fontVariant: ['tabular-nums'],
-  },
-  ok: { color: C.money, fontSize: 12, fontWeight: '800' },
-  toggle: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 4 },
+  chainText: { fontFamily: F.bold, fontSize: 18, color: C.ink },
+  toggle: { flexDirection: 'row', alignItems: 'center', paddingTop: 10 },
 });

@@ -1,18 +1,16 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import LinearGradient from 'react-native-linear-gradient';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { cachedProfile, useMyProfile, usePeers } from '../peers';
 import {
   CATEGORIES,
   TAGS,
   tierFor,
-  type Card,
+  type Card as CardT,
   type Category,
-  type Tag,
+  type Tag as TagT,
 } from '../profile';
-import { Avatar } from '../ui';
-import { C, CAT_COLOR, G, H1, H2, LABEL } from '../theme';
+import { Avatar, Card, Chip, Header, ListRow, Row, Screen, Tag } from '../ui';
+import { C, CAT_COLOR, F, T } from '../theme';
 
 const money = (n: number) =>
   n >= 1e9
@@ -23,19 +21,18 @@ const money = (n: number) =>
     ? `$${(n / 1e3).toFixed(0)}K`
     : `$${Math.round(n)}`;
 
-function top<T extends string>(items: T[], n: number) {
-  const counts = new Map<T, number>();
+function top<K extends string>(items: K[], n: number) {
+  const counts = new Map<K, number>();
   items.forEach(i => counts.set(i, (counts.get(i) ?? 0) + 1));
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
 }
 
 export default function Room() {
-  const insets = useSafeAreaInsets();
   const peers = usePeers();
   const [me] = useMyProfile();
 
-  // The room includes me. My card fields come from my own profile.
-  const mine: Card | undefined = me && {
+  // The room includes me; my card fields come from my own profile.
+  const mine: CardT | undefined = me && {
     id: me.id,
     name: me.name,
     role: me.role,
@@ -57,213 +54,188 @@ export default function Room() {
   ) as [Category, number][];
   const wants = top(
     room.flatMap(c => c.lookingFor),
-    5,
-  ) as [Tag, number][];
+    6,
+  ) as [TagT, number][];
   const gives = top(
     room.flatMap(c => c.offering),
-    5,
-  ) as [Tag, number][];
+    6,
+  ) as [TagT, number][];
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: C.bg }}
-      contentContainerStyle={{
-        padding: 20,
-        paddingTop: insets.top + 12,
-        paddingBottom: 120,
-        gap: 18,
-      }}
-    >
-      <View>
-        <Text style={LABEL}>🏆 The room</Text>
-        <Text style={[H1, { marginTop: 4 }]}>
-          {room.length} {room.length === 1 ? 'person' : 'people'} here
-        </Text>
-      </View>
+    <Screen>
+      <Header title="The room" />
 
-      <View style={s.hero}>
-        <LinearGradient
-          colors={['#B6FF3B33', '#3BFFB022', '#00000000']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
-        <Text style={LABEL}>Combined net worth in this room</Text>
+      <Card>
+        <View style={s.top}>
+          <Text style={[T.strong, { flex: 1 }]}>Net worth in the room</Text>
+          <Tag
+            label={`${room.length} ${room.length === 1 ? 'person' : 'people'}`}
+          />
+        </View>
         {rich.length > 0 ? (
-          <>
-            <Text style={s.total} adjustsFontSizeToFit numberOfLines={1}>
-              {money(total)}
-            </Text>
-            <Text style={[LABEL, { color: C.money }]}>
-              {rich.length} verified{' '}
-              {rich.length === 1 ? 'wallet holder' : 'wallet holders'}
-            </Text>
-          </>
+          <Text style={s.amount} adjustsFontSizeToFit numberOfLines={1}>
+            {money(total)}
+          </Text>
         ) : (
-          <Text style={[H2, { color: C.money }]}>
-            Nobody's flexed yet. Connect a wallet on your profile and top the
-            leaderboard.
+          <Text style={[T.body, { color: C.muted }]}>
+            Nobody's flexed yet. Verify a wallet on your pass to top the board.
           </Text>
         )}
+        <Bars cats={cats} />
+      </Card>
+
+      <View style={s.pair}>
+        <Card style={s.half}>
+          <Text style={s.stat}>{rich.length}</Text>
+          <Text style={T.sub}>Verified wallets</Text>
+        </Card>
+        <Card style={s.half}>
+          <Text style={s.stat} numberOfLines={1} adjustsFontSizeToFit>
+            {wants[0] ? TAGS[wants[0][0]] : '—'}
+          </Text>
+          <Text style={T.sub}>Most wanted</Text>
+        </Card>
       </View>
 
       {rich.length > 0 && (
-        <View style={{ gap: 10 }}>
-          <Text style={H2}>🐋 Leaderboard</Text>
+        <Card style={{ gap: 4 }}>
+          <Text style={[T.h2, { marginBottom: 6 }]}>Leaderboard</Text>
           {rich.slice(0, 10).map((c, i) => (
-            <Animated.View
-              key={c.id}
-              entering={FadeInDown.delay(i * 60)}
-              style={s.row}
-            >
-              <Text style={[s.rank, i === 0 && { color: '#FFD23F' }]}>
-                {i + 1}
-              </Text>
-              <Avatar
-                name={c.name}
-                avatar={
-                  c.id === me?.id ? me?.avatar : cachedProfile(c.id)?.avatar
+            <Animated.View key={c.id} entering={FadeIn.delay(i * 50)}>
+              <ListRow
+                leading={
+                  <Avatar
+                    name={c.name}
+                    avatar={
+                      c.id === me?.id ? me?.avatar : cachedProfile(c.id)?.avatar
+                    }
+                    size={44}
+                    color={i === 0 ? C.butter : CAT_COLOR[c.category]}
+                  />
                 }
-                size={44}
-                colors={
-                  i === 0
-                    ? ['#FFD23F', '#FF7A18']
-                    : [CAT_COLOR[c.category], '#ffffff55']
+                title={`${i + 1}. ${c.name}${c.id === me?.id ? ' (you)' : ''}`}
+                subtitle={c.tier}
+                trailing={
+                  <Text style={s.rowAmount}>{money(c.netWorthUsd!)}</Text>
                 }
               />
-              <View style={{ flex: 1 }}>
-                <Text style={s.name} numberOfLines={1}>
-                  {c.name}
-                  {c.id === me?.id ? ' (you)' : ''}
-                </Text>
-                <Text style={s.sub}>{c.tier}</Text>
-              </View>
-              <Text style={s.amount}>{money(c.netWorthUsd!)}</Text>
             </Animated.View>
           ))}
-        </View>
+        </Card>
       )}
 
-      <View style={{ gap: 10 }}>
-        <Text style={H2}>Who's here</Text>
-        {cats.map(([cat, n]) => (
-          <Bar
-            key={cat}
-            label={`${CATEGORIES[cat].emoji} ${CATEGORIES[cat].label}`}
-            n={n}
-            max={room.length}
-            color={CAT_COLOR[cat]}
-          />
-        ))}
-      </View>
-
-      {wants.length > 0 && (
-        <View style={{ gap: 10 }}>
-          <Text style={H2}>The room wants</Text>
-          {wants.map(([t, n]) => (
-            <Bar
-              key={t}
-              label={TAGS[t]}
-              n={n}
-              max={room.length}
-              color={C.hot}
-            />
-          ))}
-        </View>
-      )}
-      {gives.length > 0 && (
-        <View style={{ gap: 10 }}>
-          <Text style={H2}>The room offers</Text>
-          {gives.map(([t, n]) => (
-            <Bar
-              key={t}
-              label={TAGS[t]}
-              n={n}
-              max={room.length}
-              color={C.money}
-            />
-          ))}
-        </View>
-      )}
-    </ScrollView>
+      <TagCloud title="The room wants" tags={wants} color={C.lilac} />
+      <TagCloud title="The room offers" tags={gives} color={C.mint} />
+    </Screen>
   );
 }
 
-function Bar({
-  label,
-  n,
-  max,
-  color,
-}: {
-  label: string;
-  n: number;
-  max: number;
-  color: string;
-}) {
+/** Category mix as the reference's bar chart: grey bars, the biggest in blue with a count pill. */
+function Bars({ cats }: { cats: [Category, number][] }) {
+  if (!cats.length) return null;
+  // Every category gets a slim bar (empty ones as stubs) so the chart keeps its shape.
+  const count = new Map(cats);
+  const lead = cats[0][0];
+  const max = cats[0][1];
   return (
-    <View style={{ gap: 4 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={s.barLabel}>{label}</Text>
-        <Text style={s.barN}>{n}</Text>
-      </View>
-      <View style={s.track}>
-        <LinearGradient
-          colors={[color, color + '88']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={{
-            width: `${Math.max(6, (n / max) * 100)}%`,
-            height: '100%',
-            borderRadius: 6,
-          }}
-        />
-      </View>
+    <View style={s.chart}>
+      {(Object.keys(CATEGORIES) as Category[]).map(cat => {
+        const n = count.get(cat) ?? 0;
+        const isLead = cat === lead;
+        return (
+          <View
+            key={cat}
+            style={s.col}
+            accessible
+            accessibilityLabel={`${CATEGORIES[cat].label}: ${n}`}
+          >
+            {isLead && (
+              <View style={s.pill}>
+                <Text style={s.pillText}>{n}</Text>
+              </View>
+            )}
+            <View
+              style={[
+                s.bar,
+                {
+                  height: `${8 + (n / max) * 62}%`,
+                  backgroundColor: isLead ? C.blue : n ? C.faint : C.raised,
+                },
+              ]}
+            />
+            <Text style={s.barLabel}>{CATEGORIES[cat].emoji}</Text>
+          </View>
+        );
+      })}
     </View>
   );
 }
 
+function TagCloud({
+  title,
+  tags,
+  color,
+}: {
+  title: string;
+  tags: [TagT, number][];
+  color: string;
+}) {
+  if (!tags.length) return null;
+  return (
+    <Card>
+      <Text style={T.h2}>{title}</Text>
+      <Row>
+        {tags.map(([t, n], i) => (
+          <Chip
+            key={t}
+            label={`${TAGS[t]} · ${n}`}
+            selected={i === 0}
+            color={color}
+          />
+        ))}
+      </Row>
+    </Card>
+  );
+}
+
 const s = StyleSheet.create({
-  hero: {
-    borderRadius: 26,
-    padding: 22,
-    gap: 6,
-    borderWidth: 1.5,
-    borderColor: '#B6FF3B66',
-    overflow: 'hidden',
-    backgroundColor: C.surface,
-  },
-  total: { color: C.money, fontSize: 56, fontWeight: '900', letterSpacing: -2 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: C.surface,
-    borderRadius: 18,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: C.line,
-  },
-  rank: {
-    color: C.muted,
-    fontSize: 20,
-    fontWeight: '900',
-    width: 24,
-    textAlign: 'center',
-  },
-  name: { color: C.text, fontSize: 16, fontWeight: '900' },
-  sub: { color: C.muted, fontSize: 13 },
+  top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   amount: {
-    color: C.money,
-    fontSize: 17,
-    fontWeight: '900',
-    fontVariant: ['tabular-nums'],
+    fontFamily: F.medium,
+    fontSize: 44,
+    color: C.text,
+    letterSpacing: -0.5,
   },
-  barLabel: { color: C.text, fontSize: 14, fontWeight: '700' },
-  barN: { color: C.muted, fontSize: 14, fontWeight: '800' },
-  track: {
-    height: 12,
-    backgroundColor: C.surface2,
-    borderRadius: 6,
-    overflow: 'hidden',
+  chart: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 10,
+    height: 180,
+    marginTop: 6,
+  },
+  col: {
+    flex: 1,
+    height: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 8,
+  },
+  bar: { width: '100%', borderRadius: 12 },
+  barLabel: { fontSize: 16 },
+  pill: {
+    backgroundColor: C.text,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  pillText: { fontFamily: F.medium, fontSize: 13, color: C.ink },
+  pair: { flexDirection: 'row', gap: 12 },
+  half: { flex: 1, gap: 4 },
+  stat: { fontFamily: F.medium, fontSize: 28, color: C.text },
+  rowAmount: {
+    fontFamily: F.bold,
+    fontSize: 16,
+    color: C.text,
+    fontVariant: ['tabular-nums'],
   },
 });

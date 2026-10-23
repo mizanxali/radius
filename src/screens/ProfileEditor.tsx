@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { Asterisk, Camera, ChevronRight } from 'lucide-react-native';
 import {
   CATEGORIES,
   SOCIALS,
@@ -21,8 +21,9 @@ import {
   type Tag,
 } from '../profile';
 import { publishCard, useMyAddress, useMyProfile } from '../peers';
-import { Avatar, Chip, GradientButton, Row, tap } from '../ui';
-import { BODY, C, CAT_COLOR, H1, LABEL } from '../theme';
+import { Button, Card, Chip, Header, Row, Screen } from '../ui';
+import { PassCard } from '../PassCard';
+import { C, CAT_COLOR, F, R, T } from '../theme';
 
 const blank: Omit<Profile, 'id'> = {
   name: '',
@@ -37,7 +38,57 @@ const blank: Omit<Profile, 'id'> = {
 };
 
 export default function ProfileEditor({ onDone }: { onDone: () => void }) {
+  const [saved] = useMyProfile();
+  const [started, setStarted] = useState(!!saved);
+  return started ? (
+    <Editor onDone={onDone} />
+  ) : (
+    <Welcome onStart={() => setStarted(true)} />
+  );
+}
+
+/** First launch: the brand moment, then straight into building your pass. */
+function Welcome({ onStart }: { onStart: () => void }) {
   const insets = useSafeAreaInsets();
+  return (
+    <View
+      style={[
+        s.welcome,
+        { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 },
+      ]}
+    >
+      <Animated.View entering={FadeInDown.springify()}>
+        <Asterisk size={64} color={C.blue} strokeWidth={1.25} />
+        <Text style={s.brand}>Radius</Text>
+        <Text
+          style={[
+            T.body,
+            { fontSize: 18, lineHeight: 25, marginTop: 10, maxWidth: 300 },
+          ]}
+        >
+          See who's around you at the event, and meet the people worth meeting.
+        </Text>
+      </Animated.View>
+      <Animated.View entering={FadeIn.delay(250)} style={s.tilt}>
+        <PassCard
+          id="off1radius0000"
+          name="Your name here"
+          role="Builder · ETHGlobal"
+          category="designer"
+          status="nearby"
+        />
+      </Animated.View>
+      <Button
+        title="Get started"
+        icon={ChevronRight}
+        onPress={onStart}
+        style={s.start}
+      />
+    </View>
+  );
+}
+
+function Editor({ onDone }: { onDone: () => void }) {
   const [saved, save] = useMyProfile();
   const me = useMyAddress();
   const [p, setP] = useState<Omit<Profile, 'id'>>(saved ?? blank);
@@ -59,7 +110,7 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
     if (b64) set('avatar', b64);
   };
 
-  const ready = p.name.trim() && p.role.trim() && p.building.trim() && me;
+  const ready = !!(p.name.trim() && p.role.trim() && p.building.trim() && me);
   const submit = async () => {
     save({ ...p, id: me, name: p.name.trim(), role: p.role.trim() });
     await publishCard();
@@ -71,54 +122,49 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
       style={{ flex: 1, backgroundColor: C.bg }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
-        contentContainerStyle={{
-          padding: 20,
-          paddingTop: saved && Platform.OS === 'ios' ? 20 : insets.top + 16,
-          paddingBottom: insets.bottom + 32,
-          gap: 22,
-        }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View>
-          <Text style={H1}>{saved ? 'Edit profile' : 'Who are you?'}</Text>
-          <Text style={[BODY, { color: C.muted, marginTop: 6 }]}>
-            Everyone around you sees this card. Make it count.
-          </Text>
-        </View>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Pick profile photo"
+      <Screen modal={!!saved}>
+        <Header
+          title={saved ? 'Edit pass' : 'Your pass'}
+          onBack={saved ? onDone : undefined}
+        />
+        <PassCard
+          id={me || 'off1…'}
+          name={p.name || 'Your name'}
+          role={p.role || 'Your role'}
+          company={p.company}
+          category={p.category}
+          avatar={p.avatar}
+        />
+        <Button
+          title={p.avatar ? 'Change photo' : 'Add a photo'}
+          variant="outline"
+          icon={Camera}
           onPress={pickPhoto}
-          style={{ alignSelf: 'center' }}
-        >
-          <Avatar name={p.name || '+'} avatar={p.avatar} size={120} />
-          <Text style={[LABEL, { textAlign: 'center', marginTop: 8 }]}>
-            {p.avatar ? 'Change photo' : 'Add photo'}
-          </Text>
-        </Pressable>
-
-        <Field
-          label="Name"
-          value={p.name}
-          onChangeText={v => set('name', v)}
-          placeholder="Vitalik"
-        />
-        <Field
-          label="Role"
-          value={p.role}
-          onChangeText={v => set('role', v)}
-          placeholder="Founder & CEO"
-        />
-        <Field
-          label="Company / project"
-          value={p.company ?? ''}
-          onChangeText={v => set('company', v)}
-          placeholder="Optional"
         />
 
-        <Section label="I'm a">
+        <Card>
+          <Field
+            label="Name"
+            value={p.name}
+            onChangeText={v => set('name', v)}
+            placeholder="Vitalik"
+          />
+          <Field
+            label="Role"
+            value={p.role}
+            onChangeText={v => set('role', v)}
+            placeholder="Founder & CEO"
+          />
+          <Field
+            label="Company or project"
+            value={p.company ?? ''}
+            onChangeText={v => set('company', v || undefined)}
+            placeholder="Optional"
+          />
+        </Card>
+
+        <Card>
+          <Text style={T.strong}>I'm a</Text>
           <Row>
             {(Object.keys(CATEGORIES) as Category[]).map(c => (
               <Chip
@@ -130,51 +176,40 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
               />
             ))}
           </Row>
-        </Section>
+        </Card>
 
-        <Field
-          label="What I'm building"
-          value={p.building}
-          onChangeText={v => set('building', v)}
-          placeholder="A gasless wallet for the next billion users"
-          multiline
+        <Card>
+          <Field
+            label="What I'm building"
+            value={p.building}
+            onChangeText={v => set('building', v)}
+            placeholder="A gasless wallet for the next billion users"
+            multiline
+          />
+          <Field
+            label="Bio"
+            value={p.bio}
+            onChangeText={v => set('bio', v)}
+            placeholder="ex-Coinbase, 3x hackathon winner, dog dad"
+            multiline
+          />
+        </Card>
+
+        <TagPicker
+          label="Looking for"
+          selected={p.lookingFor}
+          color={C.lilac}
+          onToggle={t => toggle('lookingFor', t)}
         />
-        <Field
-          label="Bio"
-          value={p.bio}
-          onChangeText={v => set('bio', v)}
-          placeholder="ex-Coinbase, 3x hackathon winner, dog dad"
-          multiline
+        <TagPicker
+          label="I can offer"
+          selected={p.offering}
+          color={C.mint}
+          onToggle={t => toggle('offering', t)}
         />
 
-        <Section label="Looking for">
-          <Row>
-            {(Object.keys(TAGS) as Tag[]).map(t => (
-              <Chip
-                key={t}
-                label={TAGS[t]}
-                selected={p.lookingFor.includes(t)}
-                color={C.hot}
-                onPress={() => toggle('lookingFor', t)}
-              />
-            ))}
-          </Row>
-        </Section>
-        <Section label="I can offer">
-          <Row>
-            {(Object.keys(TAGS) as Tag[]).map(t => (
-              <Chip
-                key={t}
-                label={TAGS[t]}
-                selected={p.offering.includes(t)}
-                color={C.money}
-                onPress={() => toggle('offering', t)}
-              />
-            ))}
-          </Row>
-        </Section>
-
-        <Section label="Socials">
+        <Card>
+          <Text style={T.strong}>Socials</Text>
           {(Object.keys(SOCIALS) as Social[]).map(k => (
             <View key={k} style={s.social}>
               <Text style={s.socialLabel}>{SOCIALS[k].label}</Text>
@@ -188,45 +223,56 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
                     [k]: v.replace(/^@/, '').trim() || undefined,
                   })
                 }
-                placeholder="handle"
-                placeholderTextColor={C.line}
+                placeholder="@handle"
+                placeholderTextColor={C.faint}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
             </View>
           ))}
-        </Section>
+        </Card>
 
-        <GradientButton
-          title={saved ? 'Save' : "Let's go →"}
+        <Button
+          title={saved ? 'Save' : 'Continue'}
           disabled={!ready}
           onPress={submit}
         />
-        {saved && (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => (tap(), onDone())}
-          >
-            <Text style={[LABEL, { textAlign: 'center' }]}>Cancel</Text>
-          </Pressable>
+        {!ready && (
+          <Text style={[T.sub, { textAlign: 'center' }]}>
+            Name, role and what you're building are required.
+          </Text>
         )}
-      </ScrollView>
+      </Screen>
     </KeyboardAvoidingView>
   );
 }
 
-function Section({
+function TagPicker({
   label,
-  children,
+  selected,
+  color,
+  onToggle,
 }: {
   label: string;
-  children: React.ReactNode;
+  selected: Tag[];
+  color: string;
+  onToggle: (t: Tag) => void;
 }) {
   return (
-    <View style={{ gap: 10 }}>
-      <Text style={LABEL}>{label}</Text>
-      {children}
-    </View>
+    <Card>
+      <Text style={T.strong}>{label}</Text>
+      <Row>
+        {(Object.keys(TAGS) as Tag[]).map(t => (
+          <Chip
+            key={t}
+            label={TAGS[t]}
+            selected={selected.includes(t)}
+            color={color}
+            onPress={() => onToggle(t)}
+          />
+        ))}
+      </Row>
+    </Card>
   );
 }
 
@@ -237,48 +283,94 @@ function Field({
 }: { label: string; multiline?: boolean } & React.ComponentProps<
   typeof TextInput
 >) {
+  const [focused, setFocused] = useState(false);
   return (
-    <Section label={label}>
+    <Labeled label={label}>
       <TextInput
         accessibilityLabel={label}
         style={[
           s.input,
-          multiline && { minHeight: 84, textAlignVertical: 'top' },
+          multiline && s.multiline,
+          focused && { borderColor: C.blue },
         ]}
-        placeholderTextColor={C.line}
+        placeholderTextColor={C.faint}
         multiline={multiline}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         {...props}
       />
-    </Section>
+    </Labeled>
+  );
+}
+
+function Labeled({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <View style={{ gap: 8 }}>
+      <Text style={T.label}>{label}</Text>
+      {children}
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  input: {
-    backgroundColor: C.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: C.line,
+  welcome: {
+    flex: 1,
+    backgroundColor: C.bg,
+    paddingHorizontal: 24,
+    justifyContent: 'space-between',
+  },
+  brand: {
+    fontFamily: F.medium,
+    fontSize: 64,
     color: C.text,
+    letterSpacing: -2,
+    marginTop: 20,
+  },
+  tilt: {
+    transform: [{ rotate: '-12deg' }, { scale: 1.05 }],
+    marginHorizontal: -10,
+  },
+  start: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 28,
+    flexDirection: 'row-reverse',
+  },
+  input: {
+    backgroundColor: C.raised,
+    borderRadius: R.pill,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    color: C.text,
+    fontFamily: F.regular,
     fontSize: 17,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  multiline: {
+    borderRadius: R.inner,
+    minHeight: 92,
+    textAlignVertical: 'top',
+    paddingTop: 15,
   },
   social: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: C.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: C.line,
-    paddingLeft: 16,
+    backgroundColor: C.raised,
+    borderRadius: R.pill,
+    paddingLeft: 20,
   },
-  socialLabel: { color: C.muted, fontWeight: '800', width: 90 },
+  socialLabel: {
+    fontFamily: F.medium,
+    fontSize: 15,
+    color: C.muted,
+    width: 86,
+  },
   socialInput: {
     flex: 1,
     color: C.text,
+    fontFamily: F.regular,
     fontSize: 16,
     paddingVertical: 14,
-    paddingRight: 16,
+    paddingRight: 20,
   },
 });

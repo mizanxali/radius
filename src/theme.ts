@@ -1,50 +1,65 @@
 import type { Category } from './profile';
 
+// Soft neobank palette: charcoal surfaces, pastel accents, white for primary actions.
 export const C = {
-  bg: '#07070F',
-  surface: '#13131F',
-  surface2: '#1C1C2E',
-  line: '#2A2A40',
+  bg: '#2F2F34',
+  surface: '#37383D',
+  raised: '#414248', // circle buttons, inputs, inner cards
+  line: '#4B4C53',
   text: '#FFFFFF',
-  muted: '#8E8EAA',
-  money: '#B6FF3B',
-  hot: '#FF2E93',
+  muted: '#A3A3AD',
+  faint: '#6F7079',
+  ink: '#1E1E22', // text on white / pastel
+
+  blue: '#8FB8F0',
+  blueDeep: '#648FBF',
+  lilac: '#DE8FF7',
+  mint: '#9DE3C4',
+  peach: '#FFB48C',
+  butter: '#F4DC82',
+  rose: '#F6A3BC',
+  periwinkle: '#B7AAFF',
 };
 
-export const G = {
-  hot: ['#FF2E93', '#FF7A18'],
-  cool: ['#7B61FF', '#00D4FF'],
-  money: ['#B6FF3B', '#3BFFB0'],
-  radar: ['#7B61FF', '#FF2E93', '#FF7A18'],
-};
-
+/** Each category gets its own pastel, used for cards, avatars and charts. */
 export const CAT_COLOR: Record<Category, string> = {
-  builder: '#00D4FF',
-  founder: '#FF7A18',
-  investor: '#B6FF3B',
-  designer: '#FF2E93',
-  researcher: '#7B61FF',
-  bd: '#FFD23F',
-  degen: '#FF4D4D',
+  builder: C.blue,
+  founder: C.peach,
+  investor: C.mint,
+  designer: C.lilac,
+  researcher: C.periwinkle,
+  bd: C.rose,
+  degen: C.butter,
 };
 
-export const H1 = {
-  color: C.text,
-  fontSize: 34,
-  fontWeight: '900' as const,
-  letterSpacing: -1,
+// Cabinet Grotesk, bundled. Pick the face by family name; never set fontWeight
+// (Android would synthesize a system font instead).
+export const F = {
+  regular: 'CabinetGrotesk-Regular',
+  medium: 'CabinetGrotesk-Medium',
+  bold: 'CabinetGrotesk-Bold',
+  xbold: 'CabinetGrotesk-Extrabold',
 };
-export const H2 = {
-  color: C.text,
-  fontSize: 22,
-  fontWeight: '800' as const,
-  letterSpacing: -0.5,
+
+export const T = {
+  display: {
+    fontFamily: F.medium,
+    fontSize: 44,
+    color: C.text,
+    letterSpacing: -1,
+  },
+  title: {
+    fontFamily: F.medium,
+    fontSize: 30,
+    color: C.text,
+    letterSpacing: -0.5,
+  },
+  header: { fontFamily: F.medium, fontSize: 22, color: C.text },
+  h2: { fontFamily: F.medium, fontSize: 22, color: C.text },
+  body: { fontFamily: F.regular, fontSize: 16, lineHeight: 22, color: C.text },
+  strong: { fontFamily: F.bold, fontSize: 16, color: C.text },
+  sub: { fontFamily: F.regular, fontSize: 14, lineHeight: 19, color: C.muted },
+  label: { fontFamily: F.medium, fontSize: 15, color: C.muted },
 };
-export const BODY = { color: C.text, fontSize: 16, lineHeight: 22 };
-export const LABEL = {
-  color: C.muted,
-  fontSize: 12,
-  fontWeight: '700' as const,
-  letterSpacing: 1.2,
-  textTransform: 'uppercase' as const,
-};
+
+export const R = { card: 28, inner: 20, pill: 999 };

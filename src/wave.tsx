@@ -2,11 +2,11 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { SlideInUp, SlideOutUp } from 'react-native-reanimated';
-import LinearGradient from 'react-native-linear-gradient';
+import { Hand } from 'lucide-react-native';
 import Haptics from 'react-native-haptic-feedback';
 import { cachedProfile, getMyProfile, handle, request, usePeer } from './peers';
 import { Avatar } from './ui';
-import { G } from './theme';
+import { C, CAT_COLOR, F } from './theme';
 
 type Wave = { from: string; name: string; at: number };
 let current: Wave | undefined;
@@ -61,23 +61,19 @@ export function WaveBanner({ onOpen }: { onOpen: (id: string) => void }) {
         }}
         style={s.banner}
       >
-        <LinearGradient
-          colors={G.hot}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
         <Avatar
           name={w.name}
           avatar={cachedProfile(w.from)?.avatar}
           size={48}
-          colors={['#fff', '#ffffff88']}
+          color={peer ? CAT_COLOR[peer.card.category] : C.blue}
         />
         <Text style={s.text} numberOfLines={2}>
-          👋{' '}
-          <Text style={{ fontWeight: '900' }}>{peer?.card.name ?? w.name}</Text>{' '}
+          <Text style={{ fontFamily: F.bold }}>
+            {peer?.card.name ?? w.name}
+          </Text>{' '}
           waved at you
         </Text>
+        <Hand size={24} color={C.ink} strokeWidth={1.6} />
       </Pressable>
     </Animated.View>
   );
@@ -89,9 +85,11 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    padding: 14,
-    borderRadius: 24,
-    overflow: 'hidden',
+    paddingVertical: 10,
+    paddingLeft: 10,
+    paddingRight: 20,
+    borderRadius: 999,
+    backgroundColor: C.text,
   },
-  text: { flex: 1, color: '#fff', fontSize: 17, fontWeight: '600' },
+  text: { flex: 1, color: C.ink, fontSize: 17, fontFamily: F.regular },
 });

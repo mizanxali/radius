@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
 import { useMMKVObject } from 'react-native-mmkv';
@@ -22,8 +22,8 @@ import {
   type MeetProof,
 } from './meetproof';
 import { WORKER_URL } from './config';
-import { Avatar, GradientButton } from './ui';
-import { BODY, C, G, H2 } from './theme';
+import { Avatar, Button } from './ui';
+import { C, CAT_COLOR, T } from './theme';
 
 export type Stamp = {
   id: string; // sigB: both phones know it
@@ -192,35 +192,31 @@ export function MeetPrompt() {
     <Animated.View entering={FadeIn} exiting={FadeOut} style={s.backdrop}>
       <Animated.View
         entering={ZoomIn.springify()}
-        style={[s.card, { marginBottom: insets.bottom + 24 }]}
+        style={[s.sheet, { marginBottom: insets.bottom + 16 }]}
       >
         <Avatar
           name={p?.name ?? '?'}
           avatar={p?.avatar}
-          size={96}
-          colors={G.money}
+          size={88}
+          color={p ? CAT_COLOR[p.category] : C.mint}
         />
-        <Text style={[H2, { textAlign: 'center' }]}>
-          🤝 {p?.name ?? 'Someone'} says you just met
+        <Text style={[T.title, { textAlign: 'center', fontSize: 26 }]}>
+          {p?.name ?? 'Someone'} says you just met
         </Text>
-        <Text style={[BODY, { color: C.muted, textAlign: 'center' }]}>
+        <Text style={[T.body, { color: C.muted, textAlign: 'center' }]}>
           Confirm to mint a proof-of-meet stamp on Base, signed by both of you.
         </Text>
-        <GradientButton
+        <Button
           style={{ alignSelf: 'stretch' }}
           title="Confirm & mint"
-          colors={G.money}
           onPress={() => a.resolve(true)}
         />
-        <Pressable
-          accessibilityRole="button"
+        <Button
+          style={{ alignSelf: 'stretch' }}
+          title="Not now"
+          variant="outline"
           onPress={() => a.resolve(false)}
-          hitSlop={10}
-        >
-          <Text style={[BODY, { color: C.muted, fontWeight: '800' }]}>
-            Not now
-          </Text>
-        </Pressable>
+        />
       </Animated.View>
     </Animated.View>
   );
@@ -233,18 +229,16 @@ const s = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#000000AA',
+    backgroundColor: '#00000099',
     justifyContent: 'flex-end',
     zIndex: 200,
   },
-  card: {
-    marginHorizontal: 16,
+  sheet: {
+    marginHorizontal: 12,
     backgroundColor: C.surface,
-    borderRadius: 28,
+    borderRadius: 32,
     padding: 24,
     gap: 14,
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#B6FF3B66',
   },
 });

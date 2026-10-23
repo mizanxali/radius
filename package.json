@@ -24,6 +24,7 @@
     "@reown/appkit-solana-react-native": "^2.0.6",
     "@scure/base": "^2.4.0",
     "@walletconnect/react-native-compat": "^2.26.0",
+    "lucide-react-native": "^1.61.0",
     "react": "19.3.0",
     "react-native": "0.88.0",
     "react-native-gesture-handler": "^3.4.0",

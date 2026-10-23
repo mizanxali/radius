@@ -1,6 +1,15 @@
 import { useEffect } from 'react';
-import { StatusBar, Text } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar, View } from 'react-native';
+import {
+  CircleUserRound,
+  Radar as RadarIcon,
+  Sparkles,
+  Trophy,
+} from 'lucide-react-native';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import {
   createNavigationContainerRef,
   DarkTheme,
@@ -29,6 +38,7 @@ import Finder from './src/screens/Finder';
 import { WaveBanner } from './src/wave';
 import { MeetPrompt, retryPendingMints } from './src/meet';
 import { C } from './src/theme';
+import type { Icon } from './src/ui';
 
 type Tabs = {
   Radar: undefined;
@@ -49,30 +59,49 @@ const nav = createNavigationContainerRef<Root>();
 const Stack = createNativeStackNavigator<Root>();
 const Tab = createBottomTabNavigator<Tabs>();
 
+// Active tab sits in a white circle, like the reference's active action button.
 const icon =
-  (emoji: string) =>
+  (I: Icon) =>
   ({ focused }: { focused: boolean }) =>
-    <Text style={{ fontSize: 24, opacity: focused ? 1 : 0.45 }}>{emoji}</Text>;
+    (
+      <View
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: focused ? C.text : 'transparent',
+        }}
+      >
+        <I size={22} color={focused ? C.ink : C.muted} strokeWidth={1.75} />
+      </View>
+    );
 
 function MainTabs() {
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: C.text,
-        tabBarInactiveTintColor: C.muted,
-        tabBarStyle: { backgroundColor: C.surface, borderTopColor: C.line },
-        tabBarLabelStyle: { fontWeight: '800' },
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: C.surface,
+          borderTopWidth: 0,
+          height: 68 + insets.bottom,
+          paddingTop: 10,
+          paddingBottom: insets.bottom,
+        },
       }}
     >
-      <Tab.Screen name="Radar" options={{ tabBarIcon: icon('📡') }}>
+      <Tab.Screen name="Radar" options={{ tabBarIcon: icon(RadarIcon) }}>
         {({ navigation }: BottomTabScreenProps<Tabs, 'Radar'>) => (
           <Radar
             onOpen={id => navigation.getParent()?.navigate('Person', { id })}
           />
         )}
       </Tab.Screen>
-      <Tab.Screen name="Matches" options={{ tabBarIcon: icon('✨') }}>
+      <Tab.Screen name="Matches" options={{ tabBarIcon: icon(Sparkles) }}>
         {({ navigation }: BottomTabScreenProps<Tabs, 'Matches'>) => (
           <Matches
             onOpen={id => navigation.getParent()?.navigate('Person', { id })}
@@ -82,9 +111,9 @@ function MainTabs() {
       <Tab.Screen
         name="Room"
         component={Room}
-        options={{ tabBarIcon: icon('🏆') }}
+        options={{ tabBarIcon: icon(Trophy) }}
       />
-      <Tab.Screen name="Me" options={{ tabBarIcon: icon('😎') }}>
+      <Tab.Screen name="Me" options={{ tabBarIcon: icon(CircleUserRound) }}>
         {({ navigation }: BottomTabScreenProps<Tabs, 'Me'>) => (
           <Me onEdit={() => navigation.getParent()?.navigate('EditProfile')} />
         )}

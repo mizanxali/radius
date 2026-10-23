@@ -1,23 +1,22 @@
 import { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import LinearGradient from 'react-native-linear-gradient';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   FadeInDown,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import { RefreshCw } from 'lucide-react-native';
 import { cachedProfile, usePeers } from '../peers';
 import { refreshMatches, useMatches } from '../ai';
 import type { Match } from '../match';
-import { Avatar, CategoryBadge, tap } from '../ui';
-import { BODY, C, CAT_COLOR, G, H1, LABEL } from '../theme';
+import { Avatar, Card, Header, IconButton, ListRow, Screen, Tag } from '../ui';
+import { C, CAT_COLOR, F, T } from '../theme';
 import { distanceLabel } from './Radar';
 
 export default function Matches({ onOpen }: { onOpen: (id: string) => void }) {
-  const insets = useSafeAreaInsets();
   const peers = usePeers();
   const { matches, loading } = useMatches();
 
@@ -29,46 +28,35 @@ export default function Matches({ onOpen }: { onOpen: (id: string) => void }) {
   const shown = matches.filter(m => byId.has(m.id));
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: C.bg }}
-      contentContainerStyle={{
-        padding: 20,
-        paddingTop: insets.top + 12,
-        paddingBottom: 120,
-        gap: 14,
-      }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-        <View style={{ flex: 1 }}>
-          <Text style={LABEL}>✨ AI match</Text>
-          <Text style={[H1, { marginTop: 4 }]}>Talk to these first</Text>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Re-rank the room"
-          disabled={loading}
-          hitSlop={10}
-          onPress={() => (tap(), refreshMatches(peers, true))}
-          style={s.refresh}
-        >
-          <Text style={{ fontSize: 18 }}>↻</Text>
-        </Pressable>
-      </View>
+    <Screen>
+      <Header
+        title="AI match"
+        right={
+          <IconButton
+            icon={RefreshCw}
+            label="Re-rank the room"
+            onPress={() => refreshMatches(peers, true)}
+          />
+        }
+      />
+      <Text style={[T.title, { marginTop: 4 }]}>Talk to these first</Text>
 
       {loading && <Thinking count={peers.length} />}
 
       {!loading && shown.length === 0 && (
-        <Text style={[BODY, { color: C.muted }]}>
-          {peers.length === 0
-            ? 'Nobody around yet. Matches appear as people with Radius come into range.'
-            : 'No strong fits in the room right now. Fill in what you’re looking for to sharpen matches.'}
-        </Text>
+        <Card>
+          <Text style={T.body}>
+            {peers.length === 0
+              ? 'Nobody around yet. Matches appear as people with Radius come into range.'
+              : 'No strong fits in the room right now. Add what you’re looking for to sharpen matches.'}
+          </Text>
+        </Card>
       )}
 
       {shown.map((m, i) => (
         <Animated.View
           key={m.id}
-          entering={FadeInDown.delay(i * 90).springify()}
+          entering={FadeInDown.delay(i * 80).springify()}
         >
           <MatchCard
             rank={i + 1}
@@ -80,11 +68,11 @@ export default function Matches({ onOpen }: { onOpen: (id: string) => void }) {
       ))}
 
       {!loading && shown.length > 0 && !shown[0].ai && (
-        <Text style={[LABEL, { textAlign: 'center' }]}>
+        <Text style={[T.sub, { textAlign: 'center' }]}>
           Offline: matched on tags. Reconnect for AI picks.
         </Text>
       )}
-    </ScrollView>
+    </Screen>
   );
 }
 
@@ -100,111 +88,96 @@ function MatchCard({
   onPress: () => void;
 }) {
   const p = cachedProfile(match.id);
-  const peers = usePeers();
-  const card = peers.find(x => x.card.id === match.id)?.card;
+  const card = usePeers().find(x => x.card.id === match.id)?.card;
   const name = p?.name ?? card?.name ?? '';
   const category = p?.category ?? card?.category ?? 'builder';
+  const role = [p?.role ?? card?.role, p?.company ?? card?.company]
+    .filter(Boolean)
+    .join(' · ');
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => (tap(), onPress())}
-      style={({ pressed }) => [
-        s.card,
-        { transform: [{ scale: pressed ? 0.98 : 1 }] },
-      ]}
-    >
-      <LinearGradient
-        colors={[CAT_COLOR[category] + '33', '#00000000']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
+    <Card>
+      <ListRow
+        leading={
+          <Avatar
+            name={name}
+            avatar={p?.avatar}
+            size={52}
+            color={CAT_COLOR[category]}
+          />
+        }
+        title={name}
+        subtitle={role}
+        trailing={<Tag label={`#${rank}`} />}
+        onPress={onPress}
       />
-      <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
-        <Text style={[s.rank, { color: CAT_COLOR[category] }]}>#{rank}</Text>
-        <Avatar
-          name={name}
-          avatar={p?.avatar}
-          size={56}
-          colors={[CAT_COLOR[category], '#ffffff55']}
-        />
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text style={s.name} numberOfLines={1}>
-            {name}
-          </Text>
-          <Text style={s.sub} numberOfLines={1}>
-            {p?.role ?? card?.role}
-            {p?.company ?? card?.company
-              ? ` @ ${p?.company ?? card?.company}`
-              : ''}
-          </Text>
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-            <CategoryBadge category={category} />
-            <Text style={s.status}>● {status}</Text>
-          </View>
-        </View>
-      </View>
-      <Text style={s.reason}>{match.reason}</Text>
+      <Text style={[T.h2, { fontSize: 20, lineHeight: 26 }]}>
+        {match.reason}
+      </Text>
       <View style={s.bubble}>
-        <Text style={LABEL}>Say this</Text>
-        <Text style={[BODY, { fontWeight: '600' }]}>“{match.icebreaker}”</Text>
+        <Text style={s.bubbleLabel}>Say this</Text>
+        <Text style={s.bubbleText}>{match.icebreaker}</Text>
       </View>
-    </Pressable>
+      <Text style={[T.sub, { color: C.mint }]}>● {status}</Text>
+    </Card>
   );
 }
 
+/** Loading state: chart-like bars breathing while Claude reads the room. */
 function Thinking({ count }: { count: number }) {
-  const t = useSharedValue(0);
-  useEffect(() => {
-    t.value = withRepeat(withTiming(1, { duration: 900 }), -1, true);
-  }, [t]);
-  const style = useAnimatedStyle(() => ({
-    opacity: 0.4 + t.value * 0.6,
-    transform: [{ scale: 0.98 + t.value * 0.02 }],
-  }));
   return (
-    <Animated.View style={[s.thinking, style]}>
-      <LinearGradient
-        colors={G.radar}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <Text style={s.thinkingText}>
+    <Card>
+      <Text style={T.strong}>
         Reading {count} {count === 1 ? 'profile' : 'profiles'} in the room…
       </Text>
-    </Animated.View>
+      <View style={s.bars}>
+        {[0.5, 0.25, 0.65, 0.9, 0.6, 0.75].map((h, i) => (
+          <Bar key={i} h={h} delay={i * 120} highlight={i === 5} />
+        ))}
+      </View>
+    </Card>
+  );
+}
+
+function Bar({
+  h,
+  delay,
+  highlight,
+}: {
+  h: number;
+  delay: number;
+  highlight: boolean;
+}) {
+  const t = useSharedValue(0);
+  useEffect(() => {
+    t.value = withDelay(
+      delay,
+      withRepeat(withTiming(1, { duration: 700 }), -1, true),
+    );
+  }, [t, delay]);
+  const style = useAnimatedStyle(() => ({
+    height: `${(0.35 + t.value * 0.65) * h * 100}%`,
+  }));
+  return (
+    <Animated.View
+      style={[s.bar, { backgroundColor: highlight ? C.blue : C.faint }, style]}
+    />
   );
 }
 
 const s = StyleSheet.create({
-  refresh: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: C.surface2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  card: {
-    backgroundColor: C.surface,
-    borderRadius: 24,
-    padding: 16,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: C.line,
-    overflow: 'hidden',
-  },
-  rank: { fontSize: 28, fontWeight: '900', width: 44 },
-  name: { color: C.text, fontSize: 19, fontWeight: '900' },
-  sub: { color: C.muted, fontSize: 14 },
-  status: { color: C.money, fontSize: 12, fontWeight: '800' },
-  reason: { color: C.text, fontSize: 17, fontWeight: '800', lineHeight: 23 },
   bubble: {
-    backgroundColor: C.surface2,
-    borderRadius: 16,
-    padding: 14,
-    gap: 6,
+    backgroundColor: C.blueDeep,
+    borderRadius: 20,
+    padding: 16,
+    gap: 4,
   },
-  thinking: { borderRadius: 20, padding: 18, overflow: 'hidden' },
-  thinkingText: { color: '#fff', fontSize: 16, fontWeight: '900' },
+  bubbleLabel: { fontFamily: F.medium, fontSize: 14, color: '#FFFFFFB3' },
+  bubbleText: {
+    fontFamily: F.medium,
+    fontSize: 17,
+    lineHeight: 23,
+    color: C.text,
+  },
+  bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, height: 120 },
+  bar: { flex: 1, borderRadius: 14 },
 });

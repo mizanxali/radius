@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   interpolateColor,
@@ -10,21 +10,25 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Haptics from 'react-native-haptic-feedback';
+import { X } from 'lucide-react-native';
 import { cachedProfile, usePeer } from '../peers';
-import { Avatar, tap } from '../ui';
-import { C, H1, LABEL } from '../theme';
+import { Avatar, Header, IconButton, Tag } from '../ui';
+import { C, CAT_COLOR, F, T } from '../theme';
 
 /** 0 = far (-90 dBm) … 1 = touching (-40 dBm). */
 const heat = (rssi?: number) =>
   rssi == null ? 0 : Math.min(1, Math.max(0, (rssi + 90) / 50));
 
 const COPY: [number, string][] = [
-  [0.85, 'Right here 🔥'],
+  [0.85, 'Right here'],
   [0.65, 'Hot'],
-  [0.45, 'Warmer…'],
+  [0.45, 'Warmer'],
   [0.25, 'Getting warmer'],
-  [0, 'Cold. Keep moving'],
+  [0, 'Cold, keep moving'],
 ];
+
+// cold blue → lilac → warm peach
+const STOPS = [C.blue, C.lilac, C.peach];
 
 export default function Finder({
   id,
@@ -37,36 +41,29 @@ export default function Finder({
   const peer = usePeer(id);
   const p = cachedProfile(id);
   const h = heat(peer?.rssi);
+  const name = p?.name ?? peer?.card.name ?? '';
 
-  // Pulse speed and size follow the heat; springs smooth BLE jitter.
+  // Pulse size and colour follow the heat; springs smooth BLE jitter.
   const hv = useSharedValue(h);
   const beat = useSharedValue(0);
   useEffect(() => {
     hv.value = withSpring(h, { damping: 20, stiffness: 50 });
   }, [h, hv]);
   useEffect(() => {
-    beat.value = withRepeat(withTiming(1, { duration: 900 }), -1);
+    beat.value = withRepeat(withTiming(1, { duration: 1000 }), -1);
   }, [beat]);
 
-  const ring = useAnimatedStyle(() => ({
+  const outer = useAnimatedStyle(() => ({
+    // peaks at ~1.4 × 240 so it stays on screen
     transform: [
-      // peaks at ~1.45 × 260 pt so it stays on screen
-      { scale: 0.5 + hv.value * 0.6 + beat.value * (0.1 + hv.value * 0.25) },
+      { scale: 0.5 + hv.value * 0.55 + beat.value * (0.1 + hv.value * 0.25) },
     ],
-    opacity: 0.9 - beat.value * 0.7,
-    backgroundColor: interpolateColor(
-      hv.value,
-      [0, 0.5, 1],
-      ['#00D4FF', '#7B61FF', '#FF2E93'],
-    ),
+    opacity: 0.55 - beat.value * 0.5,
+    backgroundColor: interpolateColor(hv.value, [0, 0.5, 1], STOPS),
   }));
-  const core = useAnimatedStyle(() => ({
-    transform: [{ scale: 0.8 + hv.value * 0.5 }],
-    backgroundColor: interpolateColor(
-      hv.value,
-      [0, 0.5, 1],
-      ['#0A3A55', '#3B2A7A', '#FF7A18'],
-    ),
+  const inner = useAnimatedStyle(() => ({
+    transform: [{ scale: 0.75 + hv.value * 0.35 }],
+    backgroundColor: interpolateColor(hv.value, [0, 0.5, 1], STOPS),
   }));
 
   // Geiger-counter haptics: slow ticks when cold, a buzz when you're on top of them.
@@ -85,7 +82,9 @@ export default function Finder({
     return () => clearTimeout(t);
   }, []);
 
-  const label = peer?.hops
+  const label = !peer
+    ? 'Lost them'
+    : peer.hops
     ? 'Out of Bluetooth range'
     : COPY.find(([min]) => h >= min)![1];
 
@@ -93,63 +92,51 @@ export default function Finder({
     <View
       style={[
         s.root,
-        { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 },
+        { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 32 },
       ]}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Close"
-        onPress={() => (tap(), onClose())}
-        hitSlop={12}
-        style={s.close}
-      >
-        <Text style={{ color: C.text, fontSize: 18, fontWeight: '900' }}>
-          ✕
-        </Text>
-      </Pressable>
-      <Text style={LABEL}>Finding</Text>
-      <Text style={H1}>{p?.name ?? peer?.card.name}</Text>
+      <Header
+        title="Finder"
+        right={<IconButton icon={X} label="Close" onPress={onClose} />}
+      />
+      <View style={s.who}>
+        <Text style={T.label}>Looking for</Text>
+        <Text style={T.title}>{name}</Text>
+      </View>
 
       <View style={s.stage}>
-        <Animated.View style={[s.ring, ring]} />
-        <Animated.View style={[s.core, core]} />
+        <Animated.View style={[s.circle, { width: 240, height: 240 }, outer]} />
+        <Animated.View style={[s.circle, { width: 170, height: 170 }, inner]} />
         <Avatar
-          name={p?.name ?? peer?.card.name ?? ''}
+          name={name}
           avatar={p?.avatar}
           size={120}
-          colors={['#fff', '#ffffff66']}
+          color={peer ? CAT_COLOR[peer.card.category] : C.raised}
         />
       </View>
 
-      <Text style={s.heat} accessibilityLiveRegion="polite">
-        {peer ? label : 'Lost them…'}
-      </Text>
-      <Text style={[LABEL, { textAlign: 'center' }]}>
-        {peer?.rssi != null ? `${peer.rssi} dBm` : 'listening…'}
-      </Text>
+      <View style={{ alignItems: 'center', gap: 12 }}>
+        <Text style={s.heat} accessibilityLiveRegion="polite">
+          {label}
+        </Text>
+        <Tag
+          label={peer?.rssi != null ? `${peer.rssi} dBm` : 'listening…'}
+          color={C.raised}
+        />
+      </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg, paddingHorizontal: 24, gap: 6 },
-  close: {
-    alignSelf: 'flex-end',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: C.surface2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  root: { flex: 1, backgroundColor: C.bg, paddingHorizontal: 20 },
+  who: { alignItems: 'center', gap: 4, marginTop: 12 },
   stage: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  ring: { position: 'absolute', width: 260, height: 260, borderRadius: 130 },
-  core: { position: 'absolute', width: 200, height: 200, borderRadius: 100 },
+  circle: { position: 'absolute', borderRadius: 999 },
   heat: {
-    color: C.text,
+    fontFamily: F.medium,
     fontSize: 40,
-    fontWeight: '900',
-    textAlign: 'center',
-    letterSpacing: -1,
+    color: C.text,
+    letterSpacing: -0.5,
   },
 });

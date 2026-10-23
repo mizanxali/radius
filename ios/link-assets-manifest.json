@@ -1,0 +1,25 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/CabinetGrotesk-Bold.otf",
+      "sha1": "553f503c569a15d5ef012d2bf1bb42acea4ea36e"
+    },
+    {
+      "path": "assets/fonts/CabinetGrotesk-Extrabold.otf",
+      "sha1": "62384b4c83a55aed26d4ed8c6afbcd29ed34b3d3"
+    },
+    {
+      "path": "assets/fonts/CabinetGrotesk-LICENSE.txt",
+      "sha1": "790eb326fee27987a9e8f38ff6983ecd693043f8"
+    },
+    {
+      "path": "assets/fonts/CabinetGrotesk-Medium.otf",
+      "sha1": "42a03d5987676ed3dba88c8a5fb19b3754181232"
+    },
+    {
+      "path": "assets/fonts/CabinetGrotesk-Regular.otf",
+      "sha1": "f4464f4cc0a4c62c6a331938aaefdba5050a26f7"
+    }
+  ]
+}

@@ -1,31 +1,32 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { Linking, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
-  Linking,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+  ArrowUpRight,
+  Check,
+  Hand,
+  Handshake,
+  LocateFixed,
+  Sparkles,
+} from 'lucide-react-native';
 import { cachedProfile, fetchProfile, usePeer } from '../peers';
 import {
   SOCIALS,
   TAGS,
-  type Card,
+  type Card as CardT,
   type Profile,
   type Social,
+  type Tag as TagT,
 } from '../profile';
-import { Avatar, CategoryBadge, Chip, GradientButton, Row, tap } from '../ui';
-import { BODY, C, CAT_COLOR, G, H1, H2, LABEL } from '../theme';
-import { distanceLabel } from './Radar';
+import { Action, Card, Chip, Header, ListRow, Row, Screen } from '../ui';
+import { PassCard } from '../PassCard';
 import { NetWorth } from '../NetWorth';
 import { useMatches } from '../ai';
 import { wave } from '../wave';
 import { proposeMeet, useStamps } from '../meet';
 import { shortAddress, verifyWallet } from '../verify';
+import { distanceLabel } from './Radar';
+import { C, F, T } from '../theme';
 
 /** A nearby person: card instantly, full profile from cache, refreshed over the mesh. */
 export default function Person({
@@ -51,24 +52,13 @@ export default function Person({
 
   // Only wallets whose proof names this peer's own address count.
   const verified = profile?.wallets.filter(w => verifyWallet(w, id)) ?? [];
-  const tier = peer?.card.tier;
   const match = useMatches().matches.find(m => m.id === id);
-  const [waved, setWaved] = useState<'sending' | 'sent' | 'failed'>();
   const stamp = useStamps().find(st => st.peer.id === id);
-  const [meeting, setMeeting] = useState<string>();
-  const meet = async () => {
-    setMeeting('Waiting for them to confirm…');
-    try {
-      await proposeMeet(id);
-      setMeeting(undefined);
-    } catch (e) {
-      setMeeting(
-        e instanceof Error && /declined|timeout/.test(e.message)
-          ? 'They didn’t confirm. Try again?'
-          : 'Couldn’t reach them. Move closer?',
-      );
-    }
-  };
+  const [waved, setWaved] = useState<'sending' | 'sent' | 'failed'>();
+  const [meeting, setMeeting] = useState<
+    'asking' | 'declined' | 'unreachable'
+  >();
+
   const sendWave = async () => {
     setWaved('sending');
     try {
@@ -78,289 +68,250 @@ export default function Person({
       setWaved('failed');
     }
   };
+  const meet = async () => {
+    setMeeting('asking');
+    try {
+      await proposeMeet(id);
+      setMeeting(undefined);
+    } catch (e) {
+      setMeeting(
+        e instanceof Error && /declined|timeout/.test(e.message)
+          ? 'declined'
+          : 'unreachable',
+      );
+    }
+  };
+
+  const note =
+    meeting === 'asking'
+      ? 'Waiting for them to confirm on their phone…'
+      : meeting === 'declined'
+      ? 'They didn’t confirm. Try again?'
+      : meeting === 'unreachable' || waved === 'failed'
+      ? 'Couldn’t reach them. Move a little closer.'
+      : stamp
+      ? stamp.status === 'minted'
+        ? 'You met · stamp minted on Base'
+        : 'You met · minting your stamp…'
+      : !profile && error
+      ? 'Couldn’t load their profile. Move a little closer.'
+      : undefined;
 
   return (
     <ProfileView
+      id={id}
+      title="Profile"
       card={peer?.card}
       profile={profile}
       status={peer ? distanceLabel(peer) : 'out of range'}
-      note={
-        !profile && error
-          ? "Couldn't reach them. Move a little closer."
-          : undefined
-      }
-      onClose={onClose}
+      onBack={onClose}
       actions={
-        <View style={{ gap: 14 }}>
-          {peer && (
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <GradientButton
-                style={{ flex: 1 }}
-                title={
-                  waved === 'sent'
-                    ? 'Waved ✓'
-                    : waved === 'sending'
-                    ? 'Waving…'
-                    : waved === 'failed'
-                    ? 'Retry 👋'
-                    : '👋 Wave'
-                }
+        peer && (
+          <View style={{ gap: 14 }}>
+            <View style={s.actions}>
+              <Action
+                icon={Hand}
+                label={waved === 'sent' ? 'Waved' : 'Wave'}
                 disabled={waved === 'sending' || waved === 'sent'}
                 onPress={sendWave}
               />
-              {peer.hops === 0 && (
-                <GradientButton
-                  style={{ flex: 1 }}
-                  title="📡 Find them"
-                  colors={G.cool}
-                  onPress={onFind}
-                />
-              )}
-            </View>
-          )}
-          {peer && !stamp && (
-            <GradientButton
-              title={
-                meeting === 'Waiting for them to confirm…'
-                  ? meeting
-                  : '🤝 We met · mint a stamp'
-              }
-              colors={G.money}
-              disabled={meeting === 'Waiting for them to confirm…'}
-              onPress={meet}
-            />
-          )}
-          {meeting && meeting !== 'Waiting for them to confirm…' && (
-            <Text style={[BODY, { color: C.hot, textAlign: 'center' }]}>
-              {meeting}
-            </Text>
-          )}
-          {stamp && (
-            <Text style={[LABEL, { color: C.money, textAlign: 'center' }]}>
-              🤝 You met ·{' '}
-              {stamp.status === 'minted'
-                ? 'stamp minted on Base'
-                : 'stamp minting…'}
-            </Text>
-          )}
-          {match && (
-            <View style={s.match}>
-              <Text style={LABEL}>✨ Why talk to them</Text>
-              <Text style={[H2, { fontSize: 18 }]}>{match.reason}</Text>
-              <Text style={[BODY, { color: C.muted }]}>
-                “{match.icebreaker}”
-              </Text>
-            </View>
-          )}
-          {verified.length > 0 && (
-            <View style={{ gap: 10 }}>
-              <NetWorth
-                usd={profile?.netWorthUsd}
-                tier={tier}
-                verifiedCount={verified.length}
+              <Action
+                icon={LocateFixed}
+                label="Find"
+                disabled={peer.hops > 0}
+                onPress={onFind}
               />
-              <Row>
-                {verified.map(w => (
-                  <Chip
-                    key={w.address}
-                    label={`${w.chain === 'evm' ? 'Ξ' : '◎'} ${shortAddress(
-                      w.address,
-                    )} ✓`}
-                    selected
-                    color={C.money}
-                  />
-                ))}
-              </Row>
+              <Action
+                icon={stamp ? Check : Handshake}
+                label={stamp ? 'Met' : 'We met'}
+                active
+                disabled={!!stamp || meeting === 'asking'}
+                onPress={meet}
+              />
             </View>
-          )}
-        </View>
+            {note && (
+              <Text style={[T.sub, { textAlign: 'center' }]}>{note}</Text>
+            )}
+          </View>
+        )
       }
-    />
+    >
+      {match && (
+        <Animated.View entering={FadeInDown}>
+          <Card>
+            <View style={s.inline}>
+              <Sparkles size={18} color={C.blue} strokeWidth={1.75} />
+              <Text style={T.strong}>Why talk to them</Text>
+            </View>
+            <Text style={[T.h2, { fontSize: 20, lineHeight: 26 }]}>
+              {match.reason}
+            </Text>
+            <View style={s.bubble}>
+              <Text style={s.bubbleLabel}>Say this</Text>
+              <Text style={s.bubbleText}>{match.icebreaker}</Text>
+            </View>
+          </Card>
+        </Animated.View>
+      )}
+      {verified.length > 0 && (
+        <>
+          <NetWorth
+            usd={profile?.netWorthUsd}
+            tier={peer?.card.tier}
+            verifiedCount={verified.length}
+          />
+          <Row>
+            {verified.map(w => (
+              <Chip
+                key={w.address}
+                label={`${w.chain === 'evm' ? 'Ξ' : '◎'} ${shortAddress(
+                  w.address,
+                )}`}
+              />
+            ))}
+          </Row>
+        </>
+      )}
+    </ProfileView>
   );
 }
 
+/** Pass card, then the profile's sections. Shared by Person and Me. */
 export function ProfileView({
+  id,
+  title,
   card,
   profile,
   status,
-  note,
-  onClose,
+  onBack,
+  right,
   actions,
+  children,
 }: {
-  card?: Card;
+  id: string;
+  title: string;
+  card?: CardT;
   profile?: Profile;
   status?: string;
-  note?: string;
-  onClose?: () => void;
+  onBack?: () => void;
+  right?: ReactNode;
   actions?: ReactNode;
+  children?: ReactNode;
 }) {
-  const insets = useSafeAreaInsets();
   const name = profile?.name ?? card?.name ?? '';
-  const category = profile?.category ?? card?.category ?? 'builder';
-  const role = profile?.role ?? card?.role;
-  const company = profile?.company ?? card?.company;
   const socials = Object.entries(profile?.socials ?? {}).filter(
     ([, v]) => v,
   ) as [Social, string][];
-
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: C.bg }}
-      // iOS modals already start below the status bar.
-      contentContainerStyle={{
-        padding: 20,
-        paddingTop: onClose && Platform.OS === 'ios' ? 16 : insets.top + 12,
-        paddingBottom: insets.bottom + 120,
-        gap: 22,
-      }}
-    >
-      {onClose && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-          onPress={() => (tap(), onClose())}
-          hitSlop={12}
-          style={s.close}
-        >
-          <Text style={{ color: C.text, fontSize: 18, fontWeight: '900' }}>
-            ✕
-          </Text>
-        </Pressable>
-      )}
-
-      <View style={{ alignItems: 'center', gap: 12 }}>
-        <Animated.View entering={ZoomIn.springify()}>
-          <Avatar
-            name={name}
-            avatar={profile?.avatar}
-            size={148}
-            colors={[CAT_COLOR[category], '#FF2E93', '#FF7A18']}
-          />
-        </Animated.View>
-        <Text style={[H1, { textAlign: 'center' }]}>{name}</Text>
-        <Text style={[BODY, { color: C.muted, textAlign: 'center' }]}>
-          {role}
-          {company ? ` @ ${company}` : ''}
-        </Text>
-        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-          <CategoryBadge category={category} />
-          {status && <Text style={s.status}>● {status}</Text>}
-        </View>
-      </View>
-
+    <Screen modal={!!onBack}>
+      <Header title={title} onBack={onBack} right={right} />
+      <PassCard
+        id={id}
+        name={name}
+        role={profile?.role ?? card?.role}
+        company={profile?.company ?? card?.company}
+        category={profile?.category ?? card?.category ?? 'builder'}
+        avatar={profile?.avatar}
+        status={status}
+      />
       {actions}
-      {note && (
-        <Text style={[BODY, { color: C.hot, textAlign: 'center' }]}>
-          {note}
-        </Text>
-      )}
+      {children}
 
       {profile?.building ? (
-        <Animated.View entering={FadeInDown.delay(80)} style={s.card}>
-          <Text style={LABEL}>Building</Text>
-          <Text style={[H2, { fontSize: 20 }]}>{profile.building}</Text>
-        </Animated.View>
+        <Card>
+          <Text style={T.label}>Building</Text>
+          <Text style={[T.h2, { lineHeight: 28 }]}>{profile.building}</Text>
+          {profile.bio ? (
+            <Text style={[T.body, { color: C.muted }]}>{profile.bio}</Text>
+          ) : null}
+        </Card>
       ) : null}
 
-      {profile?.bio ? (
-        <Animated.View entering={FadeInDown.delay(140)} style={s.card}>
-          <Text style={LABEL}>Bio</Text>
-          <Text style={BODY}>{profile.bio}</Text>
-        </Animated.View>
-      ) : null}
-
-      <TagBlock
+      <Tags
         label="Looking for"
         tags={profile?.lookingFor ?? card?.lookingFor}
-        color={C.hot}
+        color={C.lilac}
       />
-      <TagBlock
+      <Tags
         label="Can offer"
         tags={profile?.offering ?? card?.offering}
-        color={C.money}
+        color={C.mint}
       />
 
       {socials.length > 0 && (
-        <View style={{ gap: 10 }}>
-          <Text style={LABEL}>{onClose ? 'Find them' : 'Socials'}</Text>
+        <Card style={{ gap: 4 }}>
+          <Text style={[T.h2, { marginBottom: 6 }]}>Socials</Text>
           {socials.map(([k, handle]) => (
-            <Pressable
+            <ListRow
               key={k}
-              accessibilityRole="link"
-              onPress={() => (tap(), Linking.openURL(SOCIALS[k].url(handle)))}
-              style={({ pressed }) => [
-                s.social,
-                { opacity: pressed ? 0.7 : 1 },
-              ]}
-            >
-              <Text style={s.socialLabel}>{SOCIALS[k].label}</Text>
-              <Text style={s.socialHandle}>@{handle} ↗</Text>
-            </Pressable>
+              leading={
+                <View style={s.socialIcon}>
+                  <Text style={s.socialLetter}>{SOCIALS[k].label[0]}</Text>
+                </View>
+              }
+              title={SOCIALS[k].label}
+              subtitle={`@${handle}`}
+              trailing={
+                <ArrowUpRight size={20} color={C.muted} strokeWidth={1.75} />
+              }
+              onPress={() => Linking.openURL(SOCIALS[k].url(handle))}
+            />
           ))}
-        </View>
+        </Card>
       )}
-    </ScrollView>
+    </Screen>
   );
 }
 
-function TagBlock({
+function Tags({
   label,
   tags,
   color,
 }: {
   label: string;
-  tags?: (keyof typeof TAGS)[];
+  tags?: TagT[];
   color: string;
 }) {
   if (!tags?.length) return null;
   return (
-    <View style={{ gap: 10 }}>
-      <Text style={LABEL}>{label}</Text>
+    <Card>
+      <Text style={T.label}>{label}</Text>
       <Row>
         {tags.map(t => (
           <Chip key={t} label={TAGS[t]} selected color={color} />
         ))}
       </Row>
-    </View>
+    </Card>
   );
 }
 
 const s = StyleSheet.create({
-  close: {
-    alignSelf: 'flex-end',
-    width: 40,
-    height: 40,
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingTop: 4,
+  },
+  inline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  bubble: {
+    backgroundColor: C.blueDeep,
     borderRadius: 20,
-    backgroundColor: C.surface2,
+    padding: 16,
+    gap: 4,
+  },
+  bubbleLabel: { fontFamily: F.medium, fontSize: 14, color: '#FFFFFFB3' },
+  bubbleText: {
+    fontFamily: F.medium,
+    fontSize: 17,
+    lineHeight: 23,
+    color: C.text,
+  },
+  socialIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: C.text,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  status: { color: C.money, fontSize: 13, fontWeight: '800' },
-  match: {
-    backgroundColor: '#7B61FF22',
-    borderColor: '#7B61FF',
-    borderWidth: 1.5,
-    borderRadius: 22,
-    padding: 18,
-    gap: 8,
-  },
-  card: {
-    backgroundColor: C.surface,
-    borderRadius: 22,
-    padding: 18,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: C.line,
-  },
-  social: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: C.surface,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: C.line,
-  },
-  socialLabel: { color: C.muted, fontWeight: '800' },
-  socialHandle: { color: C.text, fontWeight: '800' },
+  socialLetter: { fontFamily: F.bold, fontSize: 18, color: C.ink },
 });
