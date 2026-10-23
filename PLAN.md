@@ -112,7 +112,7 @@ radius/worker/   Cloudflare Worker (wrangler)
   - The bridges derive the mesh node id from `profile`, so it is random per install (a constant made every phone the same node).
   - `localAddress()` needs MLS storage open → encryption `enabled` with `autoKeyExchange: false`.
   - Reown AppKit spike moved to the start of M2.
-- **M1 — profile + radar:** onboarding, MMKV, card registration/discovery, `profile` request, Radar + Person sheet.
+- **M1 — profile + radar (done):** onboarding, MMKV, card registration/discovery, `profile` request, Radar + Person sheet.
 - **M2 — wallets + net worth:** AppKit connect + sign, local verification, Worker `/networth`, card `nw`, tier display.
 - **M3 — AI:** `/match`, `/icebreaker`, `/roast`, offline fallback, Matches tab.
 - **M4 — viral interactions:** wave, finder, Room tab.
