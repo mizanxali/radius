@@ -1,97 +1,103 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Radius
 
-# Getting Started
+See who's around you at a web3 event, let AI pick who's worth talking to, walk over, and mint proof you met.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Radius finds other people running the app over Bluetooth, phone to phone, with no accounts and no sign-up. It works in a packed hall with bad Wi-Fi; the internet is only needed for the extras (net worth, AI picks, onchain stamps).
 
-## Step 1: Start Metro
+## Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **Radar:** everyone nearby on a live radar, placed by Bluetooth signal strength. Tap anyone to see their pass: role, what they're building, what they're looking for and what they offer, and their socials.
+- **AI match:** Claude reads the room and ranks the people most worth meeting for you, with a one-line reason and an icebreaker. Offline, it falls back to matching tags.
+- **Verified net worth:** sign with an Ethereum or Solana wallet (via Reown) to put your portfolio value on your pass. Others verify the signature on their own phone, so nobody can claim a wallet that isn't theirs. You can show just your tier (🦐 to 🐋) instead of the amount.
+- **The room:** total net worth in the room, a leaderboard, the category mix, and what the room wants and offers.
+- **Wave:** a tap buzzes the other person's phone.
+- **Finder:** a hot/cold screen that tracks the signal (with haptics) as you walk toward someone.
+- **Proof of meet:** both phones sign that you met, and the stamp mints as an [EAS](https://attest.org) attestation on Base. Gas is paid by the backend. If you're offline it mints later.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## How it works
+
+```
+ phone ──── Bluetooth mesh (@offline-protocol/mesh-sdk) ──── phone
+   │          card: name, role, tags, tier (public)
+   │          requests: profile · wave · meet
+   │
+   └── HTTPS, when online ──► Cloudflare Worker (worker/)
+                                /networth  Zerion portfolio
+                                /match     Claude ranking + icebreakers
+                                /attest    EAS attestation, relayer pays gas
+```
+
+- **Profiles** live on the phone (MMKV). Each phone advertises a small public card and serves the full profile on request.
+- **Identity** is the mesh SDK's `off1…` address. Wallet proofs and meet stamps are signed against it.
+- **Secrets** stay in the Worker; the app ships without keys.
+
+## Stack
+
+React Native 0.88 (TypeScript, bare), `@offline-protocol/mesh-sdk`, Reown AppKit (ethers + Solana), React Navigation, Reanimated, MMKV. The Worker uses Wrangler, the Anthropic SDK, viem and Zod.
+
+## Running it
+
+Needs Node ≥ 22.11, Xcode with CocoaPods, and Android Studio. Bluetooth discovery needs **real phones**: simulators can't see each other.
 
 ```sh
-# Using npm
+npm install
+cd ios && pod install && cd ..
 npm start
-
-# OR using Yarn
-yarn start
+npm run ios       # or: npm run android
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+### Backend (optional for discovery, needed for net worth, AI and stamps)
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+cd worker
+npm install
+cat > .dev.vars <<'EOF'
+ANTHROPIC_API_KEY=...
+ZERION_API_KEY=...
+RELAYER_KEY=0x...        # funded on the chain set in wrangler.jsonc (Base Sepolia by default)
+EOF
+npm run dev              # http://0.0.0.0:8787
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+In development the app finds the Worker on the same machine as Metro. Android needs both ports forwarded:
 
 ```sh
-bundle install
+adb reverse tcp:8081 tcp:8081 && adb reverse tcp:8787 tcp:8787
 ```
 
-Then, and every time you update your native dependencies, run:
+To use your own EAS schema, register it once with `RELAYER_KEY=0x... CHAIN=base-sepolia npm run register-schema` and put the printed UID in `wrangler.jsonc`. Deploy with `npm run deploy` after setting the three secrets with `wrangler secret put`.
+
+### Demo mode
+
+Long-press the empty top-right corner of the **Me** tab to fill the room with 15 seeded attendees. They show up beside any real phones nearby. Long-press again to turn it off.
+
+## Tests
 
 ```sh
-bundle exec pod install
+npm test              # wallet proofs, meet proofs, matching
+npx tsc --noEmit
+npm run lint
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## Project layout
 
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+```
+App.tsx              navigation, global wave banner and meet prompt
+src/
+  mesh.ts peers.ts   mesh SDK setup, peer store, request/response
+  profile.ts         profile model, card encoding, tiers
+  verify.ts          wallet ownership proofs
+  meetproof.ts       proof-of-meet signing (shared with the Worker)
+  match.ts ai.ts     offline and AI matching
+  wallet.ts          Reown AppKit, net worth
+  wave.tsx meet.tsx  wave and stamps
+  demo.ts            hidden demo mode
+  theme.ts ui.tsx    design tokens and components
+  screens/           Radar, Matches, Room, Me, Person, Finder, ProfileEditor
+worker/              Cloudflare Worker
+patches/             mesh SDK patch (live RSSI for the radar and finder)
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Licence
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Radius depends on `@offline-protocol/mesh-sdk`, which is licensed AGPL-3.0-only (or commercially).
