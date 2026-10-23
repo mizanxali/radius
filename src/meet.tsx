@@ -23,7 +23,7 @@ import {
 } from './meetproof';
 import { WORKER_URL } from './config';
 import { Avatar, Button } from './ui';
-import { C, CAT_COLOR, T } from './theme';
+import { C, T } from './theme';
 
 export type Stamp = {
   id: string; // sigB: both phones know it
@@ -197,8 +197,8 @@ export function MeetPrompt() {
         <Avatar
           name={p?.name ?? '?'}
           avatar={p?.avatar}
-          size={88}
-          color={p ? CAT_COLOR[p.category] : C.mint}
+          size={80}
+          category={p?.category}
         />
         <Text style={[T.title, { textAlign: 'center', fontSize: 26 }]}>
           {p?.name ?? 'Someone'} says you just met
@@ -236,7 +236,9 @@ const s = StyleSheet.create({
   sheet: {
     marginHorizontal: 12,
     backgroundColor: C.surface,
-    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
+    borderRadius: 24,
     padding: 24,
     gap: 14,
     alignItems: 'center',

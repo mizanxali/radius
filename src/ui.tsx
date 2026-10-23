@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import Haptics from 'react-native-haptic-feedback';
 import { ChevronLeft } from 'lucide-react-native';
-import { C, CAT_COLOR, F, R, T } from './theme';
+import { C, CAT_COLOR, CAT_GRADIENT, F, R, T } from './theme';
 import { CATEGORIES, type Category } from './profile';
 
 export const tap = () => Haptics.trigger('impactLight');
@@ -32,16 +32,18 @@ const initials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-/** Photo, or initials on a pastel disc. */
+/** Photo, or initials on a category gradient (or a solid colour). */
 export function Avatar({
   name,
   avatar,
   size,
-  color = C.blue,
+  category,
+  color = C.raised,
 }: {
   name: string;
   avatar?: string;
   size: number;
+  category?: Category;
   color?: string;
 }) {
   return (
@@ -56,6 +58,14 @@ export function Avatar({
         },
       ]}
     >
+      {category && !avatar && (
+        <LinearGradient
+          colors={CAT_GRADIENT[category]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       {avatar ? (
         <Image
           source={{ uri: `data:image/jpeg;base64,${avatar}` }}
@@ -63,7 +73,11 @@ export function Avatar({
         />
       ) : (
         <Text
-          style={{ fontFamily: F.bold, color: C.ink, fontSize: size * 0.36 }}
+          style={{
+            fontFamily: F.bold,
+            color: category || color === C.text ? C.ink : C.text,
+            fontSize: size * 0.36,
+          }}
         >
           {initials(name) || '?'}
         </Text>
@@ -72,31 +86,24 @@ export function Avatar({
   );
 }
 
-/** Full-width pill: white (primary), outlined, or a pastel tint. */
+/** Full-width button: white (primary) or hairline outline. */
 export function Button({
   title,
   onPress,
   variant = 'primary',
-  tint,
   icon: I,
   disabled,
   style,
 }: {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'outline' | 'tint';
-  tint?: string;
+  variant?: 'primary' | 'outline';
   icon?: Icon;
   disabled?: boolean;
   style?: ViewStyle;
 }) {
-  const bg =
-    variant === 'primary'
-      ? C.text
-      : variant === 'tint'
-      ? tint ?? C.blue
-      : 'transparent';
-  const fg = variant === 'outline' ? C.text : C.ink;
+  const primary = variant === 'primary';
+  const fg = primary ? C.ink : C.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -105,16 +112,15 @@ export function Button({
       onPress={() => (tap(), onPress())}
       style={({ pressed }) => [
         s.button,
+        primary ? { backgroundColor: C.text } : s.outline,
         {
-          backgroundColor: bg,
-          opacity: disabled ? 0.45 : 1,
+          opacity: disabled ? 0.4 : pressed ? 0.85 : 1,
           transform: [{ scale: pressed ? 0.98 : 1 }],
         },
-        variant === 'outline' && s.outline,
         style,
       ]}
     >
-      {I && <I size={20} color={fg} strokeWidth={1.75} />}
+      {I && <I size={18} color={fg} strokeWidth={2} />}
       <Text style={[s.buttonText, { color: fg }]} numberOfLines={1}>
         {title}
       </Text>
@@ -122,18 +128,18 @@ export function Button({
   );
 }
 
-/** Round icon button with a caption underneath (Lock card / Reissue / Unfreeze). */
+/** Round hairline button with a coloured icon and a caption underneath. */
 export function Action({
   icon: I,
   label,
   onPress,
-  active,
+  color = C.text,
   disabled,
 }: {
   icon: Icon;
   label: string;
   onPress: () => void;
-  active?: boolean;
+  color?: string;
   disabled?: boolean;
 }) {
   return (
@@ -146,13 +152,13 @@ export function Action({
       style={({ pressed }) => [
         s.action,
         {
-          opacity: disabled ? 0.45 : 1,
+          opacity: disabled ? 0.4 : 1,
           transform: [{ scale: pressed ? 0.95 : 1 }],
         },
       ]}
     >
-      <View style={[s.actionCircle, active && { backgroundColor: C.text }]}>
-        <I size={24} color={active ? C.ink : C.text} strokeWidth={1.6} />
+      <View style={s.actionCircle}>
+        <I size={22} color={color} strokeWidth={1.75} />
       </View>
       <Text style={s.actionLabel} numberOfLines={1}>
         {label}
@@ -179,12 +185,12 @@ export function IconButton({
       onPress={() => (tap(), onPress())}
       style={({ pressed }) => [s.iconButton, { opacity: pressed ? 0.7 : 1 }]}
     >
-      <I size={20} color={C.text} strokeWidth={1.75} />
+      <I size={18} color={C.text} strokeWidth={2} />
     </Pressable>
   );
 }
 
-/** Centered title between an optional back button and an optional action. */
+/** Left-aligned page title, with an optional back button and trailing action. */
 export function Header({
   title,
   onBack,
@@ -196,24 +202,22 @@ export function Header({
 }) {
   return (
     <View style={s.header}>
-      <View style={s.headerSide}>
-        {onBack && (
-          <IconButton icon={ChevronLeft} label="Back" onPress={onBack} />
-        )}
-      </View>
+      {onBack && (
+        <IconButton icon={ChevronLeft} label="Back" onPress={onBack} />
+      )}
       <Text
-        style={[T.header, { flex: 1, textAlign: 'center' }]}
+        style={[T.header, { flex: 1 }]}
         numberOfLines={1}
         accessibilityRole="header"
       >
         {title}
       </Text>
-      <View style={[s.headerSide, { alignItems: 'flex-end' }]}>{right}</View>
+      {right}
     </View>
   );
 }
 
-/** Scrollable page on the charcoal background, clear of the notch and tab bar. */
+/** Scrollable page on the black background, clear of the notch and tab bar. */
 export function Screen({
   children,
   modal,
@@ -256,20 +260,25 @@ export function Screen({
 export function Card({
   children,
   style,
-  tint,
 }: {
   children: ReactNode;
   style?: ViewStyle;
-  tint?: string;
 }) {
-  return (
-    <View style={[s.card, tint ? { backgroundColor: tint } : null, style]}>
-      {children}
-    </View>
-  );
+  return <View style={[s.card, style]}>{children}</View>;
 }
 
-/** Outlined pill; selected fills with a pastel. */
+const Dot = ({ color, size = 7 }: { color: string; size?: number }) => (
+  <View
+    style={{
+      width: size,
+      height: size,
+      borderRadius: size / 2,
+      backgroundColor: color,
+    }}
+  />
+);
+
+/** Hairline pill; selected turns white with a coloured dot. */
 export function Chip({
   label,
   selected,
@@ -287,29 +296,28 @@ export function Chip({
       accessibilityState={onPress ? { selected } : undefined}
       disabled={!onPress}
       onPress={() => (tap(), onPress?.())}
-      style={[
-        s.chip,
-        selected && { backgroundColor: color, borderColor: color },
-      ]}
+      style={[s.chip, selected && s.chipOn]}
     >
-      <Text style={[s.chipText, selected && { color: C.ink }]}>{label}</Text>
+      {selected && <Dot color={color} />}
+      <Text style={[s.chipText, selected && { color: C.text }]}>{label}</Text>
     </Pressable>
   );
 }
 
-/** Small filled pill ("Multi-use virtual"). */
+/** Small status pill, optionally led by a coloured dot; `solid` is white. */
 export function Tag({
   label,
-  color = C.text,
+  dot,
+  solid,
 }: {
   label: string;
-  color?: string;
+  dot?: string;
+  solid?: boolean;
 }) {
-  // White/pastel tags take dark text; the one dark tag colour takes light text.
-  const onDark = color === C.raised;
   return (
-    <View style={[s.tag, { backgroundColor: color }]}>
-      <Text style={[s.tagText, onDark && { color: C.text }]} numberOfLines={1}>
+    <View style={[s.tag, solid && { backgroundColor: C.text }]}>
+      {dot && <Dot color={dot} size={6} />}
+      <Text style={[s.tagText, solid && { color: C.ink }]} numberOfLines={1}>
         {label}
       </Text>
     </View>
@@ -318,7 +326,7 @@ export function Tag({
 
 export function CategoryTag({ category }: { category: Category }) {
   const c = CATEGORIES[category];
-  return <Tag label={`${c.emoji} ${c.label}`} color={CAT_COLOR[category]} />;
+  return <Tag label={c.label} dot={CAT_COLOR[category]} />;
 }
 
 /** List row: leading avatar, title + subtitle, trailing slot. */
@@ -380,61 +388,77 @@ const s = StyleSheet.create({
     overflow: 'hidden',
   },
   button: {
-    height: 58,
-    borderRadius: R.pill,
+    height: 50,
+    borderRadius: R.input,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    paddingHorizontal: 22,
+    gap: 8,
+    paddingHorizontal: 20,
   },
-  outline: { borderWidth: 1.25, borderColor: '#FFFFFFCC' },
-  buttonText: { fontFamily: F.medium, fontSize: 18 },
-  action: { alignItems: 'center', gap: 10, flex: 1 },
+  outline: { borderWidth: 1, borderColor: C.lineStrong },
+  buttonText: { fontFamily: F.bold, fontSize: 16 },
+  action: { alignItems: 'center', gap: 8, flex: 1 },
   actionCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: C.raised,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionLabel: { fontFamily: F.regular, fontSize: 15, color: C.text },
+  actionLabel: { fontFamily: F.medium, fontSize: 13, color: C.muted },
   iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: C.raised,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
     minHeight: 48,
     marginBottom: 4,
   },
-  headerSide: { width: 48 },
   card: {
     backgroundColor: C.surface,
     borderRadius: R.card,
-    padding: 20,
+    borderWidth: 1,
+    borderColor: C.line,
+    padding: 18,
     gap: 14,
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
     borderWidth: 1,
-    borderColor: '#FFFFFF55',
+    borderColor: C.lineStrong,
     borderRadius: R.pill,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
   },
-  chipText: { fontFamily: F.regular, fontSize: 15, color: C.text },
+  chipOn: { borderColor: '#FFFFFF66', backgroundColor: C.raised },
+  chipText: { fontFamily: F.medium, fontSize: 14, color: C.muted },
   tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     borderRadius: R.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
+    backgroundColor: C.raised,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
-  tagText: { fontFamily: F.medium, fontSize: 13, color: C.ink },
+  tagText: { fontFamily: F.medium, fontSize: 12, color: C.text },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

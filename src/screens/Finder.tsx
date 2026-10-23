@@ -13,7 +13,7 @@ import Haptics from 'react-native-haptic-feedback';
 import { X } from 'lucide-react-native';
 import { cachedProfile, usePeer } from '../peers';
 import { Avatar, Header, IconButton, Tag } from '../ui';
-import { C, CAT_COLOR, F, T } from '../theme';
+import { C, F, T } from '../theme';
 
 /** 0 = far (-90 dBm) … 1 = touching (-40 dBm). */
 const heat = (rssi?: number) =>
@@ -27,8 +27,8 @@ const COPY: [number, string][] = [
   [0, 'Cold, keep moving'],
 ];
 
-// cold blue → lilac → warm peach
-const STOPS = [C.blue, C.lilac, C.peach];
+// cold blue → purple → hot orange
+const STOPS = [C.blue, C.purple, C.orange];
 
 export default function Finder({
   id,
@@ -58,11 +58,12 @@ export default function Finder({
     transform: [
       { scale: 0.5 + hv.value * 0.55 + beat.value * (0.1 + hv.value * 0.25) },
     ],
-    opacity: 0.55 - beat.value * 0.5,
-    backgroundColor: interpolateColor(hv.value, [0, 0.5, 1], STOPS),
+    opacity: 1 - beat.value,
+    borderColor: interpolateColor(hv.value, [0, 0.5, 1], STOPS),
   }));
   const inner = useAnimatedStyle(() => ({
     transform: [{ scale: 0.75 + hv.value * 0.35 }],
+    opacity: 0.25 + hv.value * 0.2,
     backgroundColor: interpolateColor(hv.value, [0, 0.5, 1], STOPS),
   }));
 
@@ -120,13 +121,13 @@ export default function Finder({
       </View>
 
       <View style={s.stage}>
-        <Animated.View style={[s.circle, { width: 240, height: 240 }, outer]} />
+        <Animated.View style={[s.ring, { width: 240, height: 240 }, outer]} />
         <Animated.View style={[s.circle, { width: 170, height: 170 }, inner]} />
         <Avatar
           name={name}
           avatar={p?.avatar}
           size={120}
-          color={peer ? CAT_COLOR[peer.card.category] : C.raised}
+          category={peer?.card.category}
         />
       </View>
 
@@ -138,13 +139,10 @@ export default function Finder({
           {trend && (
             <Tag
               label={trend === 'warmer' ? '↑ warmer' : '↓ colder'}
-              color={trend === 'warmer' ? C.peach : C.blue}
+              dot={trend === 'warmer' ? C.orange : C.blue}
             />
           )}
-          <Tag
-            label={peer?.rssi != null ? `${peer.rssi} dBm` : 'listening…'}
-            color={C.raised}
-          />
+          <Tag label={peer?.rssi != null ? `${peer.rssi} dBm` : 'listening…'} />
         </View>
       </View>
     </View>
@@ -156,10 +154,11 @@ const s = StyleSheet.create({
   who: { alignItems: 'center', gap: 4, marginTop: 12 },
   stage: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   circle: { position: 'absolute', borderRadius: 999 },
+  ring: { position: 'absolute', borderRadius: 999, borderWidth: 2 },
   heat: {
-    fontFamily: F.medium,
+    fontFamily: F.bold,
     fontSize: 40,
     color: C.text,
-    letterSpacing: -0.5,
+    letterSpacing: -1.2,
   },
 });

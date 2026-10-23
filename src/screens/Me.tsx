@@ -66,11 +66,11 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
       status="you"
       actions={
         <View style={s.actions}>
-          <Action icon={PenLine} label="Edit" onPress={onEdit} />
+          <Action icon={PenLine} label="Edit" color={C.blue} onPress={onEdit} />
           <Action
             icon={Wallet}
             label="Wallet"
-            active
+            color={C.green}
             disabled={!!busy}
             onPress={() => open({ view: 'Connect' })}
           />
@@ -94,7 +94,7 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
         />
       )}
       {error && (
-        <Text style={[T.sub, { color: C.rose, textAlign: 'center' }]}>
+        <Text style={[T.sub, { color: C.red, textAlign: 'center' }]}>
           {error}
         </Text>
       )}
@@ -107,18 +107,18 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
             onRefresh={busy ? undefined : run('price', refreshNetWorth)}
           />
           <Card style={{ gap: 4 }}>
-            <Text style={[T.h2, { marginBottom: 6 }]}>Wallets</Text>
+            <Text style={[T.label, { marginBottom: 6 }]}>Wallets</Text>
             {me.wallets.map(w => (
               <ListRow
                 key={w.address}
                 leading={
-                  <View
-                    style={[
-                      s.chain,
-                      { backgroundColor: w.chain === 'evm' ? C.blue : C.lilac },
-                    ]}
-                  >
-                    <Text style={s.chainText}>
+                  <View style={s.chain}>
+                    <Text
+                      style={[
+                        s.chainText,
+                        { color: w.chain === 'evm' ? C.blue : C.purple },
+                      ]}
+                    >
                       {w.chain === 'evm' ? 'Ξ' : '◎'}
                     </Text>
                   </View>
@@ -152,7 +152,7 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
                   setMe({ ...me, hideExactNetWorth: !v });
                   publishCard();
                 }}
-                trackColor={{ true: C.blue, false: C.raised }}
+                trackColor={{ true: C.green, false: C.lineStrong }}
                 thumbColor={C.text}
               />
             </View>
@@ -160,9 +160,14 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
         </>
       ) : (
         !pending && (
-          <Card tint={C.blue}>
-            <Text style={[T.h2, { color: C.ink }]}>Flex your bags</Text>
-            <Text style={[T.body, { color: '#1E1E22CC' }]}>
+          <Card>
+            <View style={s.flex}>
+              <View style={s.chain}>
+                <Wallet size={18} color={C.green} strokeWidth={2} />
+              </View>
+              <Text style={T.h2}>Flex your bags</Text>
+            </View>
+            <Text style={[T.body, { color: C.muted }]}>
               Connect and sign with an Ethereum or Solana wallet. Your net worth
               shows on your pass, verified.
             </Text>
@@ -185,7 +190,7 @@ function Stamps() {
   if (!stamps.length) return null;
   return (
     <Card style={{ gap: 4 }}>
-      <Text style={[T.h2, { marginBottom: 6 }]}>People you've met</Text>
+      <Text style={[T.label, { marginBottom: 6 }]}>People you've met</Text>
       {stamps.map(st => (
         <ListRow
           key={st.id}
@@ -193,8 +198,8 @@ function Stamps() {
             <Avatar
               name={st.peer.name}
               avatar={cachedProfile(st.peer.id)?.avatar}
-              size={44}
-              color={C.mint}
+              size={40}
+              category={cachedProfile(st.peer.id)?.category}
             />
           }
           title={st.peer.name}
@@ -203,8 +208,8 @@ function Stamps() {
           }`}
           trailing={
             <Tag
-              label={st.status === 'minted' ? 'On Base ↗' : 'Minting'}
-              color={st.status === 'minted' ? C.mint : C.raised}
+              label={st.status === 'minted' ? 'On Base ↗\uFE0E' : 'Minting'}
+              dot={st.status === 'minted' ? C.green : C.amber}
             />
           }
           onPress={st.url ? () => Linking.openURL(st.url!) : undefined}
@@ -220,13 +225,17 @@ const s = StyleSheet.create({
     justifyContent: 'space-around',
     paddingTop: 4,
   },
+  flex: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   chain: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: C.raised,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chainText: { fontFamily: F.bold, fontSize: 18, color: C.ink },
+  chainText: { fontFamily: F.bold, fontSize: 17 },
   toggle: { flexDirection: 'row', alignItems: 'center', paddingTop: 10 },
 });

@@ -70,9 +70,10 @@ export default function Room() {
 
       <Card>
         <View style={s.top}>
-          <Text style={[T.strong, { flex: 1 }]}>Net worth in the room</Text>
+          <Text style={[T.label, { flex: 1 }]}>Net worth in the room</Text>
           <Tag
             label={`${room.length} ${room.length === 1 ? 'person' : 'people'}`}
+            dot={C.green}
           />
         </View>
         {rich.length > 0 ? (
@@ -102,7 +103,7 @@ export default function Room() {
 
       {rich.length > 0 && (
         <Card style={{ gap: 4 }}>
-          <Text style={[T.h2, { marginBottom: 6 }]}>Leaderboard</Text>
+          <Text style={[T.label, { marginBottom: 6 }]}>Leaderboard</Text>
           {board.map(([c, i]) => (
             <Animated.View key={c.id} entering={FadeIn.delay(i * 50)}>
               <ListRow
@@ -112,8 +113,8 @@ export default function Room() {
                     avatar={
                       c.id === me?.id ? me?.avatar : cachedProfile(c.id)?.avatar
                     }
-                    size={44}
-                    color={i === 0 ? C.butter : CAT_COLOR[c.category]}
+                    size={40}
+                    category={c.category}
                   />
                 }
                 title={`${i + 1}. ${c.name}${c.id === me?.id ? ' (you)' : ''}`}
@@ -127,13 +128,13 @@ export default function Room() {
         </Card>
       )}
 
-      <TagCloud title="The room wants" tags={wants} color={C.lilac} />
-      <TagCloud title="The room offers" tags={gives} color={C.mint} />
+      <TagCloud title="The room wants" tags={wants} color={C.purple} />
+      <TagCloud title="The room offers" tags={gives} color={C.green} />
     </Screen>
   );
 }
 
-/** Category mix as the reference's bar chart: grey bars, the biggest in blue with a count pill. */
+/** Category mix: grey bars, the biggest lit in its category colour with a count pill. */
 function Bars({ cats }: { cats: [Category, number][] }) {
   if (!cats.length) return null;
   // Every category gets a slim bar (empty ones as stubs) so the chart keeps its shape.
@@ -162,7 +163,11 @@ function Bars({ cats }: { cats: [Category, number][] }) {
                 s.bar,
                 {
                   height: `${8 + (n / max) * 62}%`,
-                  backgroundColor: isLead ? C.blue : n ? C.faint : C.raised,
+                  backgroundColor: isLead
+                    ? CAT_COLOR[cat]
+                    : n
+                    ? C.lineStrong
+                    : C.raised,
                 },
               ]}
             />
@@ -186,7 +191,7 @@ function TagCloud({
   if (!tags.length) return null;
   return (
     <Card>
-      <Text style={T.h2}>{title}</Text>
+      <Text style={T.label}>{title}</Text>
       <Row>
         {tags.map(([t, n], i) => (
           <Chip
@@ -204,10 +209,11 @@ function TagCloud({
 const s = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   amount: {
-    fontFamily: F.medium,
-    fontSize: 44,
+    fontFamily: F.bold,
+    fontSize: 48,
     color: C.text,
-    letterSpacing: -0.5,
+    letterSpacing: -1.5,
+    fontVariant: ['tabular-nums'],
   },
   chart: {
     flexDirection: 'row',
@@ -223,7 +229,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  bar: { width: '100%', borderRadius: 12 },
+  bar: { width: '100%', borderRadius: 6 },
   barLabel: { fontSize: 16 },
   pill: {
     backgroundColor: C.text,
@@ -234,7 +240,12 @@ const s = StyleSheet.create({
   pillText: { fontFamily: F.medium, fontSize: 13, color: C.ink },
   pair: { flexDirection: 'row', gap: 12 },
   half: { flex: 1, gap: 4 },
-  stat: { fontFamily: F.medium, fontSize: 28, color: C.text },
+  stat: {
+    fontFamily: F.bold,
+    fontSize: 28,
+    color: C.text,
+    letterSpacing: -0.6,
+  },
   rowAmount: {
     fontFamily: F.bold,
     fontSize: 16,

@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { Asterisk } from 'lucide-react-native';
 import { CATEGORIES, type Category } from './profile';
-import { Avatar, Tag } from './ui';
+import { Avatar, CategoryTag } from './ui';
 import { C, CAT_COLOR, F, R } from './theme';
 
-/** The profile as a pastel card: everyone's "Radius pass". */
+/** Everyone's "Radius pass": a black card lit by its category colour. */
 export function PassCard({
   id,
   name,
@@ -23,90 +24,110 @@ export function PassCard({
   status?: string;
 }) {
   const color = CAT_COLOR[category];
-  const cat = CATEGORIES[category];
   return (
     <View
-      style={[s.card, { backgroundColor: color }]}
-      accessibilityLabel={`${name}, ${role ?? ''}, ${cat.label}`}
+      style={s.card}
+      accessibilityLabel={`${name}, ${role ?? ''}, ${
+        CATEGORIES[category].label
+      }`}
     >
-      {/* thin arcs, like the reference card */}
-      <View style={[s.arc, { width: 320, height: 320, left: -120, top: 30 }]} />
-      <View
-        style={[s.arc, { width: 260, height: 260, right: -90, top: -60 }]}
+      {/* soft glow from the top-right corner */}
+      <LinearGradient
+        colors={[`${color}55`, `${color}00`]}
+        start={{ x: 1, y: 0 }}
+        end={{ x: 0.3, y: 0.8 }}
+        style={StyleSheet.absoluteFill}
       />
 
-      <View style={s.band}>
-        <Asterisk size={30} color="#fff" strokeWidth={1.5} />
-        <Tag label={`${cat.emoji} ${cat.label}`} />
-      </View>
-
-      <View style={s.body}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-          <Avatar name={name} avatar={avatar} size={58} color="#FFFFFF88" />
-          <View style={{ flex: 1 }}>
-            <Text style={s.name} numberOfLines={1} adjustsFontSizeToFit>
-              {name}
-            </Text>
-            {role ? (
-              <Text style={s.role} numberOfLines={1}>
-                {role}
-                {company ? ` · ${company}` : ''}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-        <View style={s.bottom}>
-          <Text style={s.id}>*{id.slice(-4)}</Text>
-          {status ? (
-            <View style={s.status}>
-              <Text style={s.statusText}>{status}</Text>
-            </View>
-          ) : null}
+      <View style={s.top}>
+        <View style={s.mark}>
+          <Asterisk size={20} color={C.text} strokeWidth={2} />
           <Text style={s.brand}>RADIUS</Text>
         </View>
+        <CategoryTag category={category} />
+      </View>
+
+      <View style={s.who}>
+        <Avatar name={name} avatar={avatar} size={60} category={category} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={s.name} numberOfLines={1} adjustsFontSizeToFit>
+            {name}
+          </Text>
+          {role ? (
+            <Text style={s.role} numberOfLines={1}>
+              {role}
+              {company ? ` · ${company}` : ''}
+            </Text>
+          ) : null}
+        </View>
+      </View>
+
+      <View style={s.bottom}>
+        <Text style={s.id}>
+          {id.slice(0, 6)}…{id.slice(-4)}
+        </Text>
+        {status ? (
+          <View style={s.status}>
+            <View
+              style={[
+                s.live,
+                {
+                  backgroundColor:
+                    status === 'out of range' ? C.faint : C.green,
+                },
+              ]}
+            />
+            <Text style={s.statusText}>{status}</Text>
+          </View>
+        ) : null}
       </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  card: { borderRadius: R.card, overflow: 'hidden' },
-  arc: {
-    position: 'absolute',
-    borderRadius: 999,
+  card: {
+    borderRadius: R.card + 4,
     borderWidth: 1,
-    borderColor: '#FFFFFF66',
+    borderColor: C.lineStrong,
+    backgroundColor: C.surface,
+    overflow: 'hidden',
+    padding: 20,
+    gap: 24,
   },
-  band: {
-    backgroundColor: '#1E1E22',
-    height: 58,
-    marginTop: 18,
-    paddingHorizontal: 20,
+  top: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  body: { padding: 20, paddingTop: 18, gap: 22 },
-  name: { fontFamily: F.bold, fontSize: 26, color: C.ink },
-  role: { fontFamily: F.medium, fontSize: 15, color: '#1E1E22AA' },
+  mark: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  brand: {
+    fontFamily: F.xbold,
+    fontSize: 13,
+    color: C.text,
+    letterSpacing: 2,
+  },
+  who: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  name: {
+    fontFamily: F.bold,
+    fontSize: 26,
+    color: C.text,
+    letterSpacing: -0.6,
+  },
+  role: { fontFamily: F.regular, fontSize: 15, color: C.muted },
   bottom: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
   },
-  id: { fontFamily: F.bold, fontSize: 20, color: '#fff' },
-  status: {
-    backgroundColor: '#FFFFFF55',
-    borderRadius: R.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  statusText: { fontFamily: F.medium, fontSize: 13, color: C.ink },
-  brand: {
-    fontFamily: F.xbold,
-    fontSize: 22,
-    color: '#fff',
+  id: {
+    fontFamily: F.medium,
+    fontSize: 13,
+    color: C.faint,
     letterSpacing: 0.5,
   },
+  status: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  live: { width: 6, height: 6, borderRadius: 3 },
+  statusText: { fontFamily: F.medium, fontSize: 13, color: C.muted },
 });

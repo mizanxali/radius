@@ -55,7 +55,7 @@ export const appKit = createAppKit({
   storage: appKitStorage,
   enableAnalytics: false,
   themeMode: 'dark',
-  themeVariables: { accent: '#8FB8F0' }, // theme C.blue
+  themeVariables: { accent: '#52A8FF' }, // theme C.blue
   // Real wallets only: email/social logins would create empty embedded wallets.
   features: { socials: false, swaps: false, onramp: false },
   metadata: {

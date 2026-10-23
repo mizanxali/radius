@@ -48,8 +48,8 @@ export function NetWorth({
   return (
     <Card>
       <View style={s.top}>
-        <Text style={[T.strong, { flex: 1 }]}>Net worth</Text>
-        {label && <Tag label={label} color={C.mint} />}
+        <Text style={[T.label, { flex: 1 }]}>Net worth</Text>
+        {label && <Tag label={label} />}
         {onRefresh && (
           <Pressable
             accessibilityRole="button"
@@ -71,8 +71,8 @@ export function NetWorth({
       )}
       {verifiedCount > 0 && (
         <View style={s.verified}>
-          <BadgeCheck size={16} color={C.mint} strokeWidth={1.75} />
-          <Text style={[T.sub, { color: C.mint }]}>
+          <BadgeCheck size={16} color={C.green} strokeWidth={2} />
+          <Text style={[T.sub, { color: C.green }]}>
             {verifiedCount} verified wallet{verifiedCount > 1 ? 's' : ''}
           </Text>
         </View>
@@ -88,14 +88,16 @@ const s = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     backgroundColor: C.raised,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
   amount: {
-    fontFamily: F.medium,
+    fontFamily: F.bold,
     fontSize: 42,
     color: C.text,
-    letterSpacing: -0.5,
+    letterSpacing: -1.2,
     fontVariant: ['tabular-nums'],
   },
   verified: { flexDirection: 'row', alignItems: 'center', gap: 6 },

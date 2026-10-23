@@ -58,7 +58,7 @@ function Welcome({ onStart }: { onStart: () => void }) {
       ]}
     >
       <Animated.View entering={FadeInDown.springify()}>
-        <Asterisk size={64} color={C.blue} strokeWidth={1.25} />
+        <Asterisk size={56} color={C.text} strokeWidth={1.75} />
         <Text style={s.brand}>Radius</Text>
         <Text
           style={[
@@ -164,12 +164,12 @@ function Editor({ onDone }: { onDone: () => void }) {
         </Card>
 
         <Card>
-          <Text style={T.strong}>I'm a</Text>
+          <Text style={T.label}>I'm a</Text>
           <Row>
             {(Object.keys(CATEGORIES) as Category[]).map(c => (
               <Chip
                 key={c}
-                label={`${CATEGORIES[c].emoji} ${CATEGORIES[c].label}`}
+                label={CATEGORIES[c].label}
                 selected={p.category === c}
                 color={CAT_COLOR[c]}
                 onPress={() => set('category', c)}
@@ -198,18 +198,18 @@ function Editor({ onDone }: { onDone: () => void }) {
         <TagPicker
           label="Looking for"
           selected={p.lookingFor}
-          color={C.lilac}
+          color={C.purple}
           onToggle={t => toggle('lookingFor', t)}
         />
         <TagPicker
           label="I can offer"
           selected={p.offering}
-          color={C.mint}
+          color={C.green}
           onToggle={t => toggle('offering', t)}
         />
 
         <Card>
-          <Text style={T.strong}>Socials</Text>
+          <Text style={T.label}>Socials</Text>
           {(Object.keys(SOCIALS) as Social[]).map(k => (
             <View key={k} style={s.social}>
               <Text style={s.socialLabel}>{SOCIALS[k].label}</Text>
@@ -260,7 +260,7 @@ function TagPicker({
 }) {
   return (
     <Card>
-      <Text style={T.strong}>{label}</Text>
+      <Text style={T.label}>{label}</Text>
       <Row>
         {(Object.keys(TAGS) as Tag[]).map(t => (
           <Chip
@@ -291,7 +291,7 @@ function Field({
         style={[
           s.input,
           multiline && s.multiline,
-          focused && { borderColor: C.blue },
+          focused && { borderColor: C.muted },
         ]}
         placeholderTextColor={C.faint}
         multiline={multiline}
@@ -320,10 +320,10 @@ const s = StyleSheet.create({
     justifyContent: 'space-between',
   },
   brand: {
-    fontFamily: F.medium,
+    fontFamily: F.bold,
     fontSize: 64,
     color: C.text,
-    letterSpacing: -2,
+    letterSpacing: -2.5,
     marginTop: 20,
   },
   tilt: {
@@ -336,28 +336,29 @@ const s = StyleSheet.create({
     flexDirection: 'row-reverse',
   },
   input: {
-    backgroundColor: C.raised,
-    borderRadius: R.pill,
+    backgroundColor: C.bg,
+    borderRadius: R.input,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: C.lineStrong,
     color: C.text,
     fontFamily: F.regular,
     fontSize: 17,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
   },
   multiline: {
-    borderRadius: R.inner,
     minHeight: 92,
     textAlignVertical: 'top',
-    paddingTop: 15,
+    paddingTop: 13,
   },
   social: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: C.raised,
-    borderRadius: R.pill,
-    paddingLeft: 20,
+    backgroundColor: C.bg,
+    borderRadius: R.input,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
+    paddingLeft: 14,
   },
   socialLabel: {
     fontFamily: F.medium,
@@ -370,7 +371,7 @@ const s = StyleSheet.create({
     color: C.text,
     fontFamily: F.regular,
     fontSize: 16,
-    paddingVertical: 14,
-    paddingRight: 20,
+    paddingVertical: 13,
+    paddingRight: 14,
   },
 });

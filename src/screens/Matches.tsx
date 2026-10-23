@@ -8,12 +8,12 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { RefreshCw } from 'lucide-react-native';
+import { MessageCircle, RefreshCw } from 'lucide-react-native';
 import { cachedProfile, usePeers } from '../peers';
 import { refreshMatches, useMatches } from '../ai';
 import type { Match } from '../match';
 import { Avatar, Card, Header, IconButton, ListRow, Screen, Tag } from '../ui';
-import { C, CAT_COLOR, F, T } from '../theme';
+import { C, F, R, T } from '../theme';
 import { distanceLabel } from './Radar';
 
 export default function Matches({ onOpen }: { onOpen: (id: string) => void }) {
@@ -101,24 +101,35 @@ function MatchCard({
           <Avatar
             name={name}
             avatar={p?.avatar}
-            size={52}
-            color={CAT_COLOR[category]}
+            size={48}
+            category={category}
           />
         }
         title={name}
         subtitle={role}
-        trailing={<Tag label={`#${rank}`} />}
+        trailing={<Tag label={`#${rank}`} solid={rank === 1} />}
         onPress={onPress}
       />
-      <Text style={[T.h2, { fontSize: 20, lineHeight: 26 }]}>
-        {match.reason}
-      </Text>
-      <View style={s.bubble}>
-        <Text style={s.bubbleLabel}>Say this</Text>
-        <Text style={s.bubbleText}>{match.icebreaker}</Text>
+      <Text style={[T.h2, { lineHeight: 25 }]}>{match.reason}</Text>
+      <Icebreaker text={match.icebreaker} />
+      <View style={s.status}>
+        <View style={s.live} />
+        <Text style={T.sub}>{status}</Text>
       </View>
-      <Text style={[T.sub, { color: C.mint }]}>● {status}</Text>
     </Card>
+  );
+}
+
+/** The line to open with, in a quote panel with a purple label. Shared with Person. */
+export function Icebreaker({ text }: { text: string }) {
+  return (
+    <View style={s.bubble}>
+      <View style={s.status}>
+        <MessageCircle size={14} color={C.purple} strokeWidth={2} />
+        <Text style={s.bubbleLabel}>Say this</Text>
+      </View>
+      <Text style={s.bubbleText}>{text}</Text>
+    </View>
   );
 }
 
@@ -131,7 +142,7 @@ function Thinking({ count }: { count: number }) {
       </Text>
       <View style={s.bars}>
         {[0.5, 0.25, 0.65, 0.9, 0.6, 0.75].map((h, i) => (
-          <Bar key={i} h={h} delay={i * 120} highlight={i === 5} />
+          <Bar key={i} h={h} delay={i * 120} highlight={i === 3} />
         ))}
       </View>
     </Card>
@@ -159,19 +170,33 @@ function Bar({
   }));
   return (
     <Animated.View
-      style={[s.bar, { backgroundColor: highlight ? C.blue : C.faint }, style]}
+      style={[
+        s.bar,
+        { backgroundColor: highlight ? C.purple : C.lineStrong },
+        style,
+      ]}
     />
   );
 }
 
 const s = StyleSheet.create({
   bubble: {
-    backgroundColor: C.blueDeep,
-    borderRadius: 20,
-    padding: 16,
-    gap: 4,
+    backgroundColor: C.raised,
+    borderWidth: 1,
+    borderColor: C.line,
+    borderRadius: R.inner,
+    padding: 14,
+    gap: 6,
   },
-  bubbleLabel: { fontFamily: F.medium, fontSize: 14, color: '#FFFFFFB3' },
+  bubbleLabel: {
+    fontFamily: F.medium,
+    fontSize: 12,
+    color: C.purple,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  status: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  live: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.green },
   bubbleText: {
     fontFamily: F.medium,
     fontSize: 17,
@@ -179,5 +204,5 @@ const s = StyleSheet.create({
     color: C.text,
   },
   bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, height: 120 },
-  bar: { flex: 1, borderRadius: 14 },
+  bar: { flex: 1, borderRadius: 6 },
 });

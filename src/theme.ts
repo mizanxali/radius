@@ -1,35 +1,48 @@
 import type { Category } from './profile';
 
-// Soft neobank palette: charcoal surfaces, pastel accents, white for primary actions.
+// Minimal black: white type, hairline borders, colour only on avatars, icons and dots.
 export const C = {
-  bg: '#2F2F34',
-  surface: '#37383D',
-  raised: '#414248', // circle buttons, inputs, inner cards
-  line: '#4B4C53',
-  text: '#FFFFFF',
-  muted: '#A3A3AD',
-  faint: '#6F7079',
-  ink: '#1E1E22', // text on white / pastel
+  bg: '#000000',
+  surface: '#0A0A0A', // cards
+  raised: '#141414', // inputs, icon buttons, inner panels
+  line: '#1F1F1F', // card borders, rings
+  lineStrong: '#2E2E2E', // button/chip outlines
+  text: '#FAFAFA',
+  muted: '#A1A1A1',
+  faint: '#5C5C5C',
+  ink: '#000000', // text on white or on a colour
 
-  blue: '#8FB8F0',
-  blueDeep: '#648FBF',
-  lilac: '#DE8FF7',
-  mint: '#9DE3C4',
-  peach: '#FFB48C',
-  butter: '#F4DC82',
-  rose: '#F6A3BC',
-  periwinkle: '#B7AAFF',
+  blue: '#52A8FF',
+  violet: '#8B7CF6',
+  purple: '#BF7AF0',
+  pink: '#F75F8F',
+  orange: '#FF8A3D',
+  amber: '#FFC53D',
+  green: '#3DD68C',
+  teal: '#22C7B8',
+  red: '#FF6166',
 };
 
-/** Each category gets its own pastel, used for cards, avatars and charts. */
+/** Each category gets its own vivid accent: avatars, dots, charts. */
 export const CAT_COLOR: Record<Category, string> = {
   builder: C.blue,
-  founder: C.peach,
-  investor: C.mint,
-  designer: C.lilac,
-  researcher: C.periwinkle,
-  bd: C.rose,
-  degen: C.butter,
+  founder: C.orange,
+  investor: C.green,
+  designer: C.pink,
+  researcher: C.violet,
+  bd: C.teal,
+  degen: C.amber,
+};
+
+/** Avatar gradients (Vercel-style), from the category accent into a neighbour. */
+export const CAT_GRADIENT: Record<Category, [string, string]> = {
+  builder: [C.blue, C.violet],
+  founder: [C.amber, C.orange],
+  investor: [C.green, C.teal],
+  designer: [C.pink, C.purple],
+  researcher: [C.violet, C.purple],
+  bd: [C.teal, C.blue],
+  degen: [C.amber, C.pink],
 };
 
 // Cabinet Grotesk, bundled. Pick the face by family name; never set fontWeight
@@ -43,23 +56,39 @@ export const F = {
 
 export const T = {
   display: {
-    fontFamily: F.medium,
+    fontFamily: F.bold,
     fontSize: 44,
     color: C.text,
-    letterSpacing: -1,
+    letterSpacing: -1.5,
   },
   title: {
-    fontFamily: F.medium,
+    fontFamily: F.bold,
     fontSize: 30,
     color: C.text,
-    letterSpacing: -0.5,
+    letterSpacing: -0.8,
   },
-  header: { fontFamily: F.medium, fontSize: 22, color: C.text },
-  h2: { fontFamily: F.medium, fontSize: 22, color: C.text },
-  body: { fontFamily: F.regular, fontSize: 16, lineHeight: 22, color: C.text },
+  header: {
+    fontFamily: F.bold,
+    fontSize: 28,
+    color: C.text,
+    letterSpacing: -0.6,
+  },
+  h2: {
+    fontFamily: F.bold,
+    fontSize: 19,
+    color: C.text,
+    letterSpacing: -0.3,
+  },
+  body: { fontFamily: F.regular, fontSize: 16, lineHeight: 23, color: C.text },
   strong: { fontFamily: F.bold, fontSize: 16, color: C.text },
   sub: { fontFamily: F.regular, fontSize: 14, lineHeight: 19, color: C.muted },
-  label: { fontFamily: F.medium, fontSize: 15, color: C.muted },
+  label: {
+    fontFamily: F.medium,
+    fontSize: 12,
+    color: C.muted,
+    letterSpacing: 1,
+    textTransform: 'uppercase' as const,
+  },
 };
 
-export const R = { card: 28, inner: 20, pill: 999 };
+export const R = { card: 16, inner: 12, input: 10, pill: 999 };

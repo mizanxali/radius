@@ -60,22 +60,21 @@ const nav = createNavigationContainerRef<Root>();
 const Stack = createNativeStackNavigator<Root>();
 const Tab = createBottomTabNavigator<Tabs>();
 
-// Active tab sits in a white circle, like the reference's active action button.
+// Each tab lights up in its own accent, with a dot underneath.
 const icon =
-  (I: Icon) =>
+  (I: Icon, accent: string) =>
   ({ focused }: { focused: boolean }) =>
     (
-      <View
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: 24,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: focused ? C.text : 'transparent',
-        }}
-      >
-        <I size={22} color={focused ? C.ink : C.muted} strokeWidth={1.75} />
+      <View style={{ alignItems: 'center', gap: 6 }}>
+        <I size={22} color={focused ? accent : C.faint} strokeWidth={1.9} />
+        <View
+          style={{
+            width: 4,
+            height: 4,
+            borderRadius: 2,
+            backgroundColor: focused ? accent : 'transparent',
+          }}
+        />
       </View>
     );
 
@@ -87,22 +86,29 @@ function MainTabs() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
-          backgroundColor: C.surface,
-          borderTopWidth: 0,
-          height: 68 + insets.bottom,
-          paddingTop: 10,
+          backgroundColor: C.bg,
+          borderTopWidth: 1,
+          borderTopColor: C.line,
+          height: 64 + insets.bottom,
+          paddingTop: 12,
           paddingBottom: insets.bottom,
         },
       }}
     >
-      <Tab.Screen name="Radar" options={{ tabBarIcon: icon(RadarIcon) }}>
+      <Tab.Screen
+        name="Radar"
+        options={{ tabBarIcon: icon(RadarIcon, C.blue) }}
+      >
         {({ navigation }: BottomTabScreenProps<Tabs, 'Radar'>) => (
           <Radar
             onOpen={id => navigation.getParent()?.navigate('Person', { id })}
           />
         )}
       </Tab.Screen>
-      <Tab.Screen name="Matches" options={{ tabBarIcon: icon(Sparkles) }}>
+      <Tab.Screen
+        name="Matches"
+        options={{ tabBarIcon: icon(Sparkles, C.purple) }}
+      >
         {({ navigation }: BottomTabScreenProps<Tabs, 'Matches'>) => (
           <Matches
             onOpen={id => navigation.getParent()?.navigate('Person', { id })}
@@ -112,9 +118,12 @@ function MainTabs() {
       <Tab.Screen
         name="Room"
         component={Room}
-        options={{ tabBarIcon: icon(Trophy) }}
+        options={{ tabBarIcon: icon(Trophy, C.amber) }}
       />
-      <Tab.Screen name="Me" options={{ tabBarIcon: icon(CircleUserRound) }}>
+      <Tab.Screen
+        name="Me"
+        options={{ tabBarIcon: icon(CircleUserRound, C.green) }}
+      >
         {({ navigation }: BottomTabScreenProps<Tabs, 'Me'>) => (
           <Me onEdit={() => navigation.getParent()?.navigate('EditProfile')} />
         )}

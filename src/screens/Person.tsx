@@ -26,6 +26,7 @@ import { wave } from '../wave';
 import { proposeMeet, useStamps } from '../meet';
 import { shortAddress, verifyWallet } from '../verify';
 import { distanceLabel } from './Radar';
+import { Icebreaker } from './Matches';
 import { C, F, T } from '../theme';
 
 /** A nearby person: card instantly, full profile from cache, refreshed over the mesh. */
@@ -111,12 +112,14 @@ export default function Person({
             <View style={s.actions}>
               <Action
                 icon={Hand}
+                color={C.amber}
                 label={waved === 'sent' ? 'Waved' : 'Wave'}
                 disabled={waved === 'sending' || waved === 'sent'}
                 onPress={sendWave}
               />
               <Action
                 icon={LocateFixed}
+                color={C.blue}
                 label="Find"
                 disabled={peer.hops > 0}
                 onPress={onFind}
@@ -124,7 +127,7 @@ export default function Person({
               <Action
                 icon={stamp ? Check : Handshake}
                 label={stamp ? 'Met' : 'We met'}
-                active
+                color={C.green}
                 disabled={!!stamp || meeting === 'asking'}
                 onPress={meet}
               />
@@ -140,16 +143,11 @@ export default function Person({
         <Animated.View entering={FadeInDown}>
           <Card>
             <View style={s.inline}>
-              <Sparkles size={18} color={C.blue} strokeWidth={1.75} />
-              <Text style={T.strong}>Why talk to them</Text>
+              <Sparkles size={16} color={C.purple} strokeWidth={2} />
+              <Text style={T.label}>Why talk to them</Text>
             </View>
-            <Text style={[T.h2, { fontSize: 20, lineHeight: 26 }]}>
-              {match.reason}
-            </Text>
-            <View style={s.bubble}>
-              <Text style={s.bubbleLabel}>Say this</Text>
-              <Text style={s.bubbleText}>{match.icebreaker}</Text>
-            </View>
+            <Text style={[T.h2, { lineHeight: 25 }]}>{match.reason}</Text>
+            <Icebreaker text={match.icebreaker} />
           </Card>
         </Animated.View>
       )}
@@ -220,7 +218,7 @@ export function ProfileView({
       {profile?.building ? (
         <Card>
           <Text style={T.label}>Building</Text>
-          <Text style={[T.h2, { lineHeight: 28 }]}>{profile.building}</Text>
+          <Text style={[T.h2, { lineHeight: 25 }]}>{profile.building}</Text>
           {profile.bio ? (
             <Text style={[T.body, { color: C.muted }]}>{profile.bio}</Text>
           ) : null}
@@ -230,17 +228,17 @@ export function ProfileView({
       <Tags
         label="Looking for"
         tags={profile?.lookingFor ?? card?.lookingFor}
-        color={C.lilac}
+        color={C.purple}
       />
       <Tags
         label="Can offer"
         tags={profile?.offering ?? card?.offering}
-        color={C.mint}
+        color={C.green}
       />
 
       {socials.length > 0 && (
         <Card style={{ gap: 4 }}>
-          <Text style={[T.h2, { marginBottom: 6 }]}>Socials</Text>
+          <Text style={[T.label, { marginBottom: 6 }]}>Socials</Text>
           {socials.map(([k, handle]) => (
             <ListRow
               key={k}
@@ -292,26 +290,15 @@ const s = StyleSheet.create({
     paddingTop: 4,
   },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  bubble: {
-    backgroundColor: C.blueDeep,
-    borderRadius: 20,
-    padding: 16,
-    gap: 4,
-  },
-  bubbleLabel: { fontFamily: F.medium, fontSize: 14, color: '#FFFFFFB3' },
-  bubbleText: {
-    fontFamily: F.medium,
-    fontSize: 17,
-    lineHeight: 23,
-    color: C.text,
-  },
   socialIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: C.text,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: C.raised,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  socialLetter: { fontFamily: F.bold, fontSize: 18, color: C.ink },
+  socialLetter: { fontFamily: F.bold, fontSize: 16, color: C.text },
 });

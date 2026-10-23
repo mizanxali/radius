@@ -62,13 +62,14 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
       <Header title="Around you" />
       <Card>
         <View style={s.cardTop}>
-          <Text style={[T.strong, { flex: 1 }]}>Nearby</Text>
+          <Text style={[T.label, { flex: 1 }]}>Nearby</Text>
           <Tag
             label={
               peers.length
                 ? `${peers.length} ${peers.length === 1 ? 'person' : 'people'}`
                 : 'Scanning'
             }
+            dot={peers.length ? C.green : C.faint}
           />
         </View>
         <View
@@ -107,7 +108,7 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
       </Card>
 
       <Card style={{ gap: 4 }}>
-        <Text style={[T.h2, { marginBottom: 6 }]}>People</Text>
+        <Text style={[T.label, { marginBottom: 6 }]}>People</Text>
         {peers.length === 0 && (
           <Text style={[T.sub, { paddingVertical: 8 }]}>
             Keep Radius open. People with the app show up here as they come into
@@ -121,8 +122,8 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
                 <Avatar
                   name={p.card.name}
                   avatar={cachedProfile(p.card.id)?.avatar}
-                  size={48}
-                  color={CAT_COLOR[p.card.category]}
+                  size={44}
+                  category={p.card.category}
                 />
               }
               title={p.card.name}
@@ -164,7 +165,7 @@ function RadarField({ size }: { size: number }) {
   }));
   const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: 0.2 + pulse.value * 0.8 }],
-    opacity: 0.35 * (1 - pulse.value),
+    opacity: 0.12 * (1 - pulse.value),
   }));
 
   return (
@@ -188,7 +189,7 @@ function RadarField({ size }: { size: number }) {
       />
       <Animated.View style={[StyleSheet.absoluteFill, sweepStyle]}>
         <LinearGradient
-          colors={['#8FB8F000', '#8FB8F0']}
+          colors={['#FFFFFF00', '#FFFFFFB3']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={{
@@ -271,7 +272,7 @@ function RadarDot({
           name={peer.card.name}
           avatar={cachedProfile(peer.card.id)?.avatar}
           size={dot}
-          color={color}
+          category={peer.card.category}
         />
       </Pressable>
     </Animated.View>
@@ -281,14 +282,20 @@ function RadarDot({
 const s = StyleSheet.create({
   cardTop: { flexDirection: 'row', alignItems: 'center' },
   center: { alignItems: 'center', justifyContent: 'center' },
-  meRing: { padding: 5, borderRadius: 40, backgroundColor: C.raised },
+  meRing: {
+    padding: 4,
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
+    backgroundColor: C.bg,
+  },
   ring: {
     position: 'absolute',
     borderRadius: 999,
     borderWidth: 1,
     borderColor: C.line,
   },
-  pulse: { position: 'absolute', borderRadius: 999, backgroundColor: C.blue },
-  tier: { fontFamily: F.medium, fontSize: 13, color: C.mint },
+  pulse: { position: 'absolute', borderRadius: 999, backgroundColor: C.text },
+  tier: { fontFamily: F.medium, fontSize: 13, color: C.text },
   dist: { fontFamily: F.regular, fontSize: 13, color: C.muted },
 });

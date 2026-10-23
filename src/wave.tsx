@@ -6,7 +6,7 @@ import { Hand } from 'lucide-react-native';
 import Haptics from 'react-native-haptic-feedback';
 import { cachedProfile, getMyProfile, handle, request, usePeer } from './peers';
 import { Avatar } from './ui';
-import { C, CAT_COLOR, F } from './theme';
+import { C, F, R } from './theme';
 
 type Wave = { from: string; name: string; at: number };
 let current: Wave | undefined;
@@ -64,8 +64,8 @@ export function WaveBanner({ onOpen }: { onOpen: (id: string) => void }) {
         <Avatar
           name={w.name}
           avatar={cachedProfile(w.from)?.avatar}
-          size={48}
-          color={peer ? CAT_COLOR[peer.card.category] : C.blue}
+          size={44}
+          category={peer?.card.category}
         />
         <Text style={s.text} numberOfLines={2}>
           <Text style={{ fontFamily: F.bold }}>
@@ -73,7 +73,7 @@ export function WaveBanner({ onOpen }: { onOpen: (id: string) => void }) {
           </Text>{' '}
           waved at you
         </Text>
-        <Hand size={24} color={C.ink} strokeWidth={1.6} />
+        <Hand size={22} color={C.amber} strokeWidth={1.9} />
       </Pressable>
     </Animated.View>
   );
@@ -88,8 +88,10 @@ const s = StyleSheet.create({
     paddingVertical: 10,
     paddingLeft: 10,
     paddingRight: 20,
-    borderRadius: 999,
-    backgroundColor: C.text,
+    borderRadius: R.card,
+    borderWidth: 1,
+    borderColor: C.lineStrong,
+    backgroundColor: C.surface,
   },
-  text: { flex: 1, color: C.ink, fontSize: 17, fontFamily: F.regular },
+  text: { flex: 1, color: C.text, fontSize: 16, fontFamily: F.regular },
 });
