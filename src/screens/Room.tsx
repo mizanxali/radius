@@ -48,6 +48,9 @@ export default function Room() {
   const rich = room
     .filter(c => c.netWorthUsd != null)
     .sort((a, b) => b.netWorthUsd! - a.netWorthUsd!);
+  // Top 10, plus my own row (with my real rank) when I'm further down.
+  const ranked = rich.map((c, i) => [c, i] as const);
+  const board = ranked.filter(([c, i]) => i < 10 || c.id === me?.id);
   const cats = top(
     room.map(c => c.category),
     7,
@@ -100,7 +103,7 @@ export default function Room() {
       {rich.length > 0 && (
         <Card style={{ gap: 4 }}>
           <Text style={[T.h2, { marginBottom: 6 }]}>Leaderboard</Text>
-          {rich.slice(0, 10).map((c, i) => (
+          {board.map(([c, i]) => (
             <Animated.View key={c.id} entering={FadeIn.delay(i * 50)}>
               <ListRow
                 leading={
