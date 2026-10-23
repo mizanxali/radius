@@ -5,6 +5,14 @@
   "compatibility_date": "2026-10-20",
   "observability": { "enabled": true },
   // Per-IP limit on everything that spends third-party quota (Zerion, Claude).
-  "ratelimits": [{ "name": "LIMITER", "namespace_id": "1001", "simple": { "limit": 30, "period": 60 } }]
-  // Secrets (wrangler secret put): ZERION_API_KEY, ANTHROPIC_API_KEY
+  "ratelimits": [
+    { "name": "LIMITER", "namespace_id": "1001", "simple": { "limit": 30, "period": 60 } },
+    { "name": "ATTEST_LIMITER", "namespace_id": "1002", "simple": { "limit": 5, "period": 60 } }
+  ],
+  // Base Sepolia until the relayer is funded on mainnet; SCHEMA_UID from `npm run register-schema`.
+  "vars": {
+    "CHAIN": "base-sepolia",
+    "SCHEMA_UID": "0x69ea6b6df4eccabfc16a3fcd582c888d1fc76bb1fb1b38f32bf3fd6226fc4d3d"
+  }
+  // Secrets (wrangler secret put, or .dev.vars locally): ZERION_API_KEY, ANTHROPIC_API_KEY, RELAYER_KEY
 }

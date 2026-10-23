@@ -24,6 +24,7 @@ import { distanceLabel } from './Radar';
 import { NetWorth } from '../NetWorth';
 import { useMatches } from '../ai';
 import { wave } from '../wave';
+import { proposeMeet, useStamps } from '../meet';
 import { shortAddress, verifyWallet } from '../verify';
 
 /** A nearby person: card instantly, full profile from cache, refreshed over the mesh. */
@@ -53,6 +54,21 @@ export default function Person({
   const tier = peer?.card.tier;
   const match = useMatches().matches.find(m => m.id === id);
   const [waved, setWaved] = useState<'sending' | 'sent' | 'failed'>();
+  const stamp = useStamps().find(st => st.peer.id === id);
+  const [meeting, setMeeting] = useState<string>();
+  const meet = async () => {
+    setMeeting('Waiting for them to confirm…');
+    try {
+      await proposeMeet(id);
+      setMeeting(undefined);
+    } catch (e) {
+      setMeeting(
+        e instanceof Error && /declined|timeout/.test(e.message)
+          ? 'They didn’t confirm. Try again?'
+          : 'Couldn’t reach them. Move closer?',
+      );
+    }
+  };
   const sendWave = async () => {
     setWaved('sending');
     try {
@@ -101,6 +117,31 @@ export default function Person({
                 />
               )}
             </View>
+          )}
+          {peer && !stamp && (
+            <GradientButton
+              title={
+                meeting === 'Waiting for them to confirm…'
+                  ? meeting
+                  : '🤝 We met · mint a stamp'
+              }
+              colors={G.money}
+              disabled={meeting === 'Waiting for them to confirm…'}
+              onPress={meet}
+            />
+          )}
+          {meeting && meeting !== 'Waiting for them to confirm…' && (
+            <Text style={[BODY, { color: C.hot, textAlign: 'center' }]}>
+              {meeting}
+            </Text>
+          )}
+          {stamp && (
+            <Text style={[LABEL, { color: C.money, textAlign: 'center' }]}>
+              🤝 You met ·{' '}
+              {stamp.status === 'minted'
+                ? 'stamp minted on Base'
+                : 'stamp minting…'}
+            </Text>
           )}
           {match && (
             <View style={s.match}>

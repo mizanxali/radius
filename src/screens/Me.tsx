@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import {
+  Linking,
+  Pressable,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { useAccount, useAppKit } from '@reown/appkit-react-native';
 import { useMyProfile } from '../peers';
 import { publishCard } from '../peers';
@@ -7,6 +14,9 @@ import { proveWallet, refreshNetWorth, removeWallet } from '../wallet';
 import { shortAddress } from '../verify';
 import { NetWorth } from '../NetWorth';
 import { roastMe } from '../ai';
+import { useStamps } from '../meet';
+import { cachedProfile } from '../peers';
+import { Avatar } from '../ui';
 import { GradientButton, tap } from '../ui';
 import { BODY, C, G, LABEL } from '../theme';
 import { ProfileView } from './Person';
@@ -25,6 +35,7 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
             onPress={onEdit}
           />
           <Wallets />
+          <Stamps />
           <Roast />
         </View>
       }
@@ -128,6 +139,44 @@ function Wallets() {
           />
         </View>
       )}
+    </View>
+  );
+}
+
+function Stamps() {
+  const stamps = useStamps();
+  if (!stamps.length) return null;
+  return (
+    <View style={{ gap: 10 }}>
+      <Text style={LABEL}>🤝 People you've met · {stamps.length}</Text>
+      {stamps.map(st => (
+        <Pressable
+          key={st.id}
+          accessibilityRole={st.url ? 'link' : undefined}
+          disabled={!st.url}
+          onPress={() => st.url && (tap(), Linking.openURL(st.url))}
+          style={s.wallet}
+        >
+          <Avatar
+            name={st.peer.name}
+            avatar={cachedProfile(st.peer.id)?.avatar}
+            size={40}
+            colors={G.money}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={s.addr} numberOfLines={1}>
+              {st.peer.name}
+            </Text>
+            <Text style={{ color: C.muted, fontSize: 12 }}>
+              {new Date(st.payload.ts).toLocaleDateString()}
+              {st.peer.company ? ` · ${st.peer.company}` : ''}
+            </Text>
+          </View>
+          <Text style={[s.ok, st.status !== 'minted' && { color: C.muted }]}>
+            {st.status === 'minted' ? '⛓ On Base ↗' : 'minting…'}
+          </Text>
+        </Pressable>
+      ))}
     </View>
   );
 }

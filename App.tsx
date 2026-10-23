@@ -27,6 +27,7 @@ import Matches from './src/screens/Matches';
 import Room from './src/screens/Room';
 import Finder from './src/screens/Finder';
 import { WaveBanner } from './src/wave';
+import { MeetPrompt, retryPendingMints } from './src/meet';
 import { C } from './src/theme';
 
 type Tabs = {
@@ -97,6 +98,7 @@ export default function App() {
   useEffect(() => {
     bootMesh()
       .then(() => {
+        retryPendingMints();
         // Prices move; re-price my wallets at most hourly.
         const at = profile?.netWorthAt ?? 0;
         if (profile?.wallets.length && Date.now() - at > 3_600_000)
@@ -167,6 +169,7 @@ export default function App() {
         <WaveBanner
           onOpen={id => nav.isReady() && nav.navigate('Person', { id })}
         />
+        <MeetPrompt />
         <AppKit />
       </AppKitProvider>
     </SafeAreaProvider>

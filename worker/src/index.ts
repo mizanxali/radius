@@ -2,13 +2,17 @@
 //   POST /networth  { wallets: [{ chain: 'evm'|'solana', address }] } → { usd, wallets: [{ address, usd }] }
 //   POST /match     { me, others[] } → { matches: [{ id, score, reason, icebreaker }] }
 //   POST /roast     { me } → { roast }
+//   POST /attest    MeetProof → { uid, tx, url }   (EAS on Base, relayer pays gas)
 import Anthropic from '@anthropic-ai/sdk';
+import { attest, BadProof, type AttestEnv } from './attest';
+import type { MeetProof } from '../../src/meetproof';
 import { match, MatchRequest, roast, RoastRequest } from './ai';
 
-interface Env {
+interface Env extends AttestEnv {
   ZERION_API_KEY: string;
   ANTHROPIC_API_KEY: string;
   LIMITER: RateLimit;
+  ATTEST_LIMITER: RateLimit;
 }
 
 type Wallet = { chain: 'evm' | 'solana'; address: string };
@@ -70,6 +74,33 @@ async function networth(req: Request, env: Env, ctx: ExecutionContext) {
   });
 }
 
+async function attestRoute(
+  req: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  ip: string,
+) {
+  // Gas costs real money: a tighter limit than the rest of the API.
+  if (!(await env.ATTEST_LIMITER.limit({ key: ip })).success)
+    return json({ error: 'slow down' }, 429);
+  const proof = (await req.json()) as MeetProof;
+  // Both phones may post the same proof; mint it once.
+  const key = new Request(
+    `https://radius.internal/attest/${proof.sigA}${proof.sigB}`,
+  );
+  const done = await caches.default.match(key);
+  if (done) return new Response(done.body, done);
+  try {
+    const res = json(await attest(env, proof));
+    res.headers.set('cache-control', 'public, max-age=604800');
+    ctx.waitUntil(caches.default.put(key, res.clone()));
+    return res;
+  } catch (err) {
+    if (err instanceof BadProof) return json({ error: 'invalid proof' }, 400);
+    throw err;
+  }
+}
+
 export default {
   async fetch(req, env, ctx): Promise<Response> {
     const { pathname } = new URL(req.url);
@@ -81,6 +112,7 @@ export default {
 
     try {
       if (pathname === '/networth') return await networth(req, env, ctx);
+      if (pathname === '/attest') return await attestRoute(req, env, ctx, ip);
       if (pathname === '/match' || pathname === '/roast') {
         const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
         const raw = await req.json();

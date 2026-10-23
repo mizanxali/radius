@@ -113,10 +113,10 @@ radius/worker/   Cloudflare Worker (wrangler)
   - `localAddress()` needs MLS storage open → encryption `enabled` with `autoKeyExchange: false`.
   - Reown AppKit spike moved to the start of M2.
 - **M1 — profile + radar (done):** onboarding, MMKV, card registration/discovery, `profile` request, Radar + Person sheet.
-- **M2 — wallets + net worth:** AppKit connect + sign, local verification, Worker `/networth`, card `nw`, tier display.
-- **M3 — AI:** `/match`, `/icebreaker`, `/roast`, offline fallback, Matches tab.
-- **M4 — viral interactions:** wave, finder, Room tab.
-- **M5 — stamps:** EAS schema registered, relayer funded, `meet` flow, `/attest`, Stamps UI.
+- **M2 — wallets + net worth (built):** AppKit connect + sign, local verification, Worker `/networth`, card `nw`, tier display.
+- **M3 — AI (built):** `/match`, `/icebreaker`, `/roast`, offline fallback, Matches tab.
+- **M4 — viral interactions (built):** wave, finder, Room tab.
+- **M5 — stamps (built):** EAS schema registered, relayer funded, `meet` flow, `/attest`, Stamps UI.
 - **M6 — demo + polish:** demo mode seed, design pass, two-device run (iPhone + Samsung), record.
 
 ## Risks
