@@ -22,6 +22,7 @@ import { Avatar, CategoryBadge, Chip, Row, tap } from '../ui';
 import { BODY, C, CAT_COLOR, H1, H2, LABEL } from '../theme';
 import { distanceLabel } from './Radar';
 import { NetWorth } from '../NetWorth';
+import { useMatches } from '../ai';
 import { shortAddress, verifyWallet } from '../verify';
 
 /** A nearby person: card instantly, full profile from cache, refreshed over the mesh. */
@@ -47,6 +48,7 @@ export default function Person({
   // Only wallets whose proof names this peer's own address count.
   const verified = profile?.wallets.filter(w => verifyWallet(w, id)) ?? [];
   const tier = peer?.card.tier;
+  const match = useMatches().matches.find(m => m.id === id);
 
   return (
     <ProfileView
@@ -60,27 +62,38 @@ export default function Person({
       }
       onClose={onClose}
       actions={
-        verified.length > 0 ? (
-          <View style={{ gap: 10 }}>
-            <NetWorth
-              usd={profile?.netWorthUsd}
-              tier={tier}
-              verifiedCount={verified.length}
-            />
-            <Row>
-              {verified.map(w => (
-                <Chip
-                  key={w.address}
-                  label={`${w.chain === 'evm' ? 'Ξ' : '◎'} ${shortAddress(
-                    w.address,
-                  )} ✓`}
-                  selected
-                  color={C.money}
-                />
-              ))}
-            </Row>
-          </View>
-        ) : undefined
+        <View style={{ gap: 14 }}>
+          {match && (
+            <View style={s.match}>
+              <Text style={LABEL}>✨ Why talk to them</Text>
+              <Text style={[H2, { fontSize: 18 }]}>{match.reason}</Text>
+              <Text style={[BODY, { color: C.muted }]}>
+                “{match.icebreaker}”
+              </Text>
+            </View>
+          )}
+          {verified.length > 0 && (
+            <View style={{ gap: 10 }}>
+              <NetWorth
+                usd={profile?.netWorthUsd}
+                tier={tier}
+                verifiedCount={verified.length}
+              />
+              <Row>
+                {verified.map(w => (
+                  <Chip
+                    key={w.address}
+                    label={`${w.chain === 'evm' ? 'Ξ' : '◎'} ${shortAddress(
+                      w.address,
+                    )} ✓`}
+                    selected
+                    color={C.money}
+                  />
+                ))}
+              </Row>
+            </View>
+          )}
+        </View>
       }
     />
   );
@@ -243,6 +256,14 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   status: { color: C.money, fontSize: 13, fontWeight: '800' },
+  match: {
+    backgroundColor: '#7B61FF22',
+    borderColor: '#7B61FF',
+    borderWidth: 1.5,
+    borderRadius: 22,
+    padding: 18,
+    gap: 8,
+  },
   card: {
     backgroundColor: C.surface,
     borderRadius: 22,

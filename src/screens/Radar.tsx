@@ -22,7 +22,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { usePeers, type Peer } from '../peers';
 import { cachedProfile } from '../peers';
-import { hash, useMyProfile } from '../profile';
+import { hash } from '../profile';
+import { useMyProfile } from '../peers';
 import { Avatar, CategoryBadge, tap } from '../ui';
 import { BODY, C, CAT_COLOR, G, H1, LABEL } from '../theme';
 

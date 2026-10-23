@@ -15,13 +15,12 @@ import {
   CATEGORIES,
   SOCIALS,
   TAGS,
-  useMyProfile,
   type Category,
   type Profile,
   type Social,
   type Tag,
 } from '../profile';
-import { publishCard, useMyAddress } from '../peers';
+import { publishCard, useMyAddress, useMyProfile } from '../peers';
 import { Avatar, Chip, GradientButton, Row, tap } from '../ui';
 import { BODY, C, CAT_COLOR, H1, LABEL } from '../theme';
 

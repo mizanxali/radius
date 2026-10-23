@@ -17,14 +17,15 @@ import {
 import { AppKit, AppKitProvider } from '@reown/appkit-react-native';
 import { bootMesh } from './src/peers';
 import { appKit, refreshNetWorth } from './src/wallet';
-import { useMyProfile } from './src/profile';
+import { useMyProfile } from './src/peers';
 import ProfileEditor from './src/screens/ProfileEditor';
 import Radar from './src/screens/Radar';
 import Person from './src/screens/Person';
 import Me from './src/screens/Me';
+import Matches from './src/screens/Matches';
 import { C } from './src/theme';
 
-type Tabs = { Radar: undefined; Me: undefined };
+type Tabs = { Radar: undefined; Matches: undefined; Me: undefined };
 type Root = {
   Onboarding: undefined;
   Main: NavigatorScreenParams<Tabs>;
@@ -54,6 +55,13 @@ function MainTabs() {
       <Tab.Screen name="Radar" options={{ tabBarIcon: icon('📡') }}>
         {({ navigation }: BottomTabScreenProps<Tabs, 'Radar'>) => (
           <Radar
+            onOpen={id => navigation.getParent()?.navigate('Person', { id })}
+          />
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="Matches" options={{ tabBarIcon: icon('✨') }}>
+        {({ navigation }: BottomTabScreenProps<Tabs, 'Matches'>) => (
+          <Matches
             onOpen={id => navigation.getParent()?.navigate('Person', { id })}
           />
         )}

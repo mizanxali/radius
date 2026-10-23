@@ -1,6 +1,3 @@
-import { useMMKVObject } from 'react-native-mmkv';
-import { storage } from './mesh';
-
 export const CATEGORIES = {
   builder: { label: 'Builder', emoji: '🛠️' },
   founder: { label: 'Founder', emoji: '🚀' },
@@ -78,15 +75,6 @@ export type Card = {
   verified: boolean;
   avatarHash?: string;
 };
-
-export function useMyProfile() {
-  return useMMKVObject<Profile>('profile', storage);
-}
-
-export function getMyProfile(): Profile | undefined {
-  const raw = storage.getString('profile');
-  return raw ? JSON.parse(raw) : undefined;
-}
 
 // Cheap stable hash (djb2) to tell peers whether a cached avatar is stale.
 export function hash(s: string) {

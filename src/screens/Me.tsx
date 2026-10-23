@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { useAccount, useAppKit } from '@reown/appkit-react-native';
-import { useMyProfile } from '../profile';
+import { useMyProfile } from '../peers';
 import { publishCard } from '../peers';
 import { proveWallet, refreshNetWorth, removeWallet } from '../wallet';
 import { shortAddress } from '../verify';
 import { NetWorth } from '../NetWorth';
+import { roastMe } from '../ai';
 import { GradientButton, tap } from '../ui';
 import { BODY, C, G, LABEL } from '../theme';
 import { ProfileView } from './Person';
@@ -24,6 +25,7 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
             onPress={onEdit}
           />
           <Wallets />
+          <Roast />
         </View>
       }
     />
@@ -130,7 +132,56 @@ function Wallets() {
   );
 }
 
+function Roast() {
+  const [roast, setRoast] = useState<string>();
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setBusy(true);
+    try {
+      setRoast(await roastMe());
+    } catch {
+      setRoast('The roast machine is offline. Lucky you.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <View style={{ gap: 12 }}>
+      <GradientButton
+        title={
+          busy
+            ? 'Cooking…'
+            : roast
+            ? '🔥 Roast me again'
+            : '🔥 Roast my profile'
+        }
+        colors={G.hot}
+        disabled={busy}
+        onPress={go}
+      />
+      {roast && (
+        <View style={s.roast}>
+          <Text style={LABEL}>The room says</Text>
+          <Text
+            style={[BODY, { fontSize: 18, fontWeight: '700', lineHeight: 26 }]}
+          >
+            {roast}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
+  roast: {
+    backgroundColor: '#FF2E9318',
+    borderColor: C.hot,
+    borderWidth: 1.5,
+    borderRadius: 22,
+    padding: 18,
+    gap: 8,
+  },
   wallet: {
     flexDirection: 'row',
     alignItems: 'center',

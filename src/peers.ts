@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { useMMKVObject } from 'react-native-mmkv';
 import {
   isLocalTransport,
   myNodeHash,
@@ -15,7 +16,6 @@ import {
 } from './mesh';
 import {
   fromCapabilities,
-  getMyProfile,
   hash,
   toCapabilities,
   type Card,
@@ -60,6 +60,17 @@ export function usePeer(id: string) {
 
 export const myAddress = () => me;
 export const useMyAddress = () => useSyncExternalStore(subscribe, myAddress);
+
+// ---- my profile -----------------------------------------------------------
+
+export function useMyProfile() {
+  return useMMKVObject<Profile>('profile', storage);
+}
+
+export function getMyProfile(): Profile | undefined {
+  const raw = storage.getString('profile');
+  return raw ? JSON.parse(raw) : undefined;
+}
 
 // ---- request/response over the radius.v1 service --------------------------
 
