@@ -92,6 +92,7 @@ export async function request(
   body = '',
   timeoutMs = 20_000,
 ) {
+  if (fakes.has(peerId)) return answerFake!(peerId, method, body);
   const id = await services.sendServiceRequest(
     peerId,
     SERVICE_ID,
@@ -126,6 +127,21 @@ const handlers: Record<string, Handler> = {
 /** Lets later features (wave, meet…) answer their own request methods. */
 export function handle(method: string, h: Handler) {
   handlers[method] = h;
+}
+
+// ---- demo mode: simulated peers share the store and answer in-process --------
+
+type Fake = (id: string, method: string, body: string) => Promise<string>;
+const fakes = new Set<string>();
+let answerFake: Fake | undefined;
+
+/** Replaces every simulated peer with `list` (empty list = demo off). */
+export function setFakePeers(list: Peer[], answer?: Fake) {
+  fakes.forEach(id => peers.delete(id));
+  fakes.clear();
+  list.forEach(p => (peers.set(p.card.id, p), fakes.add(p.card.id)));
+  answerFake = answer;
+  emit();
 }
 
 // ---- full profiles ----------------------------------------------------------

@@ -8,12 +8,14 @@ import {
   View,
 } from 'react-native';
 import { useAccount, useAppKit } from '@reown/appkit-react-native';
+import Haptics from 'react-native-haptic-feedback';
 import { PenLine, Trash2, Wallet } from 'lucide-react-native';
 import { cachedProfile, publishCard, useMyProfile } from '../peers';
 import { proveWallet, refreshNetWorth, removeWallet } from '../wallet';
 import { shortAddress } from '../verify';
 import { NetWorth } from '../NetWorth';
 import { useStamps } from '../meet';
+import { isDemo, setDemo } from '../demo';
 import { Action, Avatar, Button, Card, ListRow, Tag, tap } from '../ui';
 import { C, F, T } from '../theme';
 import { ProfileView } from './Person';
@@ -48,6 +50,18 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
     <ProfileView
       id={me.id}
       title="My pass"
+      right={
+        // Hidden: long-press the empty top-right corner to fill the room with demo attendees.
+        <Pressable
+          accessibilityLabel="Demo mode"
+          delayLongPress={800}
+          onLongPress={() => {
+            Haptics.trigger('notificationSuccess');
+            setDemo(!isDemo());
+          }}
+          style={{ width: 48, height: 48 }}
+        />
+      }
       profile={me}
       status="you"
       actions={

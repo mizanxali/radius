@@ -39,14 +39,23 @@ export function distanceLabel(p: Peer) {
   return 'across the room';
 }
 
-const angleFor = (id: string) =>
-  (parseInt(hash(id), 36) % 360) * (Math.PI / 180);
+/** Even spacing in a stable (hash) order, so a crowd fans out instead of clumping. */
+function angles(peers: Peer[]) {
+  const order = peers
+    .map(p => p.card.id)
+    .sort((a, b) => (hash(a) < hash(b) ? -1 : 1));
+  return new Map(
+    order.map((id, i) => [id, (i / order.length) * 2 * Math.PI - Math.PI / 2]),
+  );
+}
 
 export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
   const { width } = useWindowDimensions();
   const peers = usePeers();
   const [me] = useMyProfile();
   const size = width - 80; // inside a card with 20 px padding
+  const angle = angles(peers);
+  const dot = peers.length > 8 ? 36 : 44;
 
   return (
     <Screen>
@@ -89,6 +98,8 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
               key={p.card.id}
               peer={p}
               size={size}
+              angle={angle.get(p.card.id)!}
+              dot={dot}
               onPress={() => onOpen(p.card.id)}
             />
           ))}
@@ -197,14 +208,23 @@ function RadarField({ size }: { size: number }) {
 function RadarDot({
   peer,
   size,
+  angle,
+  dot,
   onPress,
 }: {
   peer: Peer;
   size: number;
+  angle: number;
+  dot: number;
   onPress: () => void;
 }) {
-  const dot = 44;
-  const a = angleFor(peer.card.id);
+  const a = useSharedValue(angle);
+  useEffect(() => {
+    // Turn the short way round when the crowd re-spaces.
+    const t = 2 * Math.PI;
+    const d = ((((angle - a.value + Math.PI) % t) + t) % t) - Math.PI;
+    a.value = withSpring(a.value + d, { damping: 18, stiffness: 60 });
+  }, [angle, a]);
   // Keep clear of my avatar (56 + ring) in the centre, and inside the outer ring.
   const minR = (66 / 2 + dot / 2 + 6) / (size / 2);
   const fraction = minR + (0.9 - minR) * closeness(peer);
@@ -213,8 +233,8 @@ function RadarDot({
     r.value = withSpring(fraction, { damping: 18, stiffness: 60 });
   }, [fraction, r]);
   const style = useAnimatedStyle(() => ({
-    left: size / 2 + Math.cos(a) * r.value * (size / 2) - dot / 2,
-    top: size / 2 + Math.sin(a) * r.value * (size / 2) - dot / 2,
+    left: size / 2 + Math.cos(a.value) * r.value * (size / 2) - dot / 2,
+    top: size / 2 + Math.sin(a.value) * r.value * (size / 2) - dot / 2,
   }));
   const halo = useSharedValue(0);
   useEffect(() => {

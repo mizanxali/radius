@@ -26,6 +26,7 @@ import {
 } from '@react-navigation/bottom-tabs';
 import { AppKit, AppKitProvider } from '@reown/appkit-react-native';
 import { bootMesh } from './src/peers';
+import { isDemo, setDemo } from './src/demo';
 import { appKit, refreshNetWorth } from './src/wallet';
 import { useMyProfile } from './src/peers';
 import ProfileEditor from './src/screens/ProfileEditor';
@@ -127,6 +128,7 @@ export default function App() {
   useEffect(() => {
     bootMesh()
       .then(() => {
+        if (isDemo()) setDemo(true);
         retryPendingMints();
         // Prices move; re-price my wallets at most hourly.
         const at = profile?.netWorthAt ?? 0;
