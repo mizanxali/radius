@@ -14,4 +14,4 @@ export const WORKER_URL =
     ? `http://${metroHost}:8787`
     : 'https://radius.mizanalip786.workers.dev';
 
-export const REOWN_PROJECT_ID = 'REPLACE_WITH_REOWN_PROJECT_ID'; // dashboard.reown.com (public id)
+export const REOWN_PROJECT_ID = '6a225bc58a079102da4e76dd5693b91a'; // dashboard.reown.com (public id)

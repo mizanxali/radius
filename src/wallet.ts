@@ -55,7 +55,9 @@ export const appKit = createAppKit({
   storage: appKitStorage,
   enableAnalytics: false,
   themeMode: 'dark',
-  themeVariables: { accent: '#FF2E93' },
+  themeVariables: { accent: '#8FB8F0' }, // theme C.blue
+  // Real wallets only: email/social logins would create empty embedded wallets.
+  features: { socials: false, swaps: false, onramp: false },
   metadata: {
     name: 'Radius',
     description: 'See who is around you at web3 events',
