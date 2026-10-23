@@ -21,13 +21,16 @@ export const storage = createMMKV();
 const meshProfile =
   storage.getString('meshProfile') ??
   (() => {
-    const p = 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    const p =
+      'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     storage.set('meshProfile', p);
     return p;
   })();
 
 /** The node hash this phone's BLE advertisements carry (first 8 bytes of SHA-256(profile)). */
-export const myNodeHash = bytesToHex(sha256(utf8ToBytes(meshProfile)).slice(0, 8));
+export const myNodeHash = bytesToHex(
+  sha256(utf8ToBytes(meshProfile)).slice(0, 8),
+);
 
 // Radius only exchanges public profile data. Encryption stays "enabled" solely so
 // start() opens the identity key store (no off1 address otherwise); per-peer key
@@ -86,10 +89,14 @@ export type {
  * link knows it and by advertised node hash otherwise. Comes from a local patch
  * to the SDK's BLE bridges (patches/@offline-protocol+mesh-sdk+*.patch).
  */
-export function onPeerRssi(cb: (rssi: number, peerId?: string, nodeHash?: string) => void) {
+export function onPeerRssi(
+  cb: (rssi: number, peerId?: string, nodeHash?: string) => void,
+) {
   protocol.on<DiagnosticEvent>('diagnostic', e => {
     if (e.message !== 'peer_rssi') return;
-    const c = e.context as { peerId?: string; nodeHash?: string; rssi?: number } | undefined;
+    const c = e.context as
+      | { peerId?: string; nodeHash?: string; rssi?: number }
+      | undefined;
     if (typeof c?.rssi === 'number') cb(c.rssi, c.peerId, c.nodeHash);
   });
 }

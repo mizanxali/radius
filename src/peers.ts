@@ -13,7 +13,14 @@ import {
   type ServiceRequestReceivedEvent,
   type ServiceResponseReceivedEvent,
 } from './mesh';
-import { fromCapabilities, getMyProfile, hash, toCapabilities, type Card, type Profile } from './profile';
+import {
+  fromCapabilities,
+  getMyProfile,
+  hash,
+  toCapabilities,
+  type Card,
+  type Profile,
+} from './profile';
 
 export type Peer = {
   card: Card;
@@ -68,8 +75,18 @@ function settle(e: ServiceResponseReceivedEvent) {
   else p.reject(new Error(e.body || e.status));
 }
 
-export async function request(peerId: string, method: string, body = '', timeoutMs = 20_000) {
-  const id = await services.sendServiceRequest(peerId, SERVICE_ID, method, body);
+export async function request(
+  peerId: string,
+  method: string,
+  body = '',
+  timeoutMs = 20_000,
+) {
+  const id = await services.sendServiceRequest(
+    peerId,
+    SERVICE_ID,
+    method,
+    body,
+  );
   return new Promise<string>((resolve, reject) => {
     const timer = setTimeout(() => {
       pending.delete(id);
@@ -86,7 +103,13 @@ export async function request(peerId: string, method: string, body = '', timeout
 
 type Handler = (body: string, sender: string) => string | Promise<string>;
 const handlers: Record<string, Handler> = {
-  profile: () => JSON.stringify(getMyProfile() ?? null),
+  profile: () => {
+    const p = getMyProfile();
+    // "Hide exact amount" means the number never leaves the phone; the card still carries the tier.
+    return JSON.stringify(
+      p?.hideExactNetWorth ? { ...p, netWorthUsd: undefined } : p ?? null,
+    );
+  },
 };
 
 /** Lets later features (wave, meet…) answer their own request methods. */
@@ -115,7 +138,10 @@ const queue: string[] = [];
 let fetching = false;
 function prefetch(card: Card) {
   const cached = cachedProfile(card.id);
-  const fresh = cached && (cached.avatar ? hash(cached.avatar) : undefined) === card.avatarHash && cached.name === card.name;
+  const fresh =
+    cached &&
+    (cached.avatar ? hash(cached.avatar) : undefined) === card.avatarHash &&
+    cached.name === card.name;
   if (fresh || queue.includes(card.id)) return;
   queue.push(card.id);
   void drain();
@@ -136,7 +162,10 @@ export async function publishCard() {
   const p = getMyProfile();
   if (!me || !p) return;
   await services.unregisterService(SERVICE_ID).catch(() => {});
-  await services.registerService(SERVICE_ID, '1', { ...toCapabilities(p), nh: myNodeHash });
+  await services.registerService(SERVICE_ID, '1', {
+    ...toCapabilities(p),
+    nh: myNodeHash,
+  });
 }
 
 // ---- wiring -----------------------------------------------------------------
@@ -162,37 +191,55 @@ export async function bootMesh() {
     if (e.service_id !== SERVICE_ID || e.provider_peer_id === me) return;
     const card = fromCapabilities(e.provider_peer_id, e.capabilities);
     if (e.capabilities.nh) byHash.set(e.capabilities.nh, e.provider_peer_id);
-    upsert(card.id, p => ({ rssi: p?.rssi, card, hops: e.hop_count, lastSeen: Date.now() }));
+    upsert(card.id, p => ({
+      rssi: p?.rssi,
+      card,
+      hops: e.hop_count,
+      lastSeen: Date.now(),
+    }));
     prefetch(card);
   });
 
   onPeerRssi((rssi, peerId, nodeHash) => {
     const id = peerId ?? (nodeHash ? byHash.get(nodeHash) : undefined);
     if (!id || !peers.has(id)) return;
-    upsert(id, p =>
-      p && {
-        ...p,
-        // EMA: raw BLE RSSI swings ±8 dB between samples.
-        rssi: p.rssi == null ? rssi : Math.round(p.rssi * 0.7 + rssi * 0.3),
-        lastSeen: Date.now(),
-      },
+    upsert(
+      id,
+      p =>
+        p && {
+          ...p,
+          // EMA: raw BLE RSSI swings ±8 dB between samples.
+          rssi: p.rssi == null ? rssi : Math.round(p.rssi * 0.7 + rssi * 0.3),
+          lastSeen: Date.now(),
+        },
     );
   });
 
-  protocol.on<ServiceRequestReceivedEvent>('service_request_received', async e => {
-    if (e.service_id !== SERVICE_ID) return;
-    const h = handlers[e.method];
-    let status = 'ok';
-    let body: string;
-    try {
-      body = h ? await h(e.body, e.sender) : 'unknown method';
-      if (!h) status = 'error';
-    } catch (err) {
-      status = 'error';
-      body = String(err);
-    }
-    services.respondToServiceRequest(e.request_id, e.sender, SERVICE_ID, status, body).catch(() => {});
-  });
+  protocol.on<ServiceRequestReceivedEvent>(
+    'service_request_received',
+    async e => {
+      if (e.service_id !== SERVICE_ID) return;
+      const h = handlers[e.method];
+      let status = 'ok';
+      let body: string;
+      try {
+        body = h ? await h(e.body, e.sender) : 'unknown method';
+        if (!h) status = 'error';
+      } catch (err) {
+        status = 'error';
+        body = String(err);
+      }
+      services
+        .respondToServiceRequest(
+          e.request_id,
+          e.sender,
+          SERVICE_ID,
+          status,
+          body,
+        )
+        .catch(() => {});
+    },
+  );
 
   protocol.on<ServiceResponseReceivedEvent>('service_response_received', e => {
     if (e.service_id === SERVICE_ID) settle(e);

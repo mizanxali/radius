@@ -1,10 +1,22 @@
 import { useEffect } from 'react';
 import { StatusBar, Text } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { DarkTheme, NavigationContainer, type NavigatorScreenParams } from '@react-navigation/native';
-import { createNativeStackNavigator, type NativeStackScreenProps } from '@react-navigation/native-stack';
-import { createBottomTabNavigator, type BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import {
+  DarkTheme,
+  NavigationContainer,
+  type NavigatorScreenParams,
+} from '@react-navigation/native';
+import {
+  createNativeStackNavigator,
+  type NativeStackScreenProps,
+} from '@react-navigation/native-stack';
+import {
+  createBottomTabNavigator,
+  type BottomTabScreenProps,
+} from '@react-navigation/bottom-tabs';
+import { AppKit, AppKitProvider } from '@reown/appkit-react-native';
 import { bootMesh } from './src/peers';
+import { appKit, refreshNetWorth } from './src/wallet';
 import { useMyProfile } from './src/profile';
 import ProfileEditor from './src/screens/ProfileEditor';
 import Radar from './src/screens/Radar';
@@ -23,9 +35,10 @@ type Root = {
 const Stack = createNativeStackNavigator<Root>();
 const Tab = createBottomTabNavigator<Tabs>();
 
-const icon = (emoji: string) => ({ focused }: { focused: boolean }) => (
-  <Text style={{ fontSize: 24, opacity: focused ? 1 : 0.45 }}>{emoji}</Text>
-);
+const icon =
+  (emoji: string) =>
+  ({ focused }: { focused: boolean }) =>
+    <Text style={{ fontSize: 24, opacity: focused ? 1 : 0.45 }}>{emoji}</Text>;
 
 function MainTabs() {
   return (
@@ -36,10 +49,13 @@ function MainTabs() {
         tabBarInactiveTintColor: C.muted,
         tabBarStyle: { backgroundColor: C.surface, borderTopColor: C.line },
         tabBarLabelStyle: { fontWeight: '800' },
-      }}>
+      }}
+    >
       <Tab.Screen name="Radar" options={{ tabBarIcon: icon('📡') }}>
         {({ navigation }: BottomTabScreenProps<Tabs, 'Radar'>) => (
-          <Radar onOpen={id => navigation.getParent()?.navigate('Person', { id })} />
+          <Radar
+            onOpen={id => navigation.getParent()?.navigate('Person', { id })}
+          />
         )}
       </Tab.Screen>
       <Tab.Screen name="Me" options={{ tabBarIcon: icon('😎') }}>
@@ -54,33 +70,59 @@ function MainTabs() {
 export default function App() {
   const [profile] = useMyProfile();
   useEffect(() => {
-    bootMesh().catch(err => console.warn('mesh boot failed', err));
+    bootMesh()
+      .then(() => {
+        // Prices move; re-price my wallets at most hourly.
+        const at = profile?.netWorthAt ?? 0;
+        if (profile?.wallets.length && Date.now() - at > 3_600_000)
+          return refreshNetWorth();
+      })
+      .catch(err => console.warn('boot failed', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="light-content" />
-      <NavigationContainer theme={{ ...DarkTheme, colors: { ...DarkTheme.colors, background: C.bg } }}>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          {!profile ? (
-            <Stack.Screen name="Onboarding">{() => <ProfileEditor onDone={() => {}} />}</Stack.Screen>
-          ) : (
-            <>
-              <Stack.Screen name="Main" component={MainTabs} />
-              <Stack.Screen name="Person" options={{ presentation: 'modal' }}>
-                {({ route, navigation }: NativeStackScreenProps<Root, 'Person'>) => (
-                  <Person id={route.params.id} onClose={navigation.goBack} />
-                )}
+      <AppKitProvider instance={appKit}>
+        <StatusBar barStyle="light-content" />
+        <NavigationContainer
+          theme={{
+            ...DarkTheme,
+            colors: { ...DarkTheme.colors, background: C.bg },
+          }}
+        >
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            {!profile ? (
+              <Stack.Screen name="Onboarding">
+                {() => <ProfileEditor onDone={() => {}} />}
               </Stack.Screen>
-              <Stack.Screen name="EditProfile" options={{ presentation: 'modal' }}>
-                {({ navigation }: NativeStackScreenProps<Root, 'EditProfile'>) => (
-                  <ProfileEditor onDone={navigation.goBack} />
-                )}
-              </Stack.Screen>
-            </>
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
+            ) : (
+              <>
+                <Stack.Screen name="Main" component={MainTabs} />
+                <Stack.Screen name="Person" options={{ presentation: 'modal' }}>
+                  {({
+                    route,
+                    navigation,
+                  }: NativeStackScreenProps<Root, 'Person'>) => (
+                    <Person id={route.params.id} onClose={navigation.goBack} />
+                  )}
+                </Stack.Screen>
+                <Stack.Screen
+                  name="EditProfile"
+                  options={{ presentation: 'modal' }}
+                >
+                  {({
+                    navigation,
+                  }: NativeStackScreenProps<Root, 'EditProfile'>) => (
+                    <ProfileEditor onDone={navigation.goBack} />
+                  )}
+                </Stack.Screen>
+              </>
+            )}
+          </Stack.Navigator>
+        </NavigationContainer>
+        <AppKit />
+      </AppKitProvider>
     </SafeAreaProvider>
   );
 }

@@ -28,8 +28,18 @@ export const CAT_COLOR: Record<Category, string> = {
   degen: '#FF4D4D',
 };
 
-export const H1 = { color: C.text, fontSize: 34, fontWeight: '900' as const, letterSpacing: -1 };
-export const H2 = { color: C.text, fontSize: 22, fontWeight: '800' as const, letterSpacing: -0.5 };
+export const H1 = {
+  color: C.text,
+  fontSize: 34,
+  fontWeight: '900' as const,
+  letterSpacing: -1,
+};
+export const H2 = {
+  color: C.text,
+  fontSize: 22,
+  fontWeight: '800' as const,
+  letterSpacing: -0.5,
+};
 export const BODY = { color: C.text, fontSize: 16, lineHeight: 22 };
 export const LABEL = {
   color: C.muted,

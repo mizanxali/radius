@@ -31,13 +31,20 @@ export type Tag = keyof typeof TAGS;
 export const SOCIALS = {
   x: { label: 'X', url: (h: string) => `https://x.com/${h}` },
   telegram: { label: 'Telegram', url: (h: string) => `https://t.me/${h}` },
-  farcaster: { label: 'Farcaster', url: (h: string) => `https://farcaster.xyz/${h}` },
+  farcaster: {
+    label: 'Farcaster',
+    url: (h: string) => `https://farcaster.xyz/${h}`,
+  },
   github: { label: 'GitHub', url: (h: string) => `https://github.com/${h}` },
-  linkedin: { label: 'LinkedIn', url: (h: string) => `https://linkedin.com/in/${h}` },
+  linkedin: {
+    label: 'LinkedIn',
+    url: (h: string) => `https://linkedin.com/in/${h}`,
+  },
 } as const;
 export type Social = keyof typeof SOCIALS;
 
-export type Wallet = { chain: 'evm' | 'solana'; address: string; sig: string; issuedAt: number };
+export type { WalletProof as Wallet } from './verify';
+import type { WalletProof } from './verify';
 
 export type Profile = {
   id: string; // off1… address
@@ -51,8 +58,9 @@ export type Profile = {
   lookingFor: Tag[];
   offering: Tag[];
   socials: Partial<Record<Social, string>>;
-  wallets: Wallet[];
+  wallets: WalletProof[];
   netWorthUsd?: number;
+  netWorthAt?: number;
   hideExactNetWorth?: boolean;
 };
 
@@ -115,7 +123,8 @@ export function toCapabilities(p: Profile): Record<string, string> {
   return caps;
 }
 
-const tags = (s?: string) => (s ? (s.split(',').filter(t => t in TAGS) as Tag[]) : []);
+const tags = (s?: string) =>
+  s ? (s.split(',').filter(t => t in TAGS) as Tag[]) : [];
 
 export function fromCapabilities(id: string, c: Record<string, string>): Card {
   return {

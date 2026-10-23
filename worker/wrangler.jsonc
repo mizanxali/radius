@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "radius",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-20",
+  "observability": { "enabled": true },
+  // Per-IP limit on everything that spends third-party quota (Zerion, Claude).
+  "ratelimits": [{ "name": "LIMITER", "namespace_id": "1001", "simple": { "limit": 30, "period": 60 } }]
+  // Secrets (wrangler secret put): ZERION_API_KEY, ANTHROPIC_API_KEY
+}

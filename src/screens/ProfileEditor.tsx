@@ -42,7 +42,8 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
   const [saved, save] = useMyProfile();
   const me = useMyAddress();
   const [p, setP] = useState<Omit<Profile, 'id'>>(saved ?? blank);
-  const set = <K extends keyof Profile>(k: K, v: Profile[K]) => setP(prev => ({ ...prev, [k]: v }));
+  const set = <K extends keyof Profile>(k: K, v: Profile[K]) =>
+    setP(prev => ({ ...prev, [k]: v }));
   const toggle = (k: 'lookingFor' | 'offering', t: Tag) =>
     set(k, p[k].includes(t) ? p[k].filter(x => x !== t) : [...p[k], t]);
 
@@ -67,10 +68,19 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: C.bg }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingTop: saved && Platform.OS === 'ios' ? 20 : insets.top + 16, paddingBottom: insets.bottom + 32, gap: 22 }}
-        keyboardShouldPersistTaps="handled">
+        contentContainerStyle={{
+          padding: 20,
+          paddingTop: saved && Platform.OS === 'ios' ? 20 : insets.top + 16,
+          paddingBottom: insets.bottom + 32,
+          gap: 22,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
         <View>
           <Text style={H1}>{saved ? 'Edit profile' : 'Who are you?'}</Text>
           <Text style={[BODY, { color: C.muted, marginTop: 6 }]}>
@@ -78,14 +88,36 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
           </Text>
         </View>
 
-        <Pressable accessibilityRole="button" accessibilityLabel="Pick profile photo" onPress={pickPhoto} style={{ alignSelf: 'center' }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Pick profile photo"
+          onPress={pickPhoto}
+          style={{ alignSelf: 'center' }}
+        >
           <Avatar name={p.name || '+'} avatar={p.avatar} size={120} />
-          <Text style={[LABEL, { textAlign: 'center', marginTop: 8 }]}>{p.avatar ? 'Change photo' : 'Add photo'}</Text>
+          <Text style={[LABEL, { textAlign: 'center', marginTop: 8 }]}>
+            {p.avatar ? 'Change photo' : 'Add photo'}
+          </Text>
         </Pressable>
 
-        <Field label="Name" value={p.name} onChangeText={v => set('name', v)} placeholder="Vitalik" />
-        <Field label="Role" value={p.role} onChangeText={v => set('role', v)} placeholder="Founder & CEO" />
-        <Field label="Company / project" value={p.company ?? ''} onChangeText={v => set('company', v)} placeholder="Optional" />
+        <Field
+          label="Name"
+          value={p.name}
+          onChangeText={v => set('name', v)}
+          placeholder="Vitalik"
+        />
+        <Field
+          label="Role"
+          value={p.role}
+          onChangeText={v => set('role', v)}
+          placeholder="Founder & CEO"
+        />
+        <Field
+          label="Company / project"
+          value={p.company ?? ''}
+          onChangeText={v => set('company', v)}
+          placeholder="Optional"
+        />
 
         <Section label="I'm a">
           <Row>
@@ -108,19 +140,37 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
           placeholder="A gasless wallet for the next billion users"
           multiline
         />
-        <Field label="Bio" value={p.bio} onChangeText={v => set('bio', v)} placeholder="ex-Coinbase, 3x hackathon winner, dog dad" multiline />
+        <Field
+          label="Bio"
+          value={p.bio}
+          onChangeText={v => set('bio', v)}
+          placeholder="ex-Coinbase, 3x hackathon winner, dog dad"
+          multiline
+        />
 
         <Section label="Looking for">
           <Row>
             {(Object.keys(TAGS) as Tag[]).map(t => (
-              <Chip key={t} label={TAGS[t]} selected={p.lookingFor.includes(t)} color={C.hot} onPress={() => toggle('lookingFor', t)} />
+              <Chip
+                key={t}
+                label={TAGS[t]}
+                selected={p.lookingFor.includes(t)}
+                color={C.hot}
+                onPress={() => toggle('lookingFor', t)}
+              />
             ))}
           </Row>
         </Section>
         <Section label="I can offer">
           <Row>
             {(Object.keys(TAGS) as Tag[]).map(t => (
-              <Chip key={t} label={TAGS[t]} selected={p.offering.includes(t)} color={C.money} onPress={() => toggle('offering', t)} />
+              <Chip
+                key={t}
+                label={TAGS[t]}
+                selected={p.offering.includes(t)}
+                color={C.money}
+                onPress={() => toggle('offering', t)}
+              />
             ))}
           </Row>
         </Section>
@@ -133,7 +183,12 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
                 accessibilityLabel={`${SOCIALS[k].label} handle`}
                 style={s.socialInput}
                 value={p.socials[k] ?? ''}
-                onChangeText={v => set('socials', { ...p.socials, [k]: v.replace(/^@/, '').trim() || undefined })}
+                onChangeText={v =>
+                  set('socials', {
+                    ...p.socials,
+                    [k]: v.replace(/^@/, '').trim() || undefined,
+                  })
+                }
                 placeholder="handle"
                 placeholderTextColor={C.line}
                 autoCapitalize="none"
@@ -143,9 +198,16 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
           ))}
         </Section>
 
-        <GradientButton title={saved ? 'Save' : "Let's go →"} disabled={!ready} onPress={submit} />
+        <GradientButton
+          title={saved ? 'Save' : "Let's go →"}
+          disabled={!ready}
+          onPress={submit}
+        />
         {saved && (
-          <Pressable accessibilityRole="button" onPress={() => (tap(), onDone())}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => (tap(), onDone())}
+          >
             <Text style={[LABEL, { textAlign: 'center' }]}>Cancel</Text>
           </Pressable>
         )}
@@ -154,7 +216,13 @@ export default function ProfileEditor({ onDone }: { onDone: () => void }) {
   );
 }
 
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
+function Section({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <View style={{ gap: 10 }}>
       <Text style={LABEL}>{label}</Text>
@@ -167,12 +235,17 @@ function Field({
   label,
   multiline,
   ...props
-}: { label: string; multiline?: boolean } & React.ComponentProps<typeof TextInput>) {
+}: { label: string; multiline?: boolean } & React.ComponentProps<
+  typeof TextInput
+>) {
   return (
     <Section label={label}>
       <TextInput
         accessibilityLabel={label}
-        style={[s.input, multiline && { minHeight: 84, textAlignVertical: 'top' }]}
+        style={[
+          s.input,
+          multiline && { minHeight: 84, textAlignVertical: 'top' },
+        ]}
         placeholderTextColor={C.line}
         multiline={multiline}
         {...props}
@@ -202,5 +275,11 @@ const s = StyleSheet.create({
     paddingLeft: 16,
   },
   socialLabel: { color: C.muted, fontWeight: '800', width: 90 },
-  socialInput: { flex: 1, color: C.text, fontSize: 16, paddingVertical: 14, paddingRight: 16 },
+  socialInput: {
+    flex: 1,
+    color: C.text,
+    fontSize: 16,
+    paddingVertical: 14,
+    paddingRight: 16,
+  },
 });
