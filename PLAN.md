@@ -12,10 +12,10 @@
 | Socials | Typed handles (X, Telegram, Farcaster, GitHub, LinkedIn) → deep links |
 | Wallets | Signed verification: Reown AppKit (EVM + Solana). Signature binds wallet ↔ `off1` address, verified peer-side offline |
 | Net worth | Zerion portfolio API (EVM chains + Solana) via the Worker |
-| AI | Claude via Cloudflare Worker (`/match`, `/icebreaker`, `/roast`). Offline fallback: local tag-overlap ranking |
+| AI | Claude via Cloudflare Worker (`/match`, icebreakers included). Offline fallback: local tag-overlap ranking |
 | Backend | One Cloudflare Worker: holds Claude/Zerion keys, relayer wallet, rate limits. No DB (KV cache only) |
 | Connect action | Wave (mesh ping + haptic) + saved contacts. No in-app chat |
-| Viral v1 | Net worth reveal, hot/cold finder, room leaderboard, AI icebreaker/roast, proof-of-meet stamps |
+| Viral v1 | Net worth reveal, hot/cold finder, room leaderboard, AI icebreakers, proof-of-meet stamps |
 | Stamps | On-chain EAS attestation on Base, gas sponsored by the Worker's relayer |
 | Demo | Hidden demo mode seeds ~15 fake attendees beside the real BLE peer(s) |
 
@@ -41,7 +41,6 @@
 ┌─────────▼──────────────── Cloudflare Worker ────────────────────────────────────┐
 │ POST /networth  {wallets+sigs} → Zerion, ENS/SNS names, KV cache 10m           │
 │ POST /match     {me, others[]}  → Claude, structured ranked output             │
-│ POST /icebreaker, /roast        → Claude                                       │
 │ POST /attest    {meet payload w/ both sigs} → EAS.attest on Base (relayer)     │
 │ Rate limit per IP + per off1; verifies sigs before spending money              │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -81,7 +80,6 @@ Payload `{a, b (off1), aWallet, bWallet, event?, ts}` signed by each side's SDK 
 ### AI
 
 - `/match`: my full profile + nearby cards/bios → Claude structured output `[{id, score, reason, icebreaker}]`, top 5. Re-run when the room changes by >20 % or on pull-to-refresh. Cached per room snapshot.
-- `/roast`: "roast my profile" share card. `/icebreaker` on demand per person.
 - Offline: score = overlap(my.lookingFor, their.offering) + overlap(their.lookingFor, my.offering) + same-category bonus.
 
 ## Screens (bottom tabs)
@@ -89,7 +87,7 @@ Payload `{a, b (off1), aWallet, bWallet, event?, ts}` signed by each side's SDK 
 1. **Radar** — animated radar (reanimated + svg), avatars placed by RSSI/hop, list below. Tap → Person sheet.
 2. **Matches** — AI top picks with reasons + icebreakers; "why" expands.
 3. **Room** — net worth total ticker, 🐋 leaderboard, category donut, top "looking for".
-4. **Me** — profile, edit, wallets, stamps collection, roast.
+4. **Me** — profile, edit, wallets, stamps collection.
 - **Person sheet** — profile, net-worth roll-up, socials, Wave / Find / We met.
 - **Finder** — full-screen pulse whose size/colour/haptic rate tracks smoothed RSSI.
 - **Onboarding** — photo, name/role/company, building, tags, socials, connect wallets (skippable), BLE permission.
@@ -114,7 +112,7 @@ radius/worker/   Cloudflare Worker (wrangler)
   - Reown AppKit spike moved to the start of M2.
 - **M1 — profile + radar (done):** onboarding, MMKV, card registration/discovery, `profile` request, Radar + Person sheet.
 - **M2 — wallets + net worth (built):** AppKit connect + sign, local verification, Worker `/networth`, card `nw`, tier display.
-- **M3 — AI (built):** `/match`, `/icebreaker`, `/roast`, offline fallback, Matches tab.
+- **M3 — AI (built):** `/match` (with icebreakers), offline fallback, Matches tab.
 - **M4 — viral interactions (built):** wave, finder, Room tab.
 - **M5 — stamps (built):** EAS schema registered, relayer funded, `meet` flow, `/attest`, Stamps UI.
 - **M6 — demo + polish:** demo mode seed, design pass, two-device run (iPhone + Samsung), record.

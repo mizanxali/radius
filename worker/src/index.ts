@@ -1,12 +1,11 @@
 // Radius backend: holds the API keys so the app ships keyless.
 //   POST /networth  { wallets: [{ chain: 'evm'|'solana', address }] } → { usd, wallets: [{ address, usd }] }
 //   POST /match     { me, others[] } → { matches: [{ id, score, reason, icebreaker }] }
-//   POST /roast     { me } → { roast }
 //   POST /attest    MeetProof → { uid, tx, url }   (EAS on Base, relayer pays gas)
 import Anthropic from '@anthropic-ai/sdk';
 import { attest, BadProof, type AttestEnv } from './attest';
 import type { MeetProof } from '../../src/meetproof';
-import { match, MatchRequest, roast, RoastRequest } from './ai';
+import { match, MatchRequest } from './ai';
 
 interface Env extends AttestEnv {
   ZERION_API_KEY: string;
@@ -113,19 +112,11 @@ export default {
     try {
       if (pathname === '/networth') return await networth(req, env, ctx);
       if (pathname === '/attest') return await attestRoute(req, env, ctx, ip);
-      if (pathname === '/match' || pathname === '/roast') {
+      if (pathname === '/match') {
+        const body = MatchRequest.safeParse(await req.json());
+        if (!body.success) return json({ error: body.error.message }, 400);
         const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
-        const raw = await req.json();
-        if (pathname === '/match') {
-          const body = MatchRequest.safeParse(raw);
-          return body.success
-            ? json(await match(client, body.data))
-            : json({ error: body.error.message }, 400);
-        }
-        const body = RoastRequest.safeParse(raw);
-        return body.success
-          ? json(await roast(client, body.data))
-          : json({ error: body.error.message }, 400);
+        return json(await match(client, body.data));
       }
       return json({ error: 'not found' }, 404);
     } catch (err) {

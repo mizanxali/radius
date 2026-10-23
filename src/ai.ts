@@ -71,12 +71,3 @@ export async function refreshMatches(peers: Peer[], force = false) {
     set({ loading: false });
   }
 }
-
-export async function roastMe(): Promise<string> {
-  const me = getMyProfile();
-  if (!me) throw new Error('no profile');
-  const { roast } = await post<{ roast: string }>('/roast', {
-    me: meAsPerson(me),
-  });
-  return roast;
-}
