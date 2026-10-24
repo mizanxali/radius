@@ -1,13 +1,11 @@
 import { PermissionsAndroid, Platform } from 'react-native';
 import { createMMKV } from 'react-native-mmkv';
-import { sha256 } from '@noble/hashes/sha2.js';
-import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js';
 import {
   MeshServices,
-  type DiagnosticEvent,
   type IdentityReadyEvent,
   OfflineProtocol,
   type NeighborDiscoveredEvent,
+  type PeerRssiEvent,
   type ServiceDiscoveredEvent,
   type ServiceRequestReceivedEvent,
   type ServiceResponseReceivedEvent,
@@ -27,18 +25,15 @@ const meshProfile =
     return p;
   })();
 
-/** The node hash this phone's BLE advertisements carry (first 8 bytes of SHA-256(profile)). */
-export const myNodeHash = bytesToHex(
-  sha256(utf8ToBytes(meshProfile)).slice(0, 8),
-);
-
 // Radius only exchanges public profile data. Encryption stays "enabled" solely so
 // start() opens the identity key store (no off1 address otherwise); per-peer key
 // exchange is off, and service frames are signed by the identity key anyway.
 export const protocol = new OfflineProtocol({
   appId: 'radius',
   profile: meshProfile,
-  transports: { ble: { enabled: true } },
+  // Android advertises a digest of its address so an iPhone can name it in
+  // peer_rssi; without it Android's rotating BLE address loses the match.
+  transports: { ble: { enabled: true, advertiseNodeHash: true } },
   encryption: {
     enabled: true,
     autoKeyExchange: false,
@@ -79,24 +74,8 @@ export const isLocalTransport = (t: string) =>
 
 export type {
   NeighborDiscoveredEvent,
+  PeerRssiEvent,
   ServiceDiscoveredEvent,
   ServiceRequestReceivedEvent,
   ServiceResponseReceivedEvent,
 };
-
-/**
- * Live RSSI from BLE advertisements, ~4 Hz per peer, named by address when the
- * link knows it and by advertised node hash otherwise. Comes from a local patch
- * to the SDK's BLE bridges (patches/@offline-protocol+mesh-sdk+*.patch).
- */
-export function onPeerRssi(
-  cb: (rssi: number, peerId?: string, nodeHash?: string) => void,
-) {
-  protocol.on<DiagnosticEvent>('diagnostic', e => {
-    if (e.message !== 'peer_rssi') return;
-    const c = e.context as
-      | { peerId?: string; nodeHash?: string; rssi?: number }
-      | undefined;
-    if (typeof c?.rssi === 'number') cb(c.rssi, c.peerId, c.nodeHash);
-  });
-}

@@ -95,7 +95,6 @@ src/
   theme.ts ui.tsx    design tokens and components
   screens/           Radar, Matches, Room, Me, Person, Finder, ProfileEditor
 worker/              Cloudflare Worker
-patches/             mesh SDK patch (live RSSI for the radar and finder)
 ```
 
 ## Licence

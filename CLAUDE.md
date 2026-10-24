@@ -5,7 +5,7 @@ React Native app for meeting the right people at web3 events (ETHGlobal, Devcon,
 ## Commands
 
 ```sh
-npm install                 # also applies patches/ via patch-package
+npm install
 npm start                   # Metro
 npm test                    # node --test src/*.test.ts (pure modules only)
 npx tsc --noEmit && npm run lint
@@ -38,7 +38,7 @@ Android reaches Metro and the dev Worker through `adb reverse tcp:8081 tcp:8081`
 
 ## Gotchas
 
-- **SDK patch** (`patches/@offline-protocol+mesh-sdk+0.30.0.patch`): adds a `peer_rssi` diagnostic (iOS ~1.5 Hz, Android ~3–4 Hz) and puts Android's node hash in the scan response as `0xFFFF` manufacturer data. Drop it once the SDK ships live RSSI natively. `patch-package` can't regenerate this patch: diff by hand against a clean `npm pack` copy.
+- **Live RSSI** comes from the SDK's `peer_rssi` event (on while a listener exists), with `advertiseNodeHash` so the iPhone can name the Android. It merged after mesh-sdk 0.30.0 shipped, so `package.json` points at a local build in `vendor/` (npm's 0.30.0 never emits it); swap back to the npm version once the SDK releases. Measured ~2.6 Hz on iPhone, ~1.9 Hz on Android.
 - **Service responses** cap at 64 KiB over BLE. Keep avatars at 256 px, quality 0.6.
 - **Fonts:** Cabinet Grotesk is linked from `assets/fonts`. Pick the face with `fontFamily` (`F.bold`, …) and never set `fontWeight`, or Android substitutes a system font.
 - **LinearGradient on iOS Fabric** doesn't lay out children. Use it only as an absolute-fill background.

@@ -2,14 +2,13 @@ import { useSyncExternalStore } from 'react';
 import { useMMKVObject } from 'react-native-mmkv';
 import {
   isLocalTransport,
-  myNodeHash,
-  onPeerRssi,
   protocol,
   SERVICE_ID,
   services,
   startMesh,
   storage,
   type NeighborDiscoveredEvent,
+  type PeerRssiEvent,
   type ServiceDiscoveredEvent,
   type ServiceRequestReceivedEvent,
   type ServiceResponseReceivedEvent,
@@ -34,7 +33,6 @@ const DISCOVER_EVERY_MS = 10_000;
 
 let me = '';
 const peers = new Map<string, Peer>();
-const byHash = new Map<string, string>(); // advertised node hash → off1
 let snapshot: Peer[] = [];
 const listeners = new Set<() => void>();
 
@@ -189,10 +187,7 @@ export async function publishCard() {
   const p = getMyProfile();
   if (!me || !p) return;
   await services.unregisterService(SERVICE_ID).catch(() => {});
-  await services.registerService(SERVICE_ID, '1', {
-    ...toCapabilities(p),
-    nh: myNodeHash,
-  });
+  await services.registerService(SERVICE_ID, '1', toCapabilities(p));
 }
 
 // ---- wiring -----------------------------------------------------------------
@@ -217,7 +212,6 @@ export async function bootMesh() {
   protocol.on<ServiceDiscoveredEvent>('service_discovered', e => {
     if (e.service_id !== SERVICE_ID || e.provider_peer_id === me) return;
     const card = fromCapabilities(e.provider_peer_id, e.capabilities);
-    if (e.capabilities.nh) byHash.set(e.capabilities.nh, e.provider_peer_id);
     upsert(card.id, p => ({
       rssi: p?.rssi,
       card,
@@ -227,11 +221,11 @@ export async function bootMesh() {
     prefetch(card);
   });
 
-  onPeerRssi((rssi, peerId, nodeHash) => {
-    const id = peerId ?? (nodeHash ? byHash.get(nodeHash) : undefined);
-    if (!id || !peers.has(id)) return;
+  // ~4 Hz per linked BLE peer; listening is what switches the SDK's feed on.
+  protocol.on<PeerRssiEvent>('peer_rssi', ({ peer_id, rssi }) => {
+    if (!peers.has(peer_id)) return;
     upsert(
-      id,
+      peer_id,
       p =>
         p && {
           ...p,

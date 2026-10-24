@@ -13,7 +13,7 @@
   "dependencies": {
     "@noble/curves": "^2.4.0",
     "@noble/hashes": "^2.4.0",
-    "@offline-protocol/mesh-sdk": "^0.30.0",
+    "@offline-protocol/mesh-sdk": "file:vendor/offline-protocol-mesh-sdk-0.30.0-rssi.tgz",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/netinfo": "^12.0.1",
     "@react-navigation/bottom-tabs": "^7.21.0",
