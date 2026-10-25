@@ -1,4 +1,4 @@
-import { useMemo, type ComponentType, type ReactNode } from 'react';
+import { memo, useMemo, type ComponentType, type ReactNode } from 'react';
 import {
   Image,
   Platform,
@@ -48,8 +48,9 @@ export type Icon = ComponentType<{
 
 const dicebear = new Style(avataaars);
 
-/** Photo, or a DiceBear avataaar on the category gradient. */
-export function Avatar({
+/** Photo, or a DiceBear avataaar on the category gradient. Memoised: an
+ * avataaar is a few hundred SVG nodes, and lists re-render on every RSSI tick. */
+export const Avatar = memo(function AvatarView({
   seed,
   avatar,
   size,
@@ -86,7 +87,7 @@ export function Avatar({
       )}
     </View>
   );
-}
+});
 
 /** Full-width button: white (primary) or hairline outline. */
 export function Button({

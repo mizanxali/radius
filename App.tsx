@@ -85,6 +85,8 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        // Hidden tabs stay mounted; without this they re-render on every peer update.
+        freezeOnBlur: true,
         tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: C.bg,
