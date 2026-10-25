@@ -6,12 +6,13 @@ Radius finds other people running the app over Bluetooth, phone to phone, with n
 
 ## Features
 
-- **Radar:** everyone nearby on a live radar, placed by Bluetooth signal strength. Tap anyone to see their pass: role, what they're building, what they're looking for and what they offer, and their socials.
+- **Radar:** everyone nearby on a live radar, placed by Bluetooth signal strength. Filter by category, or to good fits (they want what you offer, or offer what you want). Tap anyone to see their pass: role, what they're building, what they're looking for and what they offer, and their socials.
 - **AI match:** Claude reads the room and ranks the people most worth meeting for you, with a one-line reason. Tap to have it write an icebreaker for someone. Offline, it falls back to matching tags.
 - **AI summary:** add your project's website and Claude reads it, cuts the BS and tells people what you actually do in a sentence or two. It shows on your pass and on match cards, always labelled as AI.
 - **Verified net worth:** sign with an Ethereum or Solana wallet (via Reown) to put your portfolio value on your pass. Others verify the signature on their own phone, so nobody can claim a wallet that isn't theirs. You can show just your tier (🦐 to 🐋) instead of the amount.
 - **The room:** total net worth in the room, a leaderboard, the category mix, and what the room wants and offers.
-- **Wave:** a tap buzzes the other person's phone.
+- **Wave:** a tap buzzes the other person's phone, and they can wave back from the banner.
+- **Notes and export:** keep a private note on anyone (it never leaves your phone), then export everyone you met or noted, with socials and stamp links, through the share sheet.
 - **Finder:** a hot/cold screen that tracks the signal (with haptics) as you walk toward someone.
 - **Proof of meet:** both phones sign that you met, and the stamp mints as an [EAS](https://attest.org) attestation on Base. Gas is paid by the backend. If you're offline it mints later.
 

@@ -36,6 +36,7 @@ Android reaches Metro and the dev Worker through `adb reverse tcp:8081 tcp:8081`
 - **AI:** `/match` uses Claude with structured output to rank the room with a reason per person. Icebreakers are written only on tap (`/icebreaker`, one person) and kept in MMKV as `icebreaker:<id>`. Profiles are untrusted input. When offline, `localMatches` ranks by tag overlap.
 - **Website summary:** saving a website calls `/summarize`, where Claude reads the site with the web fetch tool. The summary is stored on the owner's profile as `{ text, url }` and only counts while `url` matches the website. Peers refetch when the card's `sh` changes. It's always shown labelled as AI. `/match` and `/icebreaker` use it.
 - **Avatars:** with no photo, `Avatar` draws a DiceBear avataaar from `avatarSeed(id)`: the seed rolled in the editor (`as` on the card), else the address. `index.js` polyfills `structuredClone` for `@dicebear/core`. `patches/@dicebear+core+…` makes it use its own tslib helpers, because WalletConnect's tslib 1.x puts old ones on `global`; regenerate the patch when bumping DiceBear.
+- **Notes and export:** private notes live only in MMKV as `note:<id>`. Me's "People you've met" lists stamps plus noted people; Export sends them as text through the share sheet.
 - **Demo mode:** long-press the empty top-right corner of Me. `src/demo.ts` puts 15 seeded attendees into the real peer store; they answer `profile` and `wave` in-process.
 
 ## Gotchas
@@ -59,6 +60,6 @@ Android reaches Metro and the dev Worker through `adb reverse tcp:8081 tcp:8081`
 ## Status
 
 - **Chain:** stamps attest on Base Sepolia (`CHAIN`, `SCHEMA_UID` in `worker/wrangler.jsonc`).
-- **Worker:** runs locally and isn't deployed yet. Production `WORKER_URL` is `https://radius.mizanalip786.workers.dev`.
+- **Worker:** deployed to `https://radius.mizanalip786.workers.dev` (release builds' `WORKER_URL`); `cd worker && npm run deploy` after changes. Secrets set with `wrangler secret put`.
 - **Before mainnet:** register the schema on Base and fund the relayer there.
 - **Licence:** mesh-sdk is AGPL-3.0, so Radius must be AGPL or covered by a commercial licence.

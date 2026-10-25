@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -25,9 +26,19 @@ import {
   usePeers,
   type Peer,
 } from '../peers';
-import { hash } from '../profile';
-import { Radio, Users } from 'lucide-react-native';
-import { Avatar, Card, Header, ListRow, Screen, Tag, tap } from '../ui';
+import { CATEGORIES, hash, type Category } from '../profile';
+import { Radio, Target, Users } from 'lucide-react-native';
+import {
+  Avatar,
+  CAT_ICON,
+  Card,
+  Chip,
+  Header,
+  ListRow,
+  Screen,
+  Tag,
+  tap,
+} from '../ui';
 import { C, CAT_COLOR, F, T } from '../theme';
 
 /** 0 = touching (-35 dBm) … 1 = the rim (-90 dBm). Mesh-only peers sit on the rim. */
@@ -56,10 +67,33 @@ function angles(peers: Peer[]) {
   );
 }
 
+/** Wants something I offer, or offers something I want. */
+const fits = (p: Peer, lf: string[] = [], of: string[] = []) =>
+  p.card.lookingFor.some(t => of.includes(t)) ||
+  p.card.offering.some(t => lf.includes(t));
+
 export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
   const { width } = useWindowDimensions();
-  const peers = usePeers();
+  const everyone = usePeers();
   const [me] = useMyProfile();
+  const [filter, setFilter] = useState<Category | 'fit'>();
+  const present = (Object.keys(CATEGORIES) as Category[]).filter(c =>
+    everyone.some(p => p.card.category === c),
+  );
+  // A filter whose category walked off (or a room of one) quietly turns off.
+  const active =
+    everyone.length > 1 &&
+    (filter === 'fit' || present.includes(filter as Category))
+      ? filter
+      : undefined;
+  const toggle = (f: typeof filter) => setFilter(active === f ? undefined : f);
+  const peers = everyone.filter(p =>
+    !active
+      ? true
+      : active === 'fit'
+      ? fits(p, me?.lookingFor, me?.offering)
+      : p.card.category === active,
+  );
   const size = width - 60; // 16 px screen + 12 px card padding + border, each side
   const angle = angles(peers);
   const dot = peers.length > 8 ? 30 : 36;
@@ -67,17 +101,45 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
   return (
     <Screen>
       <Header title="Around you" />
+      {everyone.length > 1 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginHorizontal: -16 }}
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+        >
+          <Chip
+            label="Good fit"
+            icon={Target}
+            color={C.purple}
+            selected={active === 'fit'}
+            onPress={() => toggle('fit')}
+          />
+          {present.map(c => (
+            <Chip
+              key={c}
+              label={CATEGORIES[c].label}
+              icon={CAT_ICON[c]}
+              color={CAT_COLOR[c]}
+              selected={active === c}
+              onPress={() => toggle(c)}
+            />
+          ))}
+        </ScrollView>
+      )}
       <Card>
         <View style={s.cardTop}>
           <Text style={[T.label, { flex: 1 }]}>Nearby</Text>
           <Tag
             label={
-              peers.length
+              active
+                ? `${peers.length} of ${everyone.length}`
+                : peers.length
                 ? `${peers.length} ${peers.length === 1 ? 'person' : 'people'}`
                 : 'Scanning'
             }
-            icon={peers.length ? Users : Radio}
-            color={peers.length ? C.green : C.faint}
+            icon={everyone.length ? Users : Radio}
+            color={everyone.length ? C.green : C.faint}
           />
         </View>
         <View
@@ -117,7 +179,12 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
 
       <Card style={{ gap: 4 }}>
         <Text style={[T.label, { marginBottom: 2 }]}>People</Text>
-        {peers.length === 0 && (
+        {active && peers.length === 0 && (
+          <Text style={[T.sub, { paddingVertical: 8 }]}>
+            Nobody nearby matches this filter yet.
+          </Text>
+        )}
+        {everyone.length === 0 && (
           <Text style={[T.sub, { paddingVertical: 8 }]}>
             Keep Radius open. People with the app show up here as they come into
             Bluetooth range.

@@ -338,7 +338,7 @@ function TagPicker({
   );
 }
 
-function Field({
+export function Field({
   label,
   multiline,
   ...props

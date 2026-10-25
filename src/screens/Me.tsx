@@ -13,7 +13,9 @@ import {
   Check,
   Clock,
   PenLine,
+  Share2,
   Sparkles,
+  StickyNote,
   Trash2,
   Wallet,
 } from 'lucide-react-native';
@@ -21,7 +23,9 @@ import { avatarSeed, cachedProfile, publishCard, useMyProfile } from '../peers';
 import { proveWallet, refreshNetWorth, removeWallet } from '../wallet';
 import { shortAddress } from '../verify';
 import { NetWorth } from '../NetWorth';
-import { useStamps } from '../meet';
+import { useMMKVKeys } from 'react-native-mmkv';
+import { storage } from '../mesh';
+import { exportMet, noteKey, notedIds, useStamps } from '../meet';
 import { isDemo, setDemo } from '../demo';
 import { summarizeMyWebsite, useMatches } from '../ai';
 import { siteHost } from '../profile';
@@ -219,10 +223,25 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
 
 function Stamps() {
   const stamps = useStamps();
-  if (!stamps.length) return null;
+  const noted = notedIds(useMMKVKeys(storage)).filter(
+    id => !stamps.some(st => st.peer.id === id),
+  );
+  if (!stamps.length && !noted.length) return null;
   return (
     <Card style={{ gap: 4 }}>
-      <Text style={[T.label, { marginBottom: 2 }]}>People you've met</Text>
+      <View style={[s.flex, { marginBottom: 2 }]}>
+        <Text style={[T.label, { flex: 1 }]}>People you've met</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Export people you've met"
+          hitSlop={10}
+          onPress={() => (tap(), exportMet())}
+          style={s.flex}
+        >
+          <Share2 size={13} color={C.muted} strokeWidth={2} />
+          <Text style={T.label}>Export</Text>
+        </Pressable>
+      </View>
       {stamps.map(st => (
         <ListRow
           key={st.id}
@@ -246,6 +265,22 @@ function Stamps() {
             />
           }
           onPress={st.url ? () => Linking.openURL(st.url!) : undefined}
+        />
+      ))}
+      {noted.map(id => (
+        <ListRow
+          key={id}
+          leading={
+            <Avatar
+              seed={avatarSeed(id)}
+              avatar={cachedProfile(id)?.avatar}
+              size={34}
+              category={cachedProfile(id)?.category}
+            />
+          }
+          title={cachedProfile(id)?.name ?? 'Someone'}
+          subtitle={storage.getString(noteKey(id))}
+          trailing={<Tag label="Note" icon={StickyNote} color={C.amber} />}
         />
       ))}
     </Card>

@@ -238,6 +238,7 @@ export function Screen({
       <ScrollView
         style={{ flex: 1 }}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets // iOS: keep a focused field above the keyboard
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: sheet ? 12 : insets.top + 4,

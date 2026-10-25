@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Share, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
 import { useMMKVObject } from 'react-native-mmkv';
@@ -22,6 +22,7 @@ import {
   type MeetPayload,
   type MeetProof,
 } from './meetproof';
+import { SOCIALS, type Social } from './profile';
 import { WORKER_URL } from './config';
 import { Avatar, Button } from './ui';
 import { C, T } from './theme';
@@ -119,6 +120,52 @@ export async function proposeMeet(peerId: string): Promise<Stamp> {
   save(stamp);
   void mint(stamp);
   return stamp;
+}
+
+// Private notes on people: stay on this phone, never sent to peers or the Worker.
+export const noteKey = (id: string) => `note:${id}`;
+export const notedIds = (keys: string[]) =>
+  keys.filter(k => k.startsWith('note:')).map(k => k.slice(5));
+
+/** Everyone I met or wrote a note on, as plain text for the share sheet. */
+export function exportMet() {
+  const stamps = load();
+  const ids = [
+    ...new Set([
+      ...stamps.map(s => s.peer.id),
+      ...notedIds(storage.getAllKeys()),
+    ]),
+  ];
+  const people = ids.map(id => {
+    const p = cachedProfile(id);
+    const st = stamps.find(s => s.peer.id === id);
+    const name = p?.name ?? st?.peer.name ?? 'Someone';
+    const role = p?.role ?? st?.peer.role;
+    const company = p?.company ?? st?.peer.company;
+    const links = [
+      p?.website,
+      ...Object.entries(p?.socials ?? {})
+        .filter(([, h]) => h)
+        .map(([k, h]) => `${SOCIALS[k as Social].label} @${h}`),
+    ].filter(Boolean);
+    const note = storage.getString(noteKey(id));
+    return [
+      [name, [role, company].filter(Boolean).join(' at ')]
+        .filter(Boolean)
+        .join(' · '),
+      st &&
+        `Met ${new Date(st.payload.ts).toLocaleDateString()}${
+          st.url ? ` · stamp ${st.url}` : ''
+        }`,
+      links.length ? links.join(' · ') : undefined,
+      note && `Note: ${note}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+  });
+  return Share.share({
+    message: ['People I met with Radius', ...people].join('\n\n'),
+  });
 }
 
 /** Re-try mints that failed while offline. */

@@ -19,20 +19,15 @@ import {
   type Social,
   type Tag as TagT,
 } from '../profile';
-import {
-  Action,
-  Card,
-  Chip,
-  Header,
-  Row,
-  Screen,
-  TAG_ICON,
-} from '../ui';
+import { Action, Card, Chip, Header, Row, Screen, TAG_ICON } from '../ui';
 import { PassCard } from '../PassCard';
 import { NetWorth } from '../NetWorth';
 import { useMatches } from '../ai';
 import { wave } from '../wave';
-import { proposeMeet, useStamps } from '../meet';
+import { useMMKVString } from 'react-native-mmkv';
+import { storage } from '../mesh';
+import { noteKey, proposeMeet, useStamps } from '../meet';
+import { Field } from './ProfileEditor';
 import { shortAddress, verifyWallet } from '../verify';
 import { distanceLabel } from './Radar';
 import { AiSummary, IcebreakerSlot } from './Matches';
@@ -64,6 +59,7 @@ export default function Person({
   const verified = profile?.wallets.filter(w => verifyWallet(w, id)) ?? [];
   const match = useMatches().matches.find(m => m.id === id);
   const stamp = useStamps().find(st => st.peer.id === id);
+  const [myNote, setMyNote] = useMMKVString(noteKey(id), storage);
   const [waved, setWaved] = useState<'sending' | 'sent' | 'failed'>();
   const [meeting, setMeeting] = useState<
     'asking' | 'declined' | 'unreachable'
@@ -160,6 +156,16 @@ export default function Person({
           </Card>
         </Animated.View>
       )}
+      <Card>
+        <Field
+          label="Private note"
+          multiline
+          maxLength={500}
+          placeholder="Only you see this. What you talked about, what to follow up on…"
+          value={myNote ?? ''}
+          onChangeText={t => setMyNote(t.trim() ? t : undefined)}
+        />
+      </Card>
       {verified.length > 0 && (
         <>
           <NetWorth
@@ -277,7 +283,6 @@ export function ProfileView({
         tags={profile?.offering ?? card?.offering}
         color={C.green}
       />
-
     </Screen>
   );
 }
