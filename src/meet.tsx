@@ -7,6 +7,7 @@ import Haptics from 'react-native-haptic-feedback';
 import { bytesToHex } from '@noble/hashes/utils.js';
 import { protocol, storage } from './mesh';
 import {
+  avatarSeed,
   cachedProfile,
   getMyProfile,
   handle,
@@ -195,7 +196,7 @@ export function MeetPrompt() {
         style={[s.sheet, { marginBottom: insets.bottom + 16 }]}
       >
         <Avatar
-          name={p?.name ?? '?'}
+          seed={avatarSeed(a.from)}
           avatar={p?.avatar}
           size={80}
           category={p?.category}

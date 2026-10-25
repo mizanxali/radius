@@ -4,7 +4,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { SlideInUp, SlideOutUp } from 'react-native-reanimated';
 import { Hand } from 'lucide-react-native';
 import Haptics from 'react-native-haptic-feedback';
-import { cachedProfile, getMyProfile, handle, request, usePeer } from './peers';
+import {
+  avatarSeed,
+  cachedProfile,
+  getMyProfile,
+  handle,
+  request,
+  usePeer,
+} from './peers';
 import { Avatar } from './ui';
 import { C, F, R } from './theme';
 
@@ -62,7 +69,7 @@ export function WaveBanner({ onOpen }: { onOpen: (id: string) => void }) {
         style={s.banner}
       >
         <Avatar
-          name={w.name}
+          seed={avatarSeed(w.from)}
           avatar={cachedProfile(w.from)?.avatar}
           size={44}
           category={peer?.card.category}

@@ -17,7 +17,7 @@ import {
   Trash2,
   Wallet,
 } from 'lucide-react-native';
-import { cachedProfile, publishCard, useMyProfile } from '../peers';
+import { avatarSeed, cachedProfile, publishCard, useMyProfile } from '../peers';
 import { proveWallet, refreshNetWorth, removeWallet } from '../wallet';
 import { shortAddress } from '../verify';
 import { NetWorth } from '../NetWorth';
@@ -228,7 +228,7 @@ function Stamps() {
           key={st.id}
           leading={
             <Avatar
-              name={st.peer.name}
+              seed={avatarSeed(st.peer.id)}
               avatar={cachedProfile(st.peer.id)?.avatar}
               size={40}
               category={cachedProfile(st.peer.id)?.category}

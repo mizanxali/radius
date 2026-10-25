@@ -70,6 +70,11 @@ export function getMyProfile(): Profile | undefined {
   return raw ? JSON.parse(raw) : undefined;
 }
 
+/** DiceBear seed for someone without a photo: the one they rolled, else their address. */
+export const avatarSeed = (id: string) =>
+  (id === me ? getMyProfile() : peers.get(id)?.card ?? cachedProfile(id))
+    ?.avatarSeed ?? id;
+
 // ---- request/response over the radius.v1 service --------------------------
 
 type Pending = { resolve: (body: string) => void; reject: (e: Error) => void };
@@ -168,6 +173,7 @@ function prefetch(card: Card) {
     (cached.avatar ? hash(cached.avatar) : undefined) === card.avatarHash &&
     (cached.summary ? hash(cached.summary.text) : undefined) ===
       card.summaryHash &&
+    cached.avatarSeed === card.avatarSeed &&
     cached.name === card.name;
   if (fresh || queue.includes(card.id)) return;
   queue.push(card.id);

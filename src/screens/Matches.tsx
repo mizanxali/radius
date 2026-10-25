@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { MessageCircle, RefreshCw, Sparkles } from 'lucide-react-native';
-import { cachedProfile, usePeers } from '../peers';
+import { avatarSeed, cachedProfile, usePeers } from '../peers';
 import {
   refreshMatches,
   savedIcebreaker,
@@ -114,7 +114,7 @@ function MatchCard({
       <ListRow
         leading={
           <Avatar
-            name={name}
+            seed={avatarSeed(match.id)}
             avatar={p?.avatar}
             size={48}
             category={category}

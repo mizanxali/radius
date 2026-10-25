@@ -13,6 +13,7 @@ export function PassCard({
   company,
   category,
   avatar,
+  seed = id,
   status,
 }: {
   id: string;
@@ -21,6 +22,7 @@ export function PassCard({
   company?: string;
   category: Category;
   avatar?: string;
+  seed?: string;
   status?: string;
 }) {
   const color = CAT_COLOR[category];
@@ -48,7 +50,7 @@ export function PassCard({
       </View>
 
       <View style={s.who}>
-        <Avatar name={name} avatar={avatar} size={60} category={category} />
+        <Avatar seed={seed} avatar={avatar} size={60} category={category} />
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={s.name} numberOfLines={1} adjustsFontSizeToFit>
             {name}

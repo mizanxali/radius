@@ -10,7 +10,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { Asterisk, Camera, ChevronRight, Sparkles } from 'lucide-react-native';
+import {
+  Asterisk,
+  Camera,
+  ChevronRight,
+  Dices,
+  Sparkles,
+} from 'lucide-react-native';
 import {
   CATEGORIES,
   SOCIALS,
@@ -120,6 +126,12 @@ function Editor({ onDone }: { onDone: () => void }) {
     const b64 = r.assets?.[0]?.base64;
     if (b64) set('avatar', b64);
   };
+  const rollAvatar = () =>
+    setP(prev => ({
+      ...prev,
+      avatar: undefined,
+      avatarSeed: Math.random().toString(36).slice(2, 10),
+    }));
 
   const ready = !!(p.name.trim() && p.role.trim() && p.building.trim() && me);
   const submit = async () => {
@@ -155,13 +167,24 @@ function Editor({ onDone }: { onDone: () => void }) {
           company={p.company}
           category={p.category}
           avatar={p.avatar}
+          seed={p.avatarSeed ?? me}
         />
-        <Button
-          title={p.avatar ? 'Change photo' : 'Add a photo'}
-          variant="outline"
-          icon={Camera}
-          onPress={pickPhoto}
-        />
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Button
+            title={p.avatar ? 'Change photo' : 'Add a photo'}
+            variant="outline"
+            icon={Camera}
+            onPress={pickPhoto}
+            style={{ flex: 1 }}
+          />
+          <Button
+            title="New avatar"
+            variant="outline"
+            icon={Dices}
+            onPress={rollAvatar}
+            style={{ flex: 1 }}
+          />
+        </View>
 
         <Card>
           <Field

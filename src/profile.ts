@@ -47,6 +47,7 @@ export type Profile = {
   id: string; // off1… address
   name: string;
   avatar?: string; // base64 jpeg, 256px
+  avatarSeed?: string; // DiceBear seed when there's no photo; defaults to `id`
   role: string;
   company?: string;
   website?: string; // https://…
@@ -77,6 +78,7 @@ export type Card = {
   tier?: string;
   verified: boolean;
   avatarHash?: string;
+  avatarSeed?: string;
   summaryHash?: string;
 };
 
@@ -112,6 +114,7 @@ export function toCapabilities(p: Profile): Record<string, string> {
   const tier = tierFor(p.netWorthUsd);
   if (tier) caps.t = tier;
   if (p.avatar) caps.av = hash(p.avatar);
+  if (p.avatarSeed) caps.as = p.avatarSeed;
   if (p.summary) caps.sh = hash(p.summary.text);
   return caps;
 }
@@ -132,6 +135,7 @@ export function fromCapabilities(id: string, c: Record<string, string>): Card {
     tier: c.t,
     verified: c.v === '1',
     avatarHash: c.av,
+    avatarSeed: c.as,
     summaryHash: c.sh,
   };
 }

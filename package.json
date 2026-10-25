@@ -11,6 +11,8 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@dicebear/core": "^10.7.0",
+    "@dicebear/styles": "^10.6.0",
     "@noble/curves": "^2.4.0",
     "@noble/hashes": "^2.4.0",
     "@offline-protocol/mesh-sdk": "file:vendor/offline-protocol-mesh-sdk-0.30.0-rssi.tgz",

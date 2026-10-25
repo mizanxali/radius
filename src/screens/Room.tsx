@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { cachedProfile, useMyProfile, usePeers } from '../peers';
+import { avatarSeed, cachedProfile, useMyProfile, usePeers } from '../peers';
 import {
   CATEGORIES,
   TAGS,
@@ -121,7 +121,7 @@ export default function Room() {
               <ListRow
                 leading={
                   <Avatar
-                    name={c.name}
+                    seed={avatarSeed(c.id)}
                     avatar={
                       c.id === me?.id ? me?.avatar : cachedProfile(c.id)?.avatar
                     }

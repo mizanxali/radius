@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react';
+import { useMemo, type ComponentType, type ReactNode } from 'react';
 import {
   Image,
   Platform,
@@ -12,6 +12,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import Haptics from 'react-native-haptic-feedback';
+import { SvgXml } from 'react-native-svg';
+import { Avatar as DiceAvatar, Style } from '@dicebear/core';
+import avataaars from '@dicebear/styles/avataaars.json';
 import {
   Banknote,
   Briefcase,
@@ -43,39 +46,27 @@ export type Icon = ComponentType<{
   strokeWidth?: number;
 }>;
 
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .map(w => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+const dicebear = new Style(avataaars);
 
-/** Photo, or initials on a category gradient (or a solid colour). */
+/** Photo, or a DiceBear avataaar on the category gradient. */
 export function Avatar({
-  name,
+  seed,
   avatar,
   size,
   category,
-  color = C.raised,
 }: {
-  name: string;
+  seed: string;
   avatar?: string;
   size: number;
   category?: Category;
-  color?: string;
 }) {
+  const xml = useMemo(
+    () => (avatar ? '' : new DiceAvatar(dicebear, { seed }).toString()),
+    [seed, avatar],
+  );
   return (
     <View
-      style={[
-        s.avatar,
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: color,
-        },
-      ]}
+      style={[s.avatar, { width: size, height: size, borderRadius: size / 2 }]}
     >
       {category && !avatar && (
         <LinearGradient
@@ -91,15 +82,7 @@ export function Avatar({
           style={StyleSheet.absoluteFill}
         />
       ) : (
-        <Text
-          style={{
-            fontFamily: F.bold,
-            color: category || color === C.text ? C.ink : C.text,
-            fontSize: size * 0.36,
-          }}
-        >
-          {initials(name) || '?'}
-        </Text>
+        <SvgXml xml={xml} width={size} height={size} />
       )}
     </View>
   );
@@ -426,6 +409,7 @@ export function Row({
 const s = StyleSheet.create({
   scrim: { position: 'absolute', top: 0, left: 0, right: 0 },
   avatar: {
+    backgroundColor: C.raised,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',

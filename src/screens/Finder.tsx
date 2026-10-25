@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Haptics from 'react-native-haptic-feedback';
 import { Bluetooth, Flame, Snowflake, X } from 'lucide-react-native';
-import { cachedProfile, usePeer } from '../peers';
+import { avatarSeed, cachedProfile, usePeer } from '../peers';
 import { Avatar, Header, IconButton, Tag } from '../ui';
 import { C, F, T } from '../theme';
 
@@ -124,7 +124,7 @@ export default function Finder({
         <Animated.View style={[s.ring, { width: 240, height: 240 }, outer]} />
         <Animated.View style={[s.circle, { width: 170, height: 170 }, inner]} />
         <Avatar
-          name={name}
+          seed={avatarSeed(id)}
           avatar={p?.avatar}
           size={120}
           category={peer?.card.category}

@@ -18,7 +18,13 @@ import Animated, {
   withTiming,
   ZoomIn,
 } from 'react-native-reanimated';
-import { cachedProfile, useMyProfile, usePeers, type Peer } from '../peers';
+import {
+  avatarSeed,
+  cachedProfile,
+  useMyProfile,
+  usePeers,
+  type Peer,
+} from '../peers';
 import { hash } from '../profile';
 import { Radio, Users } from 'lucide-react-native';
 import { Avatar, Card, Header, ListRow, Screen, Tag, tap } from '../ui';
@@ -89,10 +95,10 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
           >
             <View style={s.meRing}>
               <Avatar
-                name={me?.name ?? ''}
+                seed={me?.avatarSeed ?? me?.id ?? ''}
                 avatar={me?.avatar}
                 size={56}
-                color={C.text}
+                category={me?.category}
               />
             </View>
           </View>
@@ -122,7 +128,7 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
             <ListRow
               leading={
                 <Avatar
-                  name={p.card.name}
+                  seed={avatarSeed(p.card.id)}
                   avatar={cachedProfile(p.card.id)?.avatar}
                   size={44}
                   category={p.card.category}
@@ -271,7 +277,7 @@ function RadarDot({
         onPress={() => (tap(), onPress())}
       >
         <Avatar
-          name={peer.card.name}
+          seed={avatarSeed(peer.card.id)}
           avatar={cachedProfile(peer.card.id)?.avatar}
           size={dot}
           category={peer.card.category}

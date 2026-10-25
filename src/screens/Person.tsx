@@ -10,7 +10,7 @@ import {
   LocateFixed,
   Sparkles,
 } from 'lucide-react-native';
-import { cachedProfile, fetchProfile, usePeer } from '../peers';
+import { avatarSeed, cachedProfile, fetchProfile, usePeer } from '../peers';
 import {
   siteHost,
   SOCIALS,
@@ -225,6 +225,7 @@ export function ProfileView({
         company={profile?.company ?? card?.company}
         category={profile?.category ?? card?.category ?? 'builder'}
         avatar={profile?.avatar}
+        seed={avatarSeed(id)}
         status={status}
       />
       {actions}

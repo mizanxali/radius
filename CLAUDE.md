@@ -28,13 +28,14 @@ Android reaches Metro and the dev Worker through `adb reverse tcp:8081 tcp:8081`
 
 ## How it works
 
-- **Card:** each phone registers `radius.v1` with a small capabilities map (`n` name, `r` role, `c` company, `cat`, `lf`/`of` tags, `v` verified, `nw` net worth, `t` tier, `av` avatar hash, `sh` summary hash, `nh` node hash). Public info only.
+- **Card:** each phone registers `radius.v1` with a small capabilities map (`n` name, `r` role, `c` company, `cat`, `lf`/`of` tags, `v` verified, `nw` net worth, `t` tier, `av` avatar hash, `as` DiceBear seed, `sh` summary hash, `nh` node hash). Public info only.
 - **Requests** (`request`/`handle` in `peers.ts`): `profile` (full profile with a 256 px avatar), `wave`, `meet` (the other side confirms and countersigns), `minted` (tells the peer where its stamp lives).
 - **Identity:** the SDK `off1…` address. The SDK derives its node id from `profile`, so Radius uses a random per-install `meshProfile` in MMKV. `localAddress()` only works once MLS storage is open, hence `encryption.enabled` with `autoKeyExchange: false`.
 - **Wallets:** the wallet signs `proofMessage` binding it to the `off1` address. Peers verify locally and reject proofs naming another address.
 - **Stamps:** both phones sign `meetMessage` with their SDK identity keys. Either phone posts the proof to `/attest`, and the relayer pays gas. Pending stamps retry on launch.
 - **AI:** `/match` uses Claude with structured output to rank the room with a reason per person. Icebreakers are written only on tap (`/icebreaker`, one person) and kept in MMKV as `icebreaker:<id>`. Profiles are untrusted input. When offline, `localMatches` ranks by tag overlap.
 - **Website summary:** saving a website calls `/summarize`, where Claude reads the site with the web fetch tool. The summary is stored on the owner's profile as `{ text, url }` and only counts while `url` matches the website. Peers refetch when the card's `sh` changes. It's always shown labelled as AI. `/match` and `/icebreaker` use it.
+- **Avatars:** with no photo, `Avatar` draws a DiceBear avataaar from `avatarSeed(id)`: the seed rolled in the editor (`as` on the card), else the address. `index.js` polyfills `structuredClone` for `@dicebear/core`. `patches/@dicebear+core+…` makes it use its own tslib helpers, because WalletConnect's tslib 1.x puts old ones on `global`; regenerate the patch when bumping DiceBear.
 - **Demo mode:** long-press the empty top-right corner of Me. `src/demo.ts` puts 15 seeded attendees into the real peer store; they answer `profile` and `wave` in-process.
 
 ## Gotchas
@@ -50,7 +51,7 @@ Android reaches Metro and the dev Worker through `adb reverse tcp:8081 tcp:8081`
 ## Conventions
 
 - **Code:** TypeScript strict, Prettier, functional components, `useSyncExternalStore` stores instead of a state library.
-- **UI:** black UI with white type and hairline borders (`C.line`/`C.lineStrong`). Colour goes only on avatars (`CAT_GRADIENT`), icons and dots (`CAT_COLOR`); use tokens, not hex.
+- **UI:** black UI with white type and hairline borders (`C.line`/`C.lineStrong`). Colour goes only on avatars (DiceBear avataaars on `CAT_GRADIENT`), icons and dots (`CAT_COLOR`); use tokens, not hex.
 - **Copy:** never guess pronouns from names in UI copy or prompts.
 - **Secrets:** they live only in `worker/.dev.vars` (gitignored) or Worker secrets. `src/config.ts` holds public config only, such as the Reown project ID.
 - **Git:** commit messages are all lowercase.
