@@ -20,6 +20,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { cachedProfile, useMyProfile, usePeers, type Peer } from '../peers';
 import { hash } from '../profile';
+import { Radio, Users } from 'lucide-react-native';
 import { Avatar, Card, Header, ListRow, Screen, Tag, tap } from '../ui';
 import { C, CAT_COLOR, F, T } from '../theme';
 
@@ -69,7 +70,8 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
                 ? `${peers.length} ${peers.length === 1 ? 'person' : 'people'}`
                 : 'Scanning'
             }
-            dot={peers.length ? C.green : C.faint}
+            icon={peers.length ? Users : Radio}
+            color={peers.length ? C.green : C.faint}
           />
         </View>
         <View

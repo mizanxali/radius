@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useAccount, useAppKit } from '@reown/appkit-react-native';
 import Haptics from 'react-native-haptic-feedback';
-import { PenLine, Trash2, Wallet } from 'lucide-react-native';
+import { Check, Clock, PenLine, Trash2, Wallet } from 'lucide-react-native';
 import { cachedProfile, publishCard, useMyProfile } from '../peers';
 import { proveWallet, refreshNetWorth, removeWallet } from '../wallet';
 import { shortAddress } from '../verify';
@@ -209,7 +209,8 @@ function Stamps() {
           trailing={
             <Tag
               label={st.status === 'minted' ? 'On Base ↗\uFE0E' : 'Minting'}
-              dot={st.status === 'minted' ? C.green : C.amber}
+              icon={st.status === 'minted' ? Check : Clock}
+              color={st.status === 'minted' ? C.green : C.amber}
             />
           }
           onPress={st.url ? () => Linking.openURL(st.url!) : undefined}

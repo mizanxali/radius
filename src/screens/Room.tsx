@@ -9,7 +9,18 @@ import {
   type Category,
   type Tag as TagT,
 } from '../profile';
-import { Avatar, Card, Chip, Header, ListRow, Row, Screen, Tag } from '../ui';
+import { Users } from 'lucide-react-native';
+import {
+  Avatar,
+  Card,
+  Chip,
+  Header,
+  ListRow,
+  Row,
+  Screen,
+  Tag,
+  TAG_ICON,
+} from '../ui';
 import { C, CAT_COLOR, F, T } from '../theme';
 
 const money = (n: number) =>
@@ -73,7 +84,8 @@ export default function Room() {
           <Text style={[T.label, { flex: 1 }]}>Net worth in the room</Text>
           <Tag
             label={`${room.length} ${room.length === 1 ? 'person' : 'people'}`}
-            dot={C.green}
+            icon={Users}
+            color={C.green}
           />
         </View>
         {rich.length > 0 ? (
@@ -197,6 +209,7 @@ function TagCloud({
           <Chip
             key={t}
             label={`${TAGS[t]} · ${n}`}
+            icon={TAG_ICON[t]}
             selected={i === 0}
             color={color}
           />

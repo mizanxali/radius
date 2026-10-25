@@ -12,9 +12,28 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import Haptics from 'react-native-haptic-feedback';
-import { ChevronLeft } from 'lucide-react-native';
+import {
+  Banknote,
+  Briefcase,
+  ChevronLeft,
+  Code,
+  Coins,
+  Dices,
+  Gift,
+  Hammer,
+  Handshake,
+  Megaphone,
+  Microscope,
+  Palette,
+  PartyPopper,
+  PenTool,
+  Rocket,
+  Sparkles,
+  UserPlus,
+  Users,
+} from 'lucide-react-native';
 import { C, CAT_COLOR, CAT_GRADIENT, F, R, T } from './theme';
-import { CATEGORIES, type Category } from './profile';
+import { CATEGORIES, type Category, type Tag as TagKey } from './profile';
 
 export const tap = () => Haptics.trigger('impactLight');
 
@@ -267,25 +286,40 @@ export function Card({
   return <View style={[s.card, style]}>{children}</View>;
 }
 
-const Dot = ({ color, size = 7 }: { color: string; size?: number }) => (
-  <View
-    style={{
-      width: size,
-      height: size,
-      borderRadius: size / 2,
-      backgroundColor: color,
-    }}
-  />
-);
+export const CAT_ICON: Record<Category, Icon> = {
+  builder: Hammer,
+  founder: Rocket,
+  investor: Coins,
+  designer: Palette,
+  researcher: Microscope,
+  bd: Handshake,
+  degen: Dices,
+};
 
-/** Hairline pill; selected turns white with a coloured dot. */
+export const TAG_ICON: Record<TagKey, Icon> = {
+  investors: Banknote,
+  cofounder: UserPlus,
+  devs: Code,
+  designers: PenTool,
+  users: Users,
+  hiring: Megaphone,
+  job: Briefcase,
+  grants: Gift,
+  partners: Handshake,
+  alpha: Sparkles,
+  frens: PartyPopper,
+};
+
+/** Hairline chip; selected turns white and tints its icon. */
 export function Chip({
   label,
+  icon: I,
   selected,
   color = C.blue,
   onPress,
 }: {
   label: string;
+  icon?: Icon;
   selected?: boolean;
   color?: string;
   onPress?: () => void;
@@ -298,25 +332,29 @@ export function Chip({
       onPress={() => (tap(), onPress?.())}
       style={[s.chip, selected && s.chipOn]}
     >
-      {selected && <Dot color={color} />}
+      {I && (
+        <I size={14} strokeWidth={2.2} color={selected ? color : C.faint} />
+      )}
       <Text style={[s.chipText, selected && { color: C.text }]}>{label}</Text>
     </Pressable>
   );
 }
 
-/** Small status pill, optionally led by a coloured dot; `solid` is white. */
+/** Small status tag, optionally led by a coloured icon; `solid` is white. */
 export function Tag({
   label,
-  dot,
+  icon: I,
+  color = C.muted,
   solid,
 }: {
   label: string;
-  dot?: string;
+  icon?: Icon;
+  color?: string;
   solid?: boolean;
 }) {
   return (
     <View style={[s.tag, solid && { backgroundColor: C.text }]}>
-      {dot && <Dot color={dot} size={6} />}
+      {I && <I size={12} strokeWidth={2.4} color={color} />}
       <Text style={[s.tagText, solid && { color: C.ink }]} numberOfLines={1}>
         {label}
       </Text>
@@ -325,8 +363,13 @@ export function Tag({
 }
 
 export function CategoryTag({ category }: { category: Category }) {
-  const c = CATEGORIES[category];
-  return <Tag label={c.label} dot={CAT_COLOR[category]} />;
+  return (
+    <Tag
+      label={CATEGORIES[category].label}
+      icon={CAT_ICON[category]}
+      color={CAT_COLOR[category]}
+    />
+  );
 }
 
 /** List row: leading avatar, title + subtitle, trailing slot. */
@@ -438,10 +481,10 @@ const s = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
+    gap: 6,
     borderWidth: 1,
     borderColor: C.lineStrong,
-    borderRadius: R.pill,
+    borderRadius: R.chip,
     paddingHorizontal: 13,
     paddingVertical: 7,
   },
@@ -450,8 +493,8 @@ const s = StyleSheet.create({
   tag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    borderRadius: R.pill,
+    gap: 5,
+    borderRadius: R.tag,
     borderWidth: 1,
     borderColor: C.lineStrong,
     backgroundColor: C.raised,

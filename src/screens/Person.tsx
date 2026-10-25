@@ -18,7 +18,16 @@ import {
   type Social,
   type Tag as TagT,
 } from '../profile';
-import { Action, Card, Chip, Header, ListRow, Row, Screen } from '../ui';
+import {
+  Action,
+  Card,
+  Chip,
+  Header,
+  ListRow,
+  Row,
+  Screen,
+  TAG_ICON,
+} from '../ui';
 import { PassCard } from '../PassCard';
 import { NetWorth } from '../NetWorth';
 import { useMatches } from '../ai';
@@ -276,7 +285,13 @@ function Tags({
       <Text style={T.label}>{label}</Text>
       <Row>
         {tags.map(t => (
-          <Chip key={t} label={TAGS[t]} selected color={color} />
+          <Chip
+            key={t}
+            label={TAGS[t]}
+            icon={TAG_ICON[t]}
+            selected
+            color={color}
+          />
         ))}
       </Row>
     </Card>

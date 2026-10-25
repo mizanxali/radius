@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Haptics from 'react-native-haptic-feedback';
-import { X } from 'lucide-react-native';
+import { Bluetooth, Flame, Snowflake, X } from 'lucide-react-native';
 import { cachedProfile, usePeer } from '../peers';
 import { Avatar, Header, IconButton, Tag } from '../ui';
 import { C, F, T } from '../theme';
@@ -138,11 +138,15 @@ export default function Finder({
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {trend && (
             <Tag
-              label={trend === 'warmer' ? '↑ warmer' : '↓ colder'}
-              dot={trend === 'warmer' ? C.orange : C.blue}
+              label={trend}
+              icon={trend === 'warmer' ? Flame : Snowflake}
+              color={trend === 'warmer' ? C.orange : C.blue}
             />
           )}
-          <Tag label={peer?.rssi != null ? `${peer.rssi} dBm` : 'listening…'} />
+          <Tag
+            label={peer?.rssi != null ? `${peer.rssi} dBm` : 'listening…'}
+            icon={Bluetooth}
+          />
         </View>
       </View>
     </View>

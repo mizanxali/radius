@@ -21,7 +21,16 @@ import {
   type Tag,
 } from '../profile';
 import { publishCard, useMyAddress, useMyProfile } from '../peers';
-import { Button, Card, Chip, Header, Row, Screen } from '../ui';
+import {
+  Button,
+  CAT_ICON,
+  Card,
+  Chip,
+  Header,
+  Row,
+  Screen,
+  TAG_ICON,
+} from '../ui';
 import { PassCard } from '../PassCard';
 import { C, CAT_COLOR, F, R, T } from '../theme';
 
@@ -170,6 +179,7 @@ function Editor({ onDone }: { onDone: () => void }) {
               <Chip
                 key={c}
                 label={CATEGORIES[c].label}
+                icon={CAT_ICON[c]}
                 selected={p.category === c}
                 color={CAT_COLOR[c]}
                 onPress={() => set('category', c)}
@@ -266,6 +276,7 @@ function TagPicker({
           <Chip
             key={t}
             label={TAGS[t]}
+            icon={TAG_ICON[t]}
             selected={selected.includes(t)}
             color={color}
             onPress={() => onToggle(t)}

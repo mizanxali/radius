@@ -91,4 +91,4 @@ export const T = {
   },
 };
 
-export const R = { card: 16, inner: 12, input: 10, pill: 999 };
+export const R = { card: 16, inner: 12, input: 10, chip: 8, tag: 6 };
