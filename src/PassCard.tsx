@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Asterisk } from 'lucide-react-native';
@@ -15,6 +16,7 @@ export function PassCard({
   avatar,
   seed = id,
   status,
+  children,
 }: {
   id: string;
   name: string;
@@ -24,6 +26,7 @@ export function PassCard({
   avatar?: string;
   seed?: string;
   status?: string;
+  children?: ReactNode;
 }) {
   const color = CAT_COLOR[category];
   return (
@@ -63,6 +66,8 @@ export function PassCard({
           ) : null}
         </View>
       </View>
+
+      {children}
 
       <View style={s.bottom}>
         <Text style={s.id}>

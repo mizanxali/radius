@@ -2,7 +2,6 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
-  ArrowUpRight,
   Check,
   Globe,
   Hand,
@@ -25,7 +24,6 @@ import {
   Card,
   Chip,
   Header,
-  ListRow,
   Row,
   Screen,
   TAG_ICON,
@@ -38,7 +36,7 @@ import { proposeMeet, useStamps } from '../meet';
 import { shortAddress, verifyWallet } from '../verify';
 import { distanceLabel } from './Radar';
 import { AiSummary, IcebreakerSlot } from './Matches';
-import { C, F, T } from '../theme';
+import { C, T } from '../theme';
 
 /** A nearby person: card instantly, full profile from cache, refreshed over the mesh. */
 export default function Person({
@@ -227,7 +225,29 @@ export function ProfileView({
         avatar={profile?.avatar}
         seed={avatarSeed(id)}
         status={status}
-      />
+      >
+        {(socials.length > 0 || website) && (
+          <Row>
+            {website && (
+              <Chip
+                label={siteHost(website)}
+                icon={Globe}
+                selected
+                color={C.text}
+                onPress={() => Linking.openURL(website)}
+              />
+            )}
+            {socials.map(([k, handle]) => (
+              <Chip
+                key={k}
+                label={`${SOCIALS[k].label} @${handle}`}
+                selected
+                onPress={() => Linking.openURL(SOCIALS[k].url(handle))}
+              />
+            ))}
+          </Row>
+        )}
+      </PassCard>
       {actions}
       {children}
 
@@ -258,42 +278,6 @@ export function ProfileView({
         color={C.green}
       />
 
-      {(socials.length > 0 || website) && (
-        <Card style={{ gap: 4 }}>
-          <Text style={[T.label, { marginBottom: 2 }]}>Links</Text>
-          {website && (
-            <ListRow
-              leading={
-                <View style={s.socialIcon}>
-                  <Globe size={16} color={C.text} strokeWidth={1.75} />
-                </View>
-              }
-              title="Website"
-              subtitle={siteHost(website)}
-              trailing={
-                <ArrowUpRight size={17} color={C.muted} strokeWidth={1.75} />
-              }
-              onPress={() => Linking.openURL(website)}
-            />
-          )}
-          {socials.map(([k, handle]) => (
-            <ListRow
-              key={k}
-              leading={
-                <View style={s.socialIcon}>
-                  <Text style={s.socialLetter}>{SOCIALS[k].label[0]}</Text>
-                </View>
-              }
-              title={SOCIALS[k].label}
-              subtitle={`@${handle}`}
-              trailing={
-                <ArrowUpRight size={17} color={C.muted} strokeWidth={1.75} />
-              }
-              onPress={() => Linking.openURL(SOCIALS[k].url(handle))}
-            />
-          ))}
-        </Card>
-      )}
     </Screen>
   );
 }
@@ -333,15 +317,4 @@ const s = StyleSheet.create({
     paddingTop: 4,
   },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  socialIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 20,
-    backgroundColor: C.raised,
-    borderWidth: 1,
-    borderColor: C.lineStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  socialLetter: { fontFamily: F.bold, fontSize: 14, color: C.text },
 });
