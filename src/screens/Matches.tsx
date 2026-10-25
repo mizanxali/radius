@@ -258,8 +258,8 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.line,
     borderRadius: R.inner,
-    padding: 14,
-    gap: 6,
+    padding: 12,
+    gap: 4,
   },
   bubbleLabel: {
     fontFamily: F.medium,

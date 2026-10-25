@@ -259,7 +259,7 @@ export function ProfileView({
 
       {(socials.length > 0 || website) && (
         <Card style={{ gap: 4 }}>
-          <Text style={[T.label, { marginBottom: 6 }]}>Links</Text>
+          <Text style={[T.label, { marginBottom: 2 }]}>Links</Text>
           {website && (
             <ListRow
               leading={

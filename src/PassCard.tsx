@@ -92,8 +92,8 @@ const s = StyleSheet.create({
     borderColor: C.lineStrong,
     backgroundColor: C.surface,
     overflow: 'hidden',
-    padding: 20,
-    gap: 24,
+    padding: 16,
+    gap: 16,
   },
   top: {
     flexDirection: 'row',

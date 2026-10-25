@@ -382,14 +382,14 @@ const s = StyleSheet.create({
     color: C.text,
     fontFamily: F.regular,
     fontSize: 17,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   hint: { flexDirection: 'row', gap: 8, marginTop: -4 },
   multiline: {
     minHeight: 92,
     textAlignVertical: 'top',
-    paddingTop: 13,
+    paddingTop: 10,
   },
   social: {
     flexDirection: 'row',
@@ -398,7 +398,7 @@ const s = StyleSheet.create({
     borderRadius: R.input,
     borderWidth: 1,
     borderColor: C.lineStrong,
-    paddingLeft: 14,
+    paddingLeft: 12,
   },
   socialLabel: {
     fontFamily: F.medium,
@@ -411,7 +411,7 @@ const s = StyleSheet.create({
     color: C.text,
     fontFamily: F.regular,
     fontSize: 16,
-    paddingVertical: 13,
-    paddingRight: 14,
+    paddingVertical: 10,
+    paddingRight: 12,
   },
 });

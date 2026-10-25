@@ -115,7 +115,7 @@ export default function Room() {
 
       {rich.length > 0 && (
         <Card style={{ gap: 4 }}>
-          <Text style={[T.label, { marginBottom: 6 }]}>Leaderboard</Text>
+          <Text style={[T.label, { marginBottom: 2 }]}>Leaderboard</Text>
           {board.map(([c, i]) => (
             <Animated.View key={c.id} entering={FadeIn.delay(i * 50)}>
               <ListRow

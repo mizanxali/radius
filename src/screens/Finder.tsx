@@ -154,7 +154,7 @@ export default function Finder({
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg, paddingHorizontal: 20 },
+  root: { flex: 1, backgroundColor: C.bg, paddingHorizontal: 16 },
   who: { alignItems: 'center', gap: 4, marginTop: 12 },
   stage: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   circle: { position: 'absolute', borderRadius: 999 },

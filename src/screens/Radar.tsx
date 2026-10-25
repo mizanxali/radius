@@ -54,7 +54,7 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
   const { width } = useWindowDimensions();
   const peers = usePeers();
   const [me] = useMyProfile();
-  const size = width - 80; // inside a card with 20 px padding
+  const size = width - 64; // 16 px screen + 14 px card padding + border, each side
   const angle = angles(peers);
   const dot = peers.length > 8 ? 36 : 44;
 
@@ -79,7 +79,7 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
             width: size,
             height: size,
             alignSelf: 'center',
-            marginVertical: 8,
+            marginVertical: 4,
           }}
         >
           <RadarField size={size} />
@@ -110,7 +110,7 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
       </Card>
 
       <Card style={{ gap: 4 }}>
-        <Text style={[T.label, { marginBottom: 6 }]}>People</Text>
+        <Text style={[T.label, { marginBottom: 2 }]}>People</Text>
         {peers.length === 0 && (
           <Text style={[T.sub, { paddingVertical: 8 }]}>
             Keep Radius open. People with the app show up here as they come into

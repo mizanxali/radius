@@ -239,8 +239,8 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.lineStrong,
     borderRadius: 24,
-    padding: 24,
-    gap: 14,
+    padding: 18,
+    gap: 12,
     alignItems: 'center',
   },
 });

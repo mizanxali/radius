@@ -139,7 +139,7 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
             onRefresh={busy ? undefined : run('price', refreshNetWorth)}
           />
           <Card style={{ gap: 4 }}>
-            <Text style={[T.label, { marginBottom: 6 }]}>Wallets</Text>
+            <Text style={[T.label, { marginBottom: 2 }]}>Wallets</Text>
             {me.wallets.map(w => (
               <ListRow
                 key={w.address}
@@ -222,7 +222,7 @@ function Stamps() {
   if (!stamps.length) return null;
   return (
     <Card style={{ gap: 4 }}>
-      <Text style={[T.label, { marginBottom: 6 }]}>People you've met</Text>
+      <Text style={[T.label, { marginBottom: 2 }]}>People you've met</Text>
       {stamps.map(st => (
         <ListRow
           key={st.id}
