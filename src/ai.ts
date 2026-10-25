@@ -1,11 +1,18 @@
 import { useSyncExternalStore } from 'react';
 import { WORKER_URL } from './config';
-import { cachedProfile, getMyProfile, type Peer } from './peers';
+import { storage } from './mesh';
+import { cachedProfile, getMyProfile, publishCard, type Peer } from './peers';
 import { localMatches, roomChanged, toPerson, type Match } from './match';
-import type { Profile } from './profile';
+import type { Card, Profile } from './profile';
 
-type State = { matches: Match[]; loading: boolean; room: string[] };
-let state: State = { matches: [], loading: false, room: [] };
+type State = {
+  matches: Match[];
+  loading: boolean;
+  room: string[];
+  summarizing?: 'reading' | 'failed'; // my website summary
+  writing: Record<string, 'writing' | 'failed'>; // icebreakers by peer id
+};
+let state: State = { matches: [], loading: false, room: [], writing: {} };
 const listeners = new Set<() => void>();
 const set = (next: Partial<State>) => {
   state = { ...state, ...next };
@@ -70,4 +77,61 @@ export async function refreshMatches(peers: Peer[], force = false) {
   } finally {
     set({ loading: false });
   }
+}
+
+/**
+ * Has Claude read my website and keeps what my project does on my profile.
+ * No-op when the summary already describes the current website.
+ */
+export async function summarizeMyWebsite() {
+  const url = getMyProfile()?.website;
+  if (!url || getMyProfile()?.summary?.url === url) return;
+  if (state.summarizing === 'reading') return;
+  set({ summarizing: 'reading' });
+  let ok = false;
+  try {
+    const { summary } = await post<{ summary: string | null }>('/summarize', {
+      url,
+    });
+    const me = getMyProfile();
+    if (summary && me?.website === url) {
+      storage.set(
+        'profile',
+        JSON.stringify({ ...me, summary: { text: summary, url } }),
+      );
+      await publishCard(); // new summary hash: peers refetch my profile
+    }
+    ok = !!summary;
+  } catch (err) {
+    console.warn('website summary unavailable', err);
+  }
+  set({ summarizing: ok ? undefined : 'failed' });
+  // The website was edited while Claude was reading the old one.
+  if (getMyProfile()?.website !== url) void summarizeMyWebsite();
+}
+
+// Icebreakers are written one at a time, only when asked, and kept so a reload doesn't pay again.
+const iceKey = (id: string) => `icebreaker:${id}`;
+export const savedIcebreaker = (id: string) => storage.getString(iceKey(id));
+
+export async function writeIcebreaker(card: Card, reason?: string) {
+  const me = getMyProfile();
+  if (!me || state.writing[card.id] === 'writing') return;
+  set({ writing: { ...state.writing, [card.id]: 'writing' } });
+  let failed = false;
+  try {
+    const { icebreaker } = await post<{ icebreaker: string }>('/icebreaker', {
+      me: meAsPerson(me),
+      them: toPerson(card, cachedProfile(card.id)),
+      reason,
+    });
+    storage.set(iceKey(card.id), icebreaker);
+  } catch (err) {
+    console.warn('icebreaker unavailable', err);
+    failed = true;
+  }
+  const writing = { ...state.writing };
+  if (failed) writing[card.id] = 'failed';
+  else delete writing[card.id];
+  set({ writing });
 }

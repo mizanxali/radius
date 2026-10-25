@@ -28,6 +28,7 @@ import { AppKit, AppKitProvider } from '@reown/appkit-react-native';
 import { bootMesh } from './src/peers';
 import { isDemo, setDemo } from './src/demo';
 import { appKit, refreshNetWorth } from './src/wallet';
+import { summarizeMyWebsite } from './src/ai';
 import { useMyProfile } from './src/peers';
 import ProfileEditor from './src/screens/ProfileEditor';
 import Radar from './src/screens/Radar';
@@ -139,6 +140,7 @@ export default function App() {
       .then(() => {
         if (isDemo()) setDemo(true);
         retryPendingMints();
+        summarizeMyWebsite(); // no-op unless a website is still unread
         // Prices move; re-price my wallets at most hourly.
         const at = profile?.netWorthAt ?? 0;
         if (profile?.wallets.length && Date.now() - at > 3_600_000)

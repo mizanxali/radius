@@ -4,6 +4,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
   ArrowUpRight,
   Check,
+  Globe,
   Hand,
   Handshake,
   LocateFixed,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react-native';
 import { cachedProfile, fetchProfile, usePeer } from '../peers';
 import {
+  siteHost,
   SOCIALS,
   TAGS,
   type Card as CardT,
@@ -35,7 +37,7 @@ import { wave } from '../wave';
 import { proposeMeet, useStamps } from '../meet';
 import { shortAddress, verifyWallet } from '../verify';
 import { distanceLabel } from './Radar';
-import { Icebreaker } from './Matches';
+import { AiSummary, IcebreakerSlot } from './Matches';
 import { C, F, T } from '../theme';
 
 /** A nearby person: card instantly, full profile from cache, refreshed over the mesh. */
@@ -156,7 +158,7 @@ export default function Person({
               <Text style={T.label}>Why talk to them</Text>
             </View>
             <Text style={[T.h2, { lineHeight: 25 }]}>{match.reason}</Text>
-            <Icebreaker text={match.icebreaker} />
+            {peer && <IcebreakerSlot card={peer.card} reason={match.reason} />}
           </Card>
         </Animated.View>
       )}
@@ -209,6 +211,10 @@ export function ProfileView({
   const socials = Object.entries(profile?.socials ?? {}).filter(
     ([, v]) => v,
   ) as [Social, string][];
+  // Peers write their own profile: only ever open a plain web link.
+  const website = /^https?:\/\//i.test(profile?.website ?? '')
+    ? profile!.website!
+    : undefined;
   return (
     <Screen modal={!!onBack}>
       <Header title={title} onBack={onBack} right={right} />
@@ -223,6 +229,12 @@ export function ProfileView({
       />
       {actions}
       {children}
+
+      {profile?.summary ? (
+        <Card>
+          <AiSummary summary={profile.summary} />
+        </Card>
+      ) : null}
 
       {profile?.building ? (
         <Card>
@@ -245,9 +257,24 @@ export function ProfileView({
         color={C.green}
       />
 
-      {socials.length > 0 && (
+      {(socials.length > 0 || website) && (
         <Card style={{ gap: 4 }}>
-          <Text style={[T.label, { marginBottom: 6 }]}>Socials</Text>
+          <Text style={[T.label, { marginBottom: 6 }]}>Links</Text>
+          {website && (
+            <ListRow
+              leading={
+                <View style={s.socialIcon}>
+                  <Globe size={18} color={C.text} strokeWidth={1.75} />
+                </View>
+              }
+              title="Website"
+              subtitle={siteHost(website)}
+              trailing={
+                <ArrowUpRight size={20} color={C.muted} strokeWidth={1.75} />
+              }
+              onPress={() => Linking.openURL(website)}
+            />
+          )}
           {socials.map(([k, handle]) => (
             <ListRow
               key={k}

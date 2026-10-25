@@ -49,6 +49,9 @@ export type Profile = {
   avatar?: string; // base64 jpeg, 256px
   role: string;
   company?: string;
+  website?: string; // https://…
+  /** What the project does, written by Claude from `url` (the website when it was read). */
+  summary?: { text: string; url: string };
   category: Category;
   bio: string;
   building: string;
@@ -74,6 +77,7 @@ export type Card = {
   tier?: string;
   verified: boolean;
   avatarHash?: string;
+  summaryHash?: string;
 };
 
 // Cheap stable hash (djb2) to tell peers whether a cached avatar is stale.
@@ -108,6 +112,7 @@ export function toCapabilities(p: Profile): Record<string, string> {
   const tier = tierFor(p.netWorthUsd);
   if (tier) caps.t = tier;
   if (p.avatar) caps.av = hash(p.avatar);
+  if (p.summary) caps.sh = hash(p.summary.text);
   return caps;
 }
 
@@ -127,5 +132,17 @@ export function fromCapabilities(id: string, c: Record<string, string>): Card {
     tier: c.t,
     verified: c.v === '1',
     avatarHash: c.av,
+    summaryHash: c.sh,
   };
 }
+
+/** "uniswap.org" → "https://uniswap.org"; blank → undefined. */
+export function websiteUrl(input?: string) {
+  const v = input?.trim();
+  if (!v) return undefined;
+  return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+}
+
+/** "https://www.uniswap.org/swap" → "uniswap.org" (RN's URL has no hostname). */
+export const siteHost = (url: string) =>
+  url.replace(/^https?:\/\/(www\.)?/i, '').replace(/[/?#].*$/, '');

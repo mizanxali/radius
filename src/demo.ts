@@ -201,6 +201,30 @@ const SEEDS: Seed[] = [
   ],
 ];
 
+// A few attendees list a website, so demo cards show an AI summary.
+const SITES: Record<string, [url: string, summary: string]> = {
+  'Leo Martins': [
+    'https://zephyrlabs.xyz',
+    'A ZK coprocessor that lets Ethereum contracts prove facts about historical chain state cheaply, without trusting an indexer.',
+  ],
+  'Marcus Bell': [
+    'https://ledgerlight.com',
+    'Payroll for remote teams in Latin America, paid in USDC on Base, with local-currency offramps and tax-ready payslips.',
+  ],
+  'Kofi Mensah': [
+    'https://openfield.fi',
+    'An intents layer for cross-chain swaps: users sign once and solvers pay the gas and route the trade across chains.',
+  ],
+  'Sofia Reyes': [
+    'https://kinship.app',
+    'A mobile app for rotating savings circles, so families across borders can pool stablecoins and take turns withdrawing.',
+  ],
+  'Elena Rossi': [
+    'https://halcyonwallet.com',
+    'A self-custody mobile wallet focused on calm, plain-language transaction previews and passkey recovery instead of seed phrases.',
+  ],
+};
+
 const idFor = (name: string) =>
   `off1q${[0, 1, 2, 3].map(i => hash(name + i)).join('')}`
     .replace(/[^a-z0-9]/g, '')
@@ -231,6 +255,10 @@ const PROFILES: Profile[] = SEEDS.map(
     socials: x ? { x } : {},
     wallets: [],
     netWorthUsd: nw,
+    ...(SITES[name] && {
+      website: SITES[name][0],
+      summary: { url: SITES[name][0], text: SITES[name][1] },
+    }),
   }),
 );
 

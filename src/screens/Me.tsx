@@ -9,13 +9,22 @@ import {
 } from 'react-native';
 import { useAccount, useAppKit } from '@reown/appkit-react-native';
 import Haptics from 'react-native-haptic-feedback';
-import { Check, Clock, PenLine, Trash2, Wallet } from 'lucide-react-native';
+import {
+  Check,
+  Clock,
+  PenLine,
+  Sparkles,
+  Trash2,
+  Wallet,
+} from 'lucide-react-native';
 import { cachedProfile, publishCard, useMyProfile } from '../peers';
 import { proveWallet, refreshNetWorth, removeWallet } from '../wallet';
 import { shortAddress } from '../verify';
 import { NetWorth } from '../NetWorth';
 import { useStamps } from '../meet';
 import { isDemo, setDemo } from '../demo';
+import { summarizeMyWebsite, useMatches } from '../ai';
+import { siteHost } from '../profile';
 import { Action, Avatar, Button, Card, ListRow, Tag, tap } from '../ui';
 import { C, F, T } from '../theme';
 import { ProfileView } from './Person';
@@ -26,7 +35,9 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
   const { isConnected, allAccounts } = useAccount();
   const [busy, setBusy] = useState<'wallet' | 'price'>();
   const [error, setError] = useState<string>();
+  const { summarizing } = useMatches();
   if (!me) return null;
+  const unread = me.website && me.summary?.url !== me.website;
 
   const has = (a: string) =>
     me.wallets.some(w => w.address.toLowerCase() === a.toLowerCase());
@@ -77,6 +88,27 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
         </View>
       }
     >
+      {unread && (
+        <Card>
+          <View style={s.flex}>
+            <Sparkles size={16} color={C.purple} strokeWidth={2} />
+            <Text style={[T.body, { flex: 1 }]}>
+              {summarizing === 'failed'
+                ? `Couldn't read ${siteHost(me.website!)} for your AI summary.`
+                : `Claude is reading ${siteHost(
+                    me.website!,
+                  )} to summarise what you do…`}
+            </Text>
+          </View>
+          {summarizing === 'failed' && (
+            <Button
+              title="Try again"
+              variant="outline"
+              onPress={summarizeMyWebsite}
+            />
+          )}
+        </Card>
+      )}
       {pending && (
         <Button
           title={

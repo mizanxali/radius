@@ -166,6 +166,8 @@ function prefetch(card: Card) {
   const fresh =
     cached &&
     (cached.avatar ? hash(cached.avatar) : undefined) === card.avatarHash &&
+    (cached.summary ? hash(cached.summary.text) : undefined) ===
+      card.summaryHash &&
     cached.name === card.name;
   if (fresh || queue.includes(card.id)) return;
   queue.push(card.id);

@@ -1,11 +1,20 @@
 // Radius backend: holds the API keys so the app ships keyless.
 //   POST /networth  { wallets: [{ chain: 'evm'|'solana', address }] } → { usd, wallets: [{ address, usd }] }
-//   POST /match     { me, others[] } → { matches: [{ id, score, reason, icebreaker }] }
+//   POST /match     { me, others[] } → { matches: [{ id, score, reason }] }
+//   POST /icebreaker { me, them, reason? } → { icebreaker }   (on demand, one person)
+//   POST /summarize { url } → { summary: string | null }   (Claude reads the site with web fetch)
 //   POST /attest    MeetProof → { uid, tx, url }   (EAS on Base, relayer pays gas)
 import Anthropic from '@anthropic-ai/sdk';
 import { attest, BadProof, type AttestEnv } from './attest';
 import type { MeetProof } from '../../src/meetproof';
-import { match, MatchRequest } from './ai';
+import {
+  icebreaker,
+  IcebreakerRequest,
+  match,
+  MatchRequest,
+  summarize,
+  SummaryRequest,
+} from './ai';
 
 interface Env extends AttestEnv {
   ZERION_API_KEY: string;
@@ -100,6 +109,24 @@ async function attestRoute(
   }
 }
 
+async function summarizeRoute(req: Request, env: Env, ctx: ExecutionContext) {
+  const body = SummaryRequest.safeParse(await req.json());
+  if (!body.success) return json({ error: body.error.message }, 400);
+  // A site's summary is the same for everyone who asks: read it once a day.
+  const key = new Request(
+    `https://radius.internal/summarize/${encodeURIComponent(body.data.url)}`,
+  );
+  const hit = await caches.default.match(key);
+  if (hit) return hit;
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+  const out = await summarize(client, body.data.url);
+  const res = json(out);
+  if (!out.summary) return res; // the site may just be down: let the next try re-read it
+  res.headers.set('cache-control', 'public, max-age=86400');
+  ctx.waitUntil(caches.default.put(key, res.clone()));
+  return res;
+}
+
 export default {
   async fetch(req, env, ctx): Promise<Response> {
     const { pathname } = new URL(req.url);
@@ -118,6 +145,13 @@ export default {
         const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
         return json(await match(client, body.data));
       }
+      if (pathname === '/icebreaker') {
+        const body = IcebreakerRequest.safeParse(await req.json());
+        if (!body.success) return json({ error: body.error.message }, 400);
+        const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+        return json(await icebreaker(client, body.data));
+      }
+      if (pathname === '/summarize') return await summarizeRoute(req, env, ctx);
       return json({ error: 'not found' }, 404);
     } catch (err) {
       console.error(pathname, err);

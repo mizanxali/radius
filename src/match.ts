@@ -5,7 +5,6 @@ export type Match = {
   id: string;
   score: number;
   reason: string;
-  icebreaker: string;
   ai: boolean;
 };
 
@@ -18,6 +17,7 @@ export const toPerson = (c: Card, p?: Profile) => ({
   category: p?.category ?? c.category,
   building: p?.building?.slice(0, 400),
   bio: p?.bio?.slice(0, 400),
+  summary: p?.summary?.text.slice(0, 400),
   lookingFor: p?.lookingFor ?? c.lookingFor,
   offering: p?.offering ?? c.offering,
   tier: c.tier,
@@ -43,10 +43,7 @@ export function localMatches(me: Profile, others: Card[]): Match[] {
       const reason = theyGive.length
         ? `Offers ${theyGive.map(t => TAGS[t]).join(' + ')}, which you're after`
         : `Looking for ${iGive.map(t => TAGS[t]).join(' + ')}, which you offer`;
-      const opener = o.company
-        ? `What are you working on at ${o.company} right now?`
-        : `What brought you to this event?`;
-      return { id: o.id, score, reason, icebreaker: opener, ai: false };
+      return { id: o.id, score, reason, ai: false };
     })
     .filter(m => m.score >= 15) // at least one real tag fit; category alone isn't a reason
     .sort((a, b) => b.score - a.score)

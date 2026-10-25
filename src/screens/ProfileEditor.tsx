@@ -10,7 +10,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { Asterisk, Camera, ChevronRight } from 'lucide-react-native';
+import { Asterisk, Camera, ChevronRight, Sparkles } from 'lucide-react-native';
 import {
   CATEGORIES,
   SOCIALS,
@@ -19,8 +19,10 @@ import {
   type Profile,
   type Social,
   type Tag,
+  websiteUrl,
 } from '../profile';
 import { publishCard, useMyAddress, useMyProfile } from '../peers';
+import { summarizeMyWebsite } from '../ai';
 import {
   Button,
   CAT_ICON,
@@ -121,8 +123,18 @@ function Editor({ onDone }: { onDone: () => void }) {
 
   const ready = !!(p.name.trim() && p.role.trim() && p.building.trim() && me);
   const submit = async () => {
-    save({ ...p, id: me, name: p.name.trim(), role: p.role.trim() });
+    const website = websiteUrl(p.website);
+    save({
+      ...p,
+      id: me,
+      name: p.name.trim(),
+      role: p.role.trim(),
+      website,
+      // A summary only ever describes the site it was read from.
+      summary: p.summary?.url === website ? p.summary : undefined,
+    });
     await publishCard();
+    void summarizeMyWebsite();
     onDone();
   };
 
@@ -170,6 +182,22 @@ function Editor({ onDone }: { onDone: () => void }) {
             onChangeText={v => set('company', v || undefined)}
             placeholder="Optional"
           />
+          <Field
+            label="Website"
+            value={p.website ?? ''}
+            onChangeText={v => set('website', v || undefined)}
+            placeholder="yourproject.xyz"
+            keyboardType="url"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <View style={s.hint}>
+            <Sparkles size={14} color={C.purple} strokeWidth={2} />
+            <Text style={[T.sub, { flex: 1 }]}>
+              Claude reads your website and writes a short summary of what your
+              project does. It shows on your pass, labelled as AI.
+            </Text>
+          </View>
         </Card>
 
         <Card>
@@ -357,6 +385,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 13,
   },
+  hint: { flexDirection: 'row', gap: 8, marginTop: -4 },
   multiline: {
     minHeight: 92,
     textAlignVertical: 'top',

@@ -7,7 +7,8 @@ Radius finds other people running the app over Bluetooth, phone to phone, with n
 ## Features
 
 - **Radar:** everyone nearby on a live radar, placed by Bluetooth signal strength. Tap anyone to see their pass: role, what they're building, what they're looking for and what they offer, and their socials.
-- **AI match:** Claude reads the room and ranks the people most worth meeting for you, with a one-line reason and an icebreaker. Offline, it falls back to matching tags.
+- **AI match:** Claude reads the room and ranks the people most worth meeting for you, with a one-line reason. Tap to have it write an icebreaker for someone. Offline, it falls back to matching tags.
+- **AI summary:** add your project's website and Claude reads it, cuts the BS and tells people what you actually do in a sentence or two. It shows on your pass and on match cards, always labelled as AI.
 - **Verified net worth:** sign with an Ethereum or Solana wallet (via Reown) to put your portfolio value on your pass. Others verify the signature on their own phone, so nobody can claim a wallet that isn't theirs. You can show just your tier (🦐 to 🐋) instead of the amount.
 - **The room:** total net worth in the room, a leaderboard, the category mix, and what the room wants and offers.
 - **Wave:** a tap buzzes the other person's phone.
@@ -22,9 +23,11 @@ Radius finds other people running the app over Bluetooth, phone to phone, with n
    │          requests: profile · wave · meet
    │
    └── HTTPS, when online ──► Cloudflare Worker (worker/)
-                                /networth  Zerion portfolio
-                                /match     Claude ranking + icebreakers
-                                /attest    EAS attestation, relayer pays gas
+                                /networth    Zerion portfolio
+                                /match       Claude ranking
+                                /icebreaker  one opener, on demand
+                                /summarize   Claude reads a website
+                                /attest      EAS attestation, relayer pays gas
 ```
 
 - **Profiles** live on the phone (MMKV). Each phone advertises a small public card and serves the full profile on request.

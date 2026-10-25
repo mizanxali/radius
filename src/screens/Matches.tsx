@@ -8,11 +8,26 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { MessageCircle, RefreshCw } from 'lucide-react-native';
+import { MessageCircle, RefreshCw, Sparkles } from 'lucide-react-native';
 import { cachedProfile, usePeers } from '../peers';
-import { refreshMatches, useMatches } from '../ai';
+import {
+  refreshMatches,
+  savedIcebreaker,
+  useMatches,
+  writeIcebreaker,
+} from '../ai';
 import type { Match } from '../match';
-import { Avatar, Card, Header, IconButton, ListRow, Screen, Tag } from '../ui';
+import { siteHost, type Card as CardT, type Profile } from '../profile';
+import {
+  Avatar,
+  Button,
+  Card,
+  Header,
+  IconButton,
+  ListRow,
+  Screen,
+  Tag,
+} from '../ui';
 import { C, F, R, T } from '../theme';
 import { distanceLabel } from './Radar';
 
@@ -110,8 +125,9 @@ function MatchCard({
         trailing={<Tag label={`#${rank}`} solid={rank === 1} />}
         onPress={onPress}
       />
+      {p?.summary && <AiSummary summary={p.summary} lines={3} />}
       <Text style={[T.h2, { lineHeight: 25 }]}>{match.reason}</Text>
-      <Icebreaker text={match.icebreaker} />
+      {card && <IcebreakerSlot card={card} reason={match.reason} />}
       <View style={s.status}>
         <View style={s.live} />
         <Text style={T.sub}>{status}</Text>
@@ -120,7 +136,35 @@ function MatchCard({
   );
 }
 
-/** The line to open with, in a quote panel with a purple label. Shared with Person. */
+/** The opener, written by Claude only when asked (one call per tap), then kept. Shared with Person. */
+export function IcebreakerSlot({
+  card,
+  reason,
+}: {
+  card: CardT;
+  reason?: string;
+}) {
+  const status = useMatches().writing[card.id]; // re-renders when it lands
+  const text = savedIcebreaker(card.id);
+  if (text) return <Icebreaker text={text} />;
+  return (
+    <Button
+      title={
+        status === 'writing'
+          ? 'Writing an icebreaker…'
+          : status === 'failed'
+          ? 'Couldn’t write one. Try again'
+          : 'Write an icebreaker'
+      }
+      icon={Sparkles}
+      variant="outline"
+      disabled={status === 'writing'}
+      onPress={() => writeIcebreaker(card, reason)}
+    />
+  );
+}
+
+/** The line to open with, in a quote panel with a purple label. */
 export function Icebreaker({ text }: { text: string }) {
   return (
     <View style={s.bubble}>
@@ -129,6 +173,35 @@ export function Icebreaker({ text }: { text: string }) {
         <Text style={s.bubbleLabel}>Say this</Text>
       </View>
       <Text style={s.bubbleText}>{text}</Text>
+    </View>
+  );
+}
+
+/** What their project does, written by Claude from their website. Always labelled as AI. */
+export function AiSummary({
+  summary,
+  lines,
+}: {
+  summary: NonNullable<Profile['summary']>;
+  lines?: number;
+}) {
+  const host = siteHost(summary.url);
+  return (
+    <View
+      accessible
+      accessibilityLabel={`AI summary from ${host}: ${summary.text}`}
+      style={{ gap: 6 }}
+    >
+      <View style={s.status}>
+        <Sparkles size={14} color={C.purple} strokeWidth={2} />
+        <Text style={s.bubbleLabel}>AI summary</Text>
+        <Text style={[T.sub, { flex: 1 }]} numberOfLines={1}>
+          from {host}
+        </Text>
+      </View>
+      <Text style={[T.body, { color: C.muted }]} numberOfLines={lines}>
+        {summary.text}
+      </Text>
     </View>
   );
 }

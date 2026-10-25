@@ -24,16 +24,17 @@ Android reaches Metro and the dev Worker through `adb reverse tcp:8081 tcp:8081`
 - `src/profile.ts`, `verify.ts`, `match.ts`, `meetproof.ts`: pure logic with `*.test.ts` beside them. `meetproof.ts` is imported by the Worker too.
 - `src/ai.ts`, `wallet.ts`, `wave.tsx`, `meet.tsx`, `demo.ts`: features. `src/screens/`: UI.
 - `src/theme.ts` + `src/ui.tsx`: design tokens and the component kit. `PassCard.tsx`, `NetWorth.tsx`: shared pieces.
-- `worker/src/index.ts` (routes, Zerion, rate limits), `ai.ts` (`/match`), `attest.ts` (EAS).
+- `worker/src/index.ts` (routes, Zerion, rate limits), `ai.ts` (`/match`, `/summarize`), `attest.ts` (EAS).
 
 ## How it works
 
-- **Card:** each phone registers `radius.v1` with a small capabilities map (`n` name, `r` role, `c` company, `cat`, `lf`/`of` tags, `v` verified, `nw` net worth, `t` tier, `av` avatar hash, `nh` node hash). Public info only.
+- **Card:** each phone registers `radius.v1` with a small capabilities map (`n` name, `r` role, `c` company, `cat`, `lf`/`of` tags, `v` verified, `nw` net worth, `t` tier, `av` avatar hash, `sh` summary hash, `nh` node hash). Public info only.
 - **Requests** (`request`/`handle` in `peers.ts`): `profile` (full profile with a 256 px avatar), `wave`, `meet` (the other side confirms and countersigns), `minted` (tells the peer where its stamp lives).
 - **Identity:** the SDK `off1…` address. The SDK derives its node id from `profile`, so Radius uses a random per-install `meshProfile` in MMKV. `localAddress()` only works once MLS storage is open, hence `encryption.enabled` with `autoKeyExchange: false`.
 - **Wallets:** the wallet signs `proofMessage` binding it to the `off1` address. Peers verify locally and reject proofs naming another address.
 - **Stamps:** both phones sign `meetMessage` with their SDK identity keys. Either phone posts the proof to `/attest`, and the relayer pays gas. Pending stamps retry on launch.
-- **AI:** `/match` uses Claude with structured output. Profiles are untrusted input. When offline, `localMatches` ranks by tag overlap.
+- **AI:** `/match` uses Claude with structured output to rank the room with a reason per person. Icebreakers are written only on tap (`/icebreaker`, one person) and kept in MMKV as `icebreaker:<id>`. Profiles are untrusted input. When offline, `localMatches` ranks by tag overlap.
+- **Website summary:** saving a website calls `/summarize`, where Claude reads the site with the web fetch tool. The summary is stored on the owner's profile as `{ text, url }` and only counts while `url` matches the website. Peers refetch when the card's `sh` changes. It's always shown labelled as AI. `/match` and `/icebreaker` use it.
 - **Demo mode:** long-press the empty top-right corner of Me. `src/demo.ts` puts 15 seeded attendees into the real peer store; they answer `profile` and `wave` in-process.
 
 ## Gotchas
