@@ -58,7 +58,7 @@ export function NetWorth({
             onPress={() => (tap(), onRefresh())}
             style={s.refresh}
           >
-            <RefreshCw size={16} color={C.text} strokeWidth={1.75} />
+            <RefreshCw size={14} color={C.text} strokeWidth={1.75} />
           </Pressable>
         )}
       </View>
@@ -71,7 +71,7 @@ export function NetWorth({
       )}
       {verifiedCount > 0 && (
         <View style={s.verified}>
-          <BadgeCheck size={16} color={C.green} strokeWidth={2} />
+          <BadgeCheck size={14} color={C.green} strokeWidth={2} />
           <Text style={[T.sub, { color: C.green }]}>
             {verifiedCount} verified wallet{verifiedCount > 1 ? 's' : ''}
           </Text>
@@ -84,8 +84,8 @@ export function NetWorth({
 const s = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   refresh: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     borderRadius: 16,
     backgroundColor: C.raised,
     borderWidth: 1,
@@ -95,7 +95,7 @@ const s = StyleSheet.create({
   },
   amount: {
     fontFamily: F.bold,
-    fontSize: 42,
+    fontSize: 30,
     color: C.text,
     letterSpacing: -1.2,
     fontVariant: ['tabular-nums'],

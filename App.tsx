@@ -66,8 +66,8 @@ const icon =
   (I: Icon, accent: string) =>
   ({ focused }: { focused: boolean }) =>
     (
-      <View style={{ alignItems: 'center', gap: 6 }}>
-        <I size={22} color={focused ? accent : C.faint} strokeWidth={1.9} />
+      <View style={{ alignItems: 'center', gap: 5 }}>
+        <I size={20} color={focused ? accent : C.faint} strokeWidth={1.9} />
         <View
           style={{
             width: 4,
@@ -90,8 +90,8 @@ function MainTabs() {
           backgroundColor: C.bg,
           borderTopWidth: 1,
           borderTopColor: C.line,
-          height: 64 + insets.bottom,
-          paddingTop: 12,
+          height: 56 + insets.bottom,
+          paddingTop: 10,
           paddingBottom: insets.bottom,
         },
       }}

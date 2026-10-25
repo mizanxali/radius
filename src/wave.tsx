@@ -71,7 +71,7 @@ export function WaveBanner({ onOpen }: { onOpen: (id: string) => void }) {
         <Avatar
           seed={avatarSeed(w.from)}
           avatar={cachedProfile(w.from)?.avatar}
-          size={44}
+          size={34}
           category={peer?.card.category}
         />
         <Text style={s.text} numberOfLines={2}>
@@ -80,7 +80,7 @@ export function WaveBanner({ onOpen }: { onOpen: (id: string) => void }) {
           </Text>{' '}
           waved at you
         </Text>
-        <Hand size={22} color={C.amber} strokeWidth={1.9} />
+        <Hand size={18} color={C.amber} strokeWidth={1.9} />
       </Pressable>
     </Animated.View>
   );
@@ -91,14 +91,14 @@ const s = StyleSheet.create({
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 10,
-    paddingLeft: 10,
-    paddingRight: 20,
+    gap: 10,
+    paddingVertical: 8,
+    paddingLeft: 8,
+    paddingRight: 16,
     borderRadius: R.card,
     borderWidth: 1,
     borderColor: C.lineStrong,
     backgroundColor: C.surface,
   },
-  text: { flex: 1, color: C.text, fontSize: 16, fontFamily: F.regular },
+  text: { flex: 1, color: C.text, fontSize: 14, fontFamily: F.regular },
 });

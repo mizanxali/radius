@@ -43,14 +43,14 @@ export function PassCard({
 
       <View style={s.top}>
         <View style={s.mark}>
-          <Asterisk size={20} color={C.text} strokeWidth={2} />
+          <Asterisk size={16} color={C.text} strokeWidth={2} />
           <Text style={s.brand}>RADIUS</Text>
         </View>
         <CategoryTag category={category} />
       </View>
 
       <View style={s.who}>
-        <Avatar seed={seed} avatar={avatar} size={60} category={category} />
+        <Avatar seed={seed} avatar={avatar} size={46} category={category} />
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={s.name} numberOfLines={1} adjustsFontSizeToFit>
             {name}
@@ -94,8 +94,8 @@ const s = StyleSheet.create({
     borderColor: C.lineStrong,
     backgroundColor: C.surface,
     overflow: 'hidden',
-    padding: 16,
-    gap: 16,
+    padding: 12,
+    gap: 12,
   },
   top: {
     flexDirection: 'row',
@@ -105,18 +105,18 @@ const s = StyleSheet.create({
   mark: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   brand: {
     fontFamily: F.xbold,
-    fontSize: 13,
+    fontSize: 11,
     color: C.text,
     letterSpacing: 2,
   },
-  who: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  who: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   name: {
     fontFamily: F.bold,
-    fontSize: 26,
+    fontSize: 19,
     color: C.text,
     letterSpacing: -0.6,
   },
-  role: { fontFamily: F.regular, fontSize: 15, color: C.muted },
+  role: { fontFamily: F.regular, fontSize: 11, color: C.muted },
   bottom: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -125,11 +125,11 @@ const s = StyleSheet.create({
   },
   id: {
     fontFamily: F.medium,
-    fontSize: 13,
+    fontSize: 11,
     color: C.faint,
     letterSpacing: 0.5,
   },
   status: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   live: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontFamily: F.medium, fontSize: 13, color: C.muted },
+  statusText: { fontFamily: F.medium, fontSize: 11, color: C.muted },
 });

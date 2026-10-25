@@ -125,7 +125,7 @@ export default function Room() {
                     avatar={
                       c.id === me?.id ? me?.avatar : cachedProfile(c.id)?.avatar
                     }
-                    size={40}
+                    size={34}
                     category={c.category}
                   />
                 }
@@ -223,16 +223,16 @@ const s = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   amount: {
     fontFamily: F.bold,
-    fontSize: 48,
+    fontSize: 36,
     color: C.text,
-    letterSpacing: -1.5,
+    letterSpacing: -1,
     fontVariant: ['tabular-nums'],
   },
   chart: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 10,
-    height: 180,
+    height: 140,
     marginTop: 6,
   },
   col: {
@@ -243,25 +243,25 @@ const s = StyleSheet.create({
     gap: 8,
   },
   bar: { width: '100%', borderRadius: 6 },
-  barLabel: { fontSize: 16 },
+  barLabel: { fontSize: 14 },
   pill: {
     backgroundColor: C.text,
     borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
-  pillText: { fontFamily: F.medium, fontSize: 13, color: C.ink },
+  pillText: { fontFamily: F.medium, fontSize: 11, color: C.ink },
   pair: { flexDirection: 'row', gap: 12 },
   half: { flex: 1, gap: 4 },
   stat: {
     fontFamily: F.bold,
-    fontSize: 28,
+    fontSize: 22,
     color: C.text,
     letterSpacing: -0.6,
   },
   rowAmount: {
     fontFamily: F.bold,
-    fontSize: 16,
+    fontSize: 14,
     color: C.text,
     fontVariant: ['tabular-nums'],
   },

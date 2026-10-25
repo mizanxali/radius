@@ -70,7 +70,7 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
             Haptics.trigger('notificationSuccess');
             setDemo(!isDemo());
           }}
-          style={{ width: 48, height: 48 }}
+          style={{ width: 40, height: 40 }}
         />
       }
       profile={me}
@@ -91,7 +91,7 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
       {unread && (
         <Card>
           <View style={s.flex}>
-            <Sparkles size={16} color={C.purple} strokeWidth={2} />
+            <Sparkles size={14} color={C.purple} strokeWidth={2} />
             <Text style={[T.body, { flex: 1 }]}>
               {summarizing === 'failed'
                 ? `Couldn't read ${siteHost(me.website!)} for your AI summary.`
@@ -170,7 +170,7 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
                       tap(), run('wallet', () => removeWallet(w.address))()
                     )}
                   >
-                    <Trash2 size={20} color={C.muted} strokeWidth={1.6} />
+                    <Trash2 size={17} color={C.muted} strokeWidth={1.6} />
                   </Pressable>
                 }
               />
@@ -195,7 +195,7 @@ export default function Me({ onEdit }: { onEdit: () => void }) {
           <Card>
             <View style={s.flex}>
               <View style={s.chain}>
-                <Wallet size={18} color={C.green} strokeWidth={2} />
+                <Wallet size={16} color={C.green} strokeWidth={2} />
               </View>
               <Text style={T.h2}>Flex your bags</Text>
             </View>
@@ -230,7 +230,7 @@ function Stamps() {
             <Avatar
               seed={avatarSeed(st.peer.id)}
               avatar={cachedProfile(st.peer.id)?.avatar}
-              size={40}
+              size={34}
               category={cachedProfile(st.peer.id)?.category}
             />
           }
@@ -258,17 +258,17 @@ const s = StyleSheet.create({
     justifyContent: 'space-around',
     paddingTop: 4,
   },
-  flex: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  flex: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   chain: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: C.raised,
     borderWidth: 1,
     borderColor: C.lineStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chainText: { fontFamily: F.bold, fontSize: 17 },
+  chainText: { fontFamily: F.bold, fontSize: 14 },
   toggle: { flexDirection: 'row', alignItems: 'center', paddingTop: 10 },
 });

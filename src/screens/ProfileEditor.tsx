@@ -75,12 +75,12 @@ function Welcome({ onStart }: { onStart: () => void }) {
       ]}
     >
       <Animated.View entering={FadeInDown.springify()}>
-        <Asterisk size={56} color={C.text} strokeWidth={1.75} />
+        <Asterisk size={44} color={C.text} strokeWidth={1.75} />
         <Text style={s.brand}>Radius</Text>
         <Text
           style={[
             T.body,
-            { fontSize: 18, lineHeight: 25, marginTop: 10, maxWidth: 300 },
+            { fontSize: 15, lineHeight: 21, marginTop: 8, maxWidth: 300 },
           ]}
         >
           See who's around you at the event, and meet the people worth meeting.
@@ -215,7 +215,7 @@ function Editor({ onDone }: { onDone: () => void }) {
             autoCorrect={false}
           />
           <View style={s.hint}>
-            <Sparkles size={14} color={C.purple} strokeWidth={2} />
+            <Sparkles size={12} color={C.purple} strokeWidth={2} />
             <Text style={[T.sub, { flex: 1 }]}>
               Claude reads your website and writes a short summary of what your
               project does. It shows on your pass, labelled as AI.
@@ -383,9 +383,9 @@ const s = StyleSheet.create({
   },
   brand: {
     fontFamily: F.bold,
-    fontSize: 64,
+    fontSize: 50,
     color: C.text,
-    letterSpacing: -2.5,
+    letterSpacing: -2,
     marginTop: 20,
   },
   tilt: {
@@ -404,15 +404,15 @@ const s = StyleSheet.create({
     borderColor: C.lineStrong,
     color: C.text,
     fontFamily: F.regular,
-    fontSize: 17,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    fontSize: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
   hint: { flexDirection: 'row', gap: 8, marginTop: -4 },
   multiline: {
-    minHeight: 92,
+    minHeight: 80,
     textAlignVertical: 'top',
-    paddingTop: 10,
+    paddingTop: 8,
   },
   social: {
     flexDirection: 'row',
@@ -421,20 +421,20 @@ const s = StyleSheet.create({
     borderRadius: R.input,
     borderWidth: 1,
     borderColor: C.lineStrong,
-    paddingLeft: 12,
+    paddingLeft: 10,
   },
   socialLabel: {
     fontFamily: F.medium,
-    fontSize: 15,
+    fontSize: 13,
     color: C.muted,
-    width: 86,
+    width: 76,
   },
   socialInput: {
     flex: 1,
     color: C.text,
     fontFamily: F.regular,
-    fontSize: 16,
-    paddingVertical: 10,
-    paddingRight: 12,
+    fontSize: 14,
+    paddingVertical: 8,
+    paddingRight: 10,
   },
 });

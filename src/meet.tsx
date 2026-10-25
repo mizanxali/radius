@@ -198,10 +198,10 @@ export function MeetPrompt() {
         <Avatar
           seed={avatarSeed(a.from)}
           avatar={p?.avatar}
-          size={80}
+          size={60}
           category={p?.category}
         />
-        <Text style={[T.title, { textAlign: 'center', fontSize: 26 }]}>
+        <Text style={[T.title, { textAlign: 'center', fontSize: 20 }]}>
           {p?.name ?? 'Someone'} says you just met
         </Text>
         <Text style={[T.body, { color: C.muted, textAlign: 'center' }]}>
@@ -240,8 +240,8 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.lineStrong,
     borderRadius: 24,
-    padding: 18,
-    gap: 12,
+    padding: 14,
+    gap: 10,
     alignItems: 'center',
   },
 });

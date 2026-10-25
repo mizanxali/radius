@@ -122,7 +122,7 @@ export function Button({
         style,
       ]}
     >
-      {I && <I size={18} color={fg} strokeWidth={2} />}
+      {I && <I size={16} color={fg} strokeWidth={2} />}
       <Text style={[s.buttonText, { color: fg }]} numberOfLines={1}>
         {title}
       </Text>
@@ -160,7 +160,7 @@ export function Action({
       ]}
     >
       <View style={s.actionCircle}>
-        <I size={22} color={color} strokeWidth={1.75} />
+        <I size={19} color={color} strokeWidth={1.75} />
       </View>
       <Text style={s.actionLabel} numberOfLines={1}>
         {label}
@@ -187,7 +187,7 @@ export function IconButton({
       onPress={() => (tap(), onPress())}
       style={({ pressed }) => [s.iconButton, { opacity: pressed ? 0.7 : 1 }]}
     >
-      <I size={18} color={C.text} strokeWidth={2} />
+      <I size={16} color={C.text} strokeWidth={2} />
     </Pressable>
   );
 }
@@ -223,7 +223,7 @@ export function Header({
 export function Screen({
   children,
   modal,
-  gap = 12,
+  gap = 10,
 }: {
   children: ReactNode;
   modal?: boolean;
@@ -316,7 +316,7 @@ export function Chip({
       style={[s.chip, selected && s.chipOn]}
     >
       {I && (
-        <I size={14} strokeWidth={2.2} color={selected ? color : C.faint} />
+        <I size={12} strokeWidth={2.2} color={selected ? color : C.faint} />
       )}
       <Text style={[s.chipText, selected && { color: C.text }]}>{label}</Text>
     </Pressable>
@@ -337,7 +337,7 @@ export function Tag({
 }) {
   return (
     <View style={[s.tag, solid && { backgroundColor: C.text }]}>
-      {I && <I size={12} strokeWidth={2.4} color={color} />}
+      {I && <I size={11} strokeWidth={2.4} color={color} />}
       <Text style={[s.tagText, solid && { color: C.ink }]} numberOfLines={1}>
         {label}
       </Text>
@@ -415,7 +415,7 @@ const s = StyleSheet.create({
     overflow: 'hidden',
   },
   button: {
-    height: 44,
+    height: 38,
     borderRadius: R.input,
     flexDirection: 'row',
     alignItems: 'center',
@@ -424,23 +424,23 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
   },
   outline: { borderWidth: 1, borderColor: C.lineStrong },
-  buttonText: { fontFamily: F.bold, fontSize: 16 },
-  action: { alignItems: 'center', gap: 6, flex: 1 },
+  buttonText: { fontFamily: F.bold, fontSize: 14 },
+  action: { alignItems: 'center', gap: 5, flex: 1 },
   actionCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: C.surface,
     borderWidth: 1,
     borderColor: C.lineStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionLabel: { fontFamily: F.medium, fontSize: 13, color: C.muted },
+  actionLabel: { fontFamily: F.medium, fontSize: 11.5, color: C.muted },
   iconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: C.surface,
     borderWidth: 1,
     borderColor: C.lineStrong,
@@ -451,15 +451,15 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    minHeight: 40,
+    minHeight: 34,
   },
   card: {
     backgroundColor: C.surface,
     borderRadius: R.card,
     borderWidth: 1,
     borderColor: C.line,
-    padding: 14,
-    gap: 10,
+    padding: 12,
+    gap: 8,
   },
   chip: {
     flexDirection: 'row',
@@ -468,27 +468,27 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.lineStrong,
     borderRadius: R.chip,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   chipOn: { borderColor: '#FFFFFF66', backgroundColor: C.raised },
-  chipText: { fontFamily: F.medium, fontSize: 14, color: C.muted },
+  chipText: { fontFamily: F.medium, fontSize: 12, color: C.muted },
   tag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
     borderRadius: R.tag,
     borderWidth: 1,
     borderColor: C.lineStrong,
     backgroundColor: C.raised,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
-  tagText: { fontFamily: F.medium, fontSize: 12, color: C.text },
+  tagText: { fontFamily: F.medium, fontSize: 10.5, color: C.text },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 6,
+    gap: 10,
+    paddingVertical: 4,
   },
 });

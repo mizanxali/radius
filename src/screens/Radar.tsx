@@ -60,9 +60,9 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
   const { width } = useWindowDimensions();
   const peers = usePeers();
   const [me] = useMyProfile();
-  const size = width - 64; // 16 px screen + 14 px card padding + border, each side
+  const size = width - 60; // 16 px screen + 12 px card padding + border, each side
   const angle = angles(peers);
-  const dot = peers.length > 8 ? 36 : 44;
+  const dot = peers.length > 8 ? 30 : 36;
 
   return (
     <Screen>
@@ -97,7 +97,7 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
               <Avatar
                 seed={me?.avatarSeed ?? me?.id ?? ''}
                 avatar={me?.avatar}
-                size={56}
+                size={46}
                 category={me?.category}
               />
             </View>
@@ -130,7 +130,7 @@ export default function Radar({ onOpen }: { onOpen: (id: string) => void }) {
                 <Avatar
                   seed={avatarSeed(p.card.id)}
                   avatar={cachedProfile(p.card.id)?.avatar}
-                  size={44}
+                  size={36}
                   category={p.card.category}
                 />
               }
@@ -234,8 +234,8 @@ function RadarDot({
     const d = ((((angle - a.value + Math.PI) % t) + t) % t) - Math.PI;
     a.value = withSpring(a.value + d, { damping: 18, stiffness: 60 });
   }, [angle, a]);
-  // Keep clear of my avatar (56 + ring) in the centre, and inside the outer ring.
-  const minR = (66 / 2 + dot / 2 + 6) / (size / 2);
+  // Keep clear of my avatar (46 + ring) in the centre, and inside the outer ring.
+  const minR = (56 / 2 + dot / 2 + 6) / (size / 2);
   const fraction = minR + (0.9 - minR) * closeness(peer);
   const r = useSharedValue(fraction);
   useEffect(() => {
@@ -304,6 +304,6 @@ const s = StyleSheet.create({
     borderColor: C.line,
   },
   pulse: { position: 'absolute', borderRadius: 999, backgroundColor: C.text },
-  tier: { fontFamily: F.medium, fontSize: 13, color: C.text },
-  dist: { fontFamily: F.regular, fontSize: 13, color: C.muted },
+  tier: { fontFamily: F.medium, fontSize: 11.5, color: C.text },
+  dist: { fontFamily: F.regular, fontSize: 11.5, color: C.muted },
 });

@@ -116,7 +116,7 @@ function MatchCard({
           <Avatar
             seed={avatarSeed(match.id)}
             avatar={p?.avatar}
-            size={48}
+            size={38}
             category={category}
           />
         }
@@ -169,7 +169,7 @@ export function Icebreaker({ text }: { text: string }) {
   return (
     <View style={s.bubble}>
       <View style={s.status}>
-        <MessageCircle size={14} color={C.purple} strokeWidth={2} />
+        <MessageCircle size={12} color={C.purple} strokeWidth={2} />
         <Text style={s.bubbleLabel}>Say this</Text>
       </View>
       <Text style={s.bubbleText}>{text}</Text>
@@ -193,7 +193,7 @@ export function AiSummary({
       style={{ gap: 6 }}
     >
       <View style={s.status}>
-        <Sparkles size={14} color={C.purple} strokeWidth={2} />
+        <Sparkles size={12} color={C.purple} strokeWidth={2} />
         <Text style={s.bubbleLabel}>AI summary</Text>
         <Text style={[T.sub, { flex: 1 }]} numberOfLines={1}>
           from {host}
@@ -258,12 +258,12 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.line,
     borderRadius: R.inner,
-    padding: 12,
+    padding: 10,
     gap: 4,
   },
   bubbleLabel: {
     fontFamily: F.medium,
-    fontSize: 12,
+    fontSize: 10.5,
     color: C.purple,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -272,10 +272,10 @@ const s = StyleSheet.create({
   live: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.green },
   bubbleText: {
     fontFamily: F.medium,
-    fontSize: 17,
+    fontSize: 15,
     lineHeight: 23,
     color: C.text,
   },
-  bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, height: 120 },
+  bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, height: 100 },
   bar: { flex: 1, borderRadius: 6 },
 });

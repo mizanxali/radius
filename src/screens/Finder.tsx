@@ -121,12 +121,12 @@ export default function Finder({
       </View>
 
       <View style={s.stage}>
-        <Animated.View style={[s.ring, { width: 240, height: 240 }, outer]} />
-        <Animated.View style={[s.circle, { width: 170, height: 170 }, inner]} />
+        <Animated.View style={[s.ring, { width: 210, height: 210 }, outer]} />
+        <Animated.View style={[s.circle, { width: 150, height: 150 }, inner]} />
         <Avatar
           seed={avatarSeed(id)}
           avatar={p?.avatar}
-          size={120}
+          size={100}
           category={peer?.card.category}
         />
       </View>
@@ -161,7 +161,7 @@ const s = StyleSheet.create({
   ring: { position: 'absolute', borderRadius: 999, borderWidth: 2 },
   heat: {
     fontFamily: F.bold,
-    fontSize: 40,
+    fontSize: 30,
     color: C.text,
     letterSpacing: -1.2,
   },

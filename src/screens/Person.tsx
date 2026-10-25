@@ -119,7 +119,7 @@ export default function Person({
       onBack={onClose}
       actions={
         peer && (
-          <View style={{ gap: 14 }}>
+          <View style={{ gap: 10 }}>
             <View style={s.actions}>
               <Action
                 icon={Hand}
@@ -154,7 +154,7 @@ export default function Person({
         <Animated.View entering={FadeInDown}>
           <Card>
             <View style={s.inline}>
-              <Sparkles size={16} color={C.purple} strokeWidth={2} />
+              <Sparkles size={14} color={C.purple} strokeWidth={2} />
               <Text style={T.label}>Why talk to them</Text>
             </View>
             <Text style={[T.h2, { lineHeight: 25 }]}>{match.reason}</Text>
@@ -265,13 +265,13 @@ export function ProfileView({
             <ListRow
               leading={
                 <View style={s.socialIcon}>
-                  <Globe size={18} color={C.text} strokeWidth={1.75} />
+                  <Globe size={16} color={C.text} strokeWidth={1.75} />
                 </View>
               }
               title="Website"
               subtitle={siteHost(website)}
               trailing={
-                <ArrowUpRight size={20} color={C.muted} strokeWidth={1.75} />
+                <ArrowUpRight size={17} color={C.muted} strokeWidth={1.75} />
               }
               onPress={() => Linking.openURL(website)}
             />
@@ -287,7 +287,7 @@ export function ProfileView({
               title={SOCIALS[k].label}
               subtitle={`@${handle}`}
               trailing={
-                <ArrowUpRight size={20} color={C.muted} strokeWidth={1.75} />
+                <ArrowUpRight size={17} color={C.muted} strokeWidth={1.75} />
               }
               onPress={() => Linking.openURL(SOCIALS[k].url(handle))}
             />
@@ -334,8 +334,8 @@ const s = StyleSheet.create({
   },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   socialIcon: {
-    width: 40,
-    height: 40,
+    width: 34,
+    height: 34,
     borderRadius: 20,
     backgroundColor: C.raised,
     borderWidth: 1,
@@ -343,5 +343,5 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  socialLetter: { fontFamily: F.bold, fontSize: 16, color: C.text },
+  socialLetter: { fontFamily: F.bold, fontSize: 14, color: C.text },
 });

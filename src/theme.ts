@@ -57,38 +57,38 @@ export const F = {
 export const T = {
   display: {
     fontFamily: F.bold,
-    fontSize: 44,
+    fontSize: 34,
     color: C.text,
-    letterSpacing: -1.5,
+    letterSpacing: -1.1,
   },
   title: {
     fontFamily: F.bold,
-    fontSize: 30,
+    fontSize: 23,
     color: C.text,
-    letterSpacing: -0.8,
+    letterSpacing: -0.5,
   },
   header: {
     fontFamily: F.bold,
-    fontSize: 28,
+    fontSize: 22,
     color: C.text,
-    letterSpacing: -0.6,
+    letterSpacing: -0.4,
   },
   h2: {
     fontFamily: F.bold,
-    fontSize: 19,
+    fontSize: 16,
     color: C.text,
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
   },
-  body: { fontFamily: F.regular, fontSize: 16, lineHeight: 23, color: C.text },
-  strong: { fontFamily: F.bold, fontSize: 16, color: C.text },
-  sub: { fontFamily: F.regular, fontSize: 14, lineHeight: 19, color: C.muted },
+  body: { fontFamily: F.regular, fontSize: 14, lineHeight: 20, color: C.text },
+  strong: { fontFamily: F.bold, fontSize: 14, color: C.text },
+  sub: { fontFamily: F.regular, fontSize: 12.5, lineHeight: 17, color: C.muted },
   label: {
     fontFamily: F.medium,
-    fontSize: 12,
+    fontSize: 10.5,
     color: C.muted,
-    letterSpacing: 1,
+    letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
   },
 };
 
-export const R = { card: 16, inner: 12, input: 10, chip: 8, tag: 6 };
+export const R = { card: 14, inner: 10, input: 9, chip: 8, tag: 6 };
