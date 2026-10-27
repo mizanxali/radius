@@ -7,9 +7,9 @@ covered by this repository's LICENSE.
 
 ## Offline Protocol SDK
 
-`vendor/offline-protocol-mesh-sdk-0.30.0-rssi.tgz` is a build of
-`@offline-protocol/mesh-sdk`. It is dual-licensed: AGPL-3.0-only, or a
-commercial license from Offline Protocol, Inc. See the package's `LICENSE` and
+`@offline-protocol/mesh-sdk` is not included in this repository; it is
+installed from npm. It is dual-licensed: AGPL-3.0-only, or a commercial
+license from Offline Protocol, Inc. See the installed package's `LICENSE` and
 `LICENSE-COMMERCIAL.md`, and https://www.offlineprotocol.com/docs/operations/licensing.
 
 ## Fonts

@@ -62,4 +62,4 @@ Android reaches Metro and the dev Worker through `adb reverse tcp:8081 tcp:8081`
 - **Chain:** stamps attest on Base Sepolia (`CHAIN`, `SCHEMA_UID` in `worker/wrangler.jsonc`).
 - **Worker:** deployed to `https://radius.mizanalip786.workers.dev` (release builds' `WORKER_URL`); `cd worker && npm run deploy` after changes. Secrets set with `wrangler secret put`.
 - **Before mainnet:** register the schema on Base and fund the relayer there.
-- **Licence:** MIT-0, like `Offline-Protocol/offline-app-examples`. Third-party material (mesh-sdk tarball, Cabinet Grotesk, DiceBear patch, RN template files) is listed in `THIRD_PARTY_NOTICES.md`.
+- **Licence:** MIT-0, like `Offline-Protocol/offline-app-examples`. Third-party material (Cabinet Grotesk, DiceBear patch, RN template files) is listed in `THIRD_PARTY_NOTICES.md`.

@@ -8,16 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		0C80B921A6F3F58F76C31292 /* libPods-Radius.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-Radius.a */; };
+		0CA1F1B7DB6341D190017973 /* CabinetGrotesk-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = B255CA826EA844BDA02B9659 /* CabinetGrotesk-LICENSE.txt */; };
+		137D6519D70D4BEF8566060D /* CabinetGrotesk-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = DFFDDBE83D49455686463150 /* CabinetGrotesk-Medium.otf */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		1DA4436470D84DA682E2D662 /* CabinetGrotesk-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4E438AF759DC4C699D1A23B7 /* CabinetGrotesk-Bold.otf */; };
+		37D900AA99994EBFA8005C1A /* CabinetGrotesk-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = BDEAC88DC40F451893EAA3D0 /* CabinetGrotesk-Regular.otf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		761780EF2CA45674006654EF /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EE2CA45674006654EF /* SceneDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		ACB355A16FD0691A4939CFFD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		EDB033D5E15641DDB74BECCF /* CabinetGrotesk-Extrabold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 948785026C4B4E6BAB6BDACB /* CabinetGrotesk-Extrabold.otf */; };
-		37D900AA99994EBFA8005C1A /* CabinetGrotesk-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = BDEAC88DC40F451893EAA3D0 /* CabinetGrotesk-Regular.otf */; };
-		1DA4436470D84DA682E2D662 /* CabinetGrotesk-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4E438AF759DC4C699D1A23B7 /* CabinetGrotesk-Bold.otf */; };
-		137D6519D70D4BEF8566060D /* CabinetGrotesk-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = DFFDDBE83D49455686463150 /* CabinetGrotesk-Medium.otf */; };
-		0CA1F1B7DB6341D190017973 /* CabinetGrotesk-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = B255CA826EA844BDA02B9659 /* CabinetGrotesk-LICENSE.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,17 +26,17 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Radius/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = Radius/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-Radius.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Radius.debug.xcconfig"; path = "Target Support Files/Pods-Radius/Pods-Radius.debug.xcconfig"; sourceTree = "<group>"; };
+		4E438AF759DC4C699D1A23B7 /* CabinetGrotesk-Bold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "CabinetGrotesk-Bold.otf"; path = "../assets/fonts/CabinetGrotesk-Bold.otf"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-Radius.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Radius.release.xcconfig"; path = "Target Support Files/Pods-Radius/Pods-Radius.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-Radius.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Radius.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Radius/AppDelegate.swift; sourceTree = "<group>"; };
 		761780EE2CA45674006654EF /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = Radius/SceneDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Radius/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		948785026C4B4E6BAB6BDACB /* CabinetGrotesk-Extrabold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "CabinetGrotesk-Extrabold.otf"; path = "../assets/fonts/CabinetGrotesk-Extrabold.otf"; sourceTree = "<group>"; };
+		B255CA826EA844BDA02B9659 /* CabinetGrotesk-LICENSE.txt */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "CabinetGrotesk-LICENSE.txt"; path = "../assets/fonts/CabinetGrotesk-LICENSE.txt"; sourceTree = "<group>"; };
+		BDEAC88DC40F451893EAA3D0 /* CabinetGrotesk-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "CabinetGrotesk-Regular.otf"; path = "../assets/fonts/CabinetGrotesk-Regular.otf"; sourceTree = "<group>"; };
+		DFFDDBE83D49455686463150 /* CabinetGrotesk-Medium.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "CabinetGrotesk-Medium.otf"; path = "../assets/fonts/CabinetGrotesk-Medium.otf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		948785026C4B4E6BAB6BDACB /* CabinetGrotesk-Extrabold.otf */ = {isa = PBXFileReference; name = "CabinetGrotesk-Extrabold.otf"; path = "../assets/fonts/CabinetGrotesk-Extrabold.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		BDEAC88DC40F451893EAA3D0 /* CabinetGrotesk-Regular.otf */ = {isa = PBXFileReference; name = "CabinetGrotesk-Regular.otf"; path = "../assets/fonts/CabinetGrotesk-Regular.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		4E438AF759DC4C699D1A23B7 /* CabinetGrotesk-Bold.otf */ = {isa = PBXFileReference; name = "CabinetGrotesk-Bold.otf"; path = "../assets/fonts/CabinetGrotesk-Bold.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		DFFDDBE83D49455686463150 /* CabinetGrotesk-Medium.otf */ = {isa = PBXFileReference; name = "CabinetGrotesk-Medium.otf"; path = "../assets/fonts/CabinetGrotesk-Medium.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		B255CA826EA844BDA02B9659 /* CabinetGrotesk-LICENSE.txt */ = {isa = PBXFileReference; name = "CabinetGrotesk-LICENSE.txt"; path = "../assets/fonts/CabinetGrotesk-LICENSE.txt"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +71,19 @@
 				5DCACB8F33CDC322A6C60F78 /* libPods-Radius.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		38AD9527228F4EB790975622 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				948785026C4B4E6BAB6BDACB /* CabinetGrotesk-Extrabold.otf */,
+				BDEAC88DC40F451893EAA3D0 /* CabinetGrotesk-Regular.otf */,
+				4E438AF759DC4C699D1A23B7 /* CabinetGrotesk-Bold.otf */,
+				DFFDDBE83D49455686463150 /* CabinetGrotesk-Medium.otf */,
+				B255CA826EA844BDA02B9659 /* CabinetGrotesk-LICENSE.txt */,
+			);
+			name = Resources;
+			path = "";
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -111,19 +124,6 @@
 			);
 			path = Pods;
 			sourceTree = "<group>";
-		};
-		38AD9527228F4EB790975622 /* Resources */ = {
-			isa = "PBXGroup";
-			children = (
-				948785026C4B4E6BAB6BDACB /* CabinetGrotesk-Extrabold.otf */,
-				BDEAC88DC40F451893EAA3D0 /* CabinetGrotesk-Regular.otf */,
-				4E438AF759DC4C699D1A23B7 /* CabinetGrotesk-Bold.otf */,
-				DFFDDBE83D49455686463150 /* CabinetGrotesk-Medium.otf */,
-				B255CA826EA844BDA02B9659 /* CabinetGrotesk-LICENSE.txt */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-			path = "";
 		};
 /* End PBXGroup section */
 

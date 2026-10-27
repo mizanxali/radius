@@ -16,7 +16,7 @@ PODS:
   - hermes-engine (260318099.0.4):
     - hermes-engine/Pre-built (= 260318099.0.4)
   - hermes-engine/Pre-built (260318099.0.4)
-  - MeshSdk (0.30.0):
+  - MeshSdk (0.31.0):
     - React-Core
   - MMKVCore (2.4.0)
   - NitroMmkv (4.3.2):
@@ -2636,7 +2636,7 @@ SPEC CHECKSUMS:
   fmt: ba0886e864ebb21d14c98b2e12e164b8002f5b93
   glog: 3cf7cb46f743c4bc758ae3e6d9c15bd1b4cfd6d4
   hermes-engine: a1158910bb7e300b9e3d2f1e2d433f817ec1a4b5
-  MeshSdk: e6d5297fb48b282635770409b51ed0d603ac9279
+  MeshSdk: 9769231fa3fdc15695e88a54ddff6132d2d29c0b
   MMKVCore: 3d16ce9f7d411e135020915fde98a056859a1efa
   NitroMmkv: 1cbda910413acda474751ac9b2522a6d466f74ad
   NitroModules: c32f969b7c536e0b6b401a9dfdb35bb4eba071ef
