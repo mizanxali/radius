@@ -103,4 +103,4 @@ worker/              Cloudflare Worker
 
 ## Licence
 
-Radius depends on `@offline-protocol/mesh-sdk`, which is licensed AGPL-3.0-only (or commercially).
+[MIT-0](./LICENSE). `@offline-protocol/mesh-sdk` and the other material listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) keep their own licenses.
